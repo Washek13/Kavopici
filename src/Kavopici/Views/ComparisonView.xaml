@@ -1,0 +1,190 @@
+<UserControl x:Class="Kavopici.Views.ComparisonView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:components="clr-namespace:Kavopici.Components"
+             xmlns:converters="clr-namespace:Kavopici.Converters"
+             Loaded="OnLoaded">
+
+    <UserControl.Resources>
+        <converters:NotNullToVisibilityConverter x:Key="NotNullToVis" />
+        <converters:RoastLevelToStringConverter x:Key="RoastLevelConverter" />
+        <converters:DoubleToIntConverter x:Key="DoubleToInt" />
+    </UserControl.Resources>
+
+    <DockPanel>
+        <!-- Header -->
+        <Border DockPanel.Dock="Top" Style="{StaticResource HeaderPanel}">
+            <Grid>
+                <TextBlock Text="POROVNAT SMĚSI" Style="{StaticResource TitleStyle}"
+                           VerticalAlignment="Center" />
+                <Button Content="← ZPĚT" Command="{Binding GoBackCommand}"
+                        Style="{StaticResource PrimaryButton}"
+                        Foreground="White" BorderBrush="White"
+                        HorizontalAlignment="Right" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <!-- Error message -->
+        <TextBlock DockPanel.Dock="Bottom" Text="{Binding ErrorMessage}"
+                   Style="{StaticResource ErrorStyle}"
+                   Margin="20,8" TextWrapping="Wrap"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource NotNullToVis}}" />
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="20">
+                <!-- Selectors -->
+                <Grid Margin="0,0,0,20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="40" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="SMĚS A" Style="{StaticResource LabelStyle}" Margin="0,0,0,8" />
+                        <ComboBox ItemsSource="{Binding AllBlends}"
+                                  SelectedItem="{Binding BlendA}"
+                                  DisplayMemberPath="BlendName"
+                                  Style="{StaticResource CoffeeComboBox}" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Column="1" Text="VS"
+                               Style="{StaticResource HeadingStyle}"
+                               HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                               Margin="0,0,0,4" />
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="SMĚS B" Style="{StaticResource LabelStyle}" Margin="0,0,0,8" />
+                        <ComboBox ItemsSource="{Binding AllBlends}"
+                                  SelectedItem="{Binding BlendB}"
+                                  DisplayMemberPath="BlendName"
+                                  Style="{StaticResource CoffeeComboBox}" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- Comparison cards -->
+                <Grid Visibility="{Binding BlendA, Converter={StaticResource NotNullToVis}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Blend A card -->
+                    <Border Grid.Column="0" Style="{StaticResource PanelBorder}"
+                            Visibility="{Binding BlendA, Converter={StaticResource NotNullToVis}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding BlendA.BlendName}"
+                                       Style="{StaticResource HeadingStyle}" Margin="0,0,0,8" />
+                            <TextBlock Style="{StaticResource BodyStyle}" Margin="0,0,0,4">
+                                <Run Text="Pražírna: " FontWeight="Bold" />
+                                <Run Text="{Binding BlendA.Roaster, Mode=OneWay}" />
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource BodyStyle}" Margin="0,0,0,4">
+                                <Run Text="Pražení: " FontWeight="Bold" />
+                                <Run Text="{Binding BlendA.RoastLevel, Converter={StaticResource RoastLevelConverter}, Mode=OneWay}" />
+                            </TextBlock>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,4">
+                                <components:StarRatingControl
+                                    Rating="{Binding BlendA.AverageRating, Converter={StaticResource DoubleToInt}}"
+                                    IsReadOnly="True" StarSize="20" />
+                                <TextBlock Text="{Binding BlendA.AverageRating, StringFormat='{}{0:F1}'}"
+                                           Style="{StaticResource BodyStyle}"
+                                           FontWeight="Bold" FontSize="16"
+                                           Margin="8,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Style="{StaticResource LabelStyle}">
+                                <Run Text="{Binding BlendA.RatingCount, Mode=OneWay}" />
+                                <Run Text=" hodnocení" />
+                            </TextBlock>
+
+                            <TextBlock Text="ROZLOŽENÍ" Style="{StaticResource LabelStyle}" Margin="0,12,0,8" />
+                            <ItemsControl ItemsSource="{Binding DistributionA}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="40" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="30" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Label}"
+                                                       Style="{StaticResource BodyStyle}" FontSize="11" />
+                                            <Border Grid.Column="1" Height="14"
+                                                    Background="{StaticResource SilverBrush}" Margin="4,0">
+                                                <Border Background="{StaticResource AmberGoldBrush}"
+                                                        HorizontalAlignment="Left"
+                                                        Width="{Binding BarWidth}" />
+                                            </Border>
+                                            <TextBlock Grid.Column="2" Text="{Binding Count}"
+                                                       Style="{StaticResource BodyStyle}" FontSize="11"
+                                                       HorizontalAlignment="Right" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Blend B card -->
+                    <Border Grid.Column="2" Style="{StaticResource PanelBorder}"
+                            Visibility="{Binding BlendB, Converter={StaticResource NotNullToVis}}">
+                        <StackPanel>
+                            <TextBlock Text="{Binding BlendB.BlendName}"
+                                       Style="{StaticResource HeadingStyle}" Margin="0,0,0,8" />
+                            <TextBlock Style="{StaticResource BodyStyle}" Margin="0,0,0,4">
+                                <Run Text="Pražírna: " FontWeight="Bold" />
+                                <Run Text="{Binding BlendB.Roaster, Mode=OneWay}" />
+                            </TextBlock>
+                            <TextBlock Style="{StaticResource BodyStyle}" Margin="0,0,0,4">
+                                <Run Text="Pražení: " FontWeight="Bold" />
+                                <Run Text="{Binding BlendB.RoastLevel, Converter={StaticResource RoastLevelConverter}, Mode=OneWay}" />
+                            </TextBlock>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,12,0,4">
+                                <components:StarRatingControl
+                                    Rating="{Binding BlendB.AverageRating, Converter={StaticResource DoubleToInt}}"
+                                    IsReadOnly="True" StarSize="20" />
+                                <TextBlock Text="{Binding BlendB.AverageRating, StringFormat='{}{0:F1}'}"
+                                           Style="{StaticResource BodyStyle}"
+                                           FontWeight="Bold" FontSize="16"
+                                           Margin="8,0,0,0" VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock Style="{StaticResource LabelStyle}">
+                                <Run Text="{Binding BlendB.RatingCount, Mode=OneWay}" />
+                                <Run Text=" hodnocení" />
+                            </TextBlock>
+
+                            <TextBlock Text="ROZLOŽENÍ" Style="{StaticResource LabelStyle}" Margin="0,12,0,8" />
+                            <ItemsControl ItemsSource="{Binding DistributionB}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid Margin="0,1">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="40" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="30" />
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Label}"
+                                                       Style="{StaticResource BodyStyle}" FontSize="11" />
+                                            <Border Grid.Column="1" Height="14"
+                                                    Background="{StaticResource SilverBrush}" Margin="4,0">
+                                                <Border Background="{StaticResource AmberGoldBrush}"
+                                                        HorizontalAlignment="Left"
+                                                        Width="{Binding BarWidth}" />
+                                            </Border>
+                                            <TextBlock Grid.Column="2" Text="{Binding Count}"
+                                                       Style="{StaticResource BodyStyle}" FontSize="11"
+                                                       HorizontalAlignment="Right" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>

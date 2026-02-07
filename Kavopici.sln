@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{84019E8B-2722-418C-A067-CAE937C7CA77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavopici", "src\Kavopici\Kavopici.csproj", "{1369458B-9E39-410E-93EC-B4A980267933}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6B2D4903-6151-4602-9E19-D511F37D0157}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kavopici.Tests", "tests\Kavopici.Tests\Kavopici.Tests.csproj", "{DD490E5F-6871-4376-A4DA-9452407D7942}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1369458B-9E39-410E-93EC-B4A980267933}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1369458B-9E39-410E-93EC-B4A980267933}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1369458B-9E39-410E-93EC-B4A980267933}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1369458B-9E39-410E-93EC-B4A980267933}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD490E5F-6871-4376-A4DA-9452407D7942}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD490E5F-6871-4376-A4DA-9452407D7942}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD490E5F-6871-4376-A4DA-9452407D7942}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD490E5F-6871-4376-A4DA-9452407D7942}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1369458B-9E39-410E-93EC-B4A980267933} = {84019E8B-2722-418C-A067-CAE937C7CA77}
+		{DD490E5F-6871-4376-A4DA-9452407D7942} = {6B2D4903-6151-4602-9E19-D511F37D0157}
+	EndGlobalSection
+EndGlobal
