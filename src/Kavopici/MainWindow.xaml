@@ -30,7 +30,7 @@
         </DataTemplate>
     </Window.Resources>
 
-    <Grid MaxWidth="1000" HorizontalAlignment="Center">
-        <ContentControl Content="{Binding CurrentViewModel}" />
+    <Grid>
+        <ContentControl Content="{Binding CurrentViewModel}" HorizontalContentAlignment="Stretch" />
     </Grid>
 </Window>
