@@ -71,6 +71,10 @@ public partial class App : Application
         var app = new App();
         app.InitializeComponent();
         app.MainWindow = host.Services.GetRequiredService<MainWindow>();
+
+        var mainViewModel = host.Services.GetRequiredService<MainViewModel>();
+        mainViewModel.NavigateToInitialView();
+
         app.MainWindow.Show();
         app.Run();
     }
