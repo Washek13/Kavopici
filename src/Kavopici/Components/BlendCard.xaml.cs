@@ -26,6 +26,10 @@ public partial class BlendCard : UserControl
         DependencyProperty.Register(nameof(SupplierName), typeof(string), typeof(BlendCard),
             new PropertyMetadata(string.Empty));
 
+    public static readonly DependencyProperty CommentProperty =
+        DependencyProperty.Register(nameof(Comment), typeof(string), typeof(BlendCard),
+            new PropertyMetadata(null));
+
     public string BlendName
     {
         get => (string)GetValue(BlendNameProperty);
@@ -54,6 +58,12 @@ public partial class BlendCard : UserControl
     {
         get => (string)GetValue(SupplierNameProperty);
         set => SetValue(SupplierNameProperty, value);
+    }
+
+    public string? Comment
+    {
+        get => (string?)GetValue(CommentProperty);
+        set => SetValue(CommentProperty, value);
     }
 
     public BlendCard()

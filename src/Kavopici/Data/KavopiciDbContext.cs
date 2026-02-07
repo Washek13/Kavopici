@@ -41,6 +41,7 @@ public class KavopiciDbContext : DbContext
         modelBuilder.Entity<TastingSession>(e =>
         {
             e.HasKey(s => s.Id);
+            e.Property(s => s.Comment).HasMaxLength(500);
             e.HasOne(s => s.Blend)
                 .WithMany(b => b.Sessions)
                 .HasForeignKey(s => s.BlendId)

@@ -24,7 +24,7 @@ public class SessionService : ISessionService
             .FirstOrDefaultAsync();
     }
 
-    public async Task<TastingSession> SetBlendOfTheDayAsync(int blendId)
+    public async Task<TastingSession> SetBlendOfTheDayAsync(int blendId, string? comment = null)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
         var today = DateOnly.FromDateTime(DateTime.Today);
@@ -44,6 +44,7 @@ public class SessionService : ISessionService
             BlendId = blendId,
             Date = today,
             IsActive = true,
+            Comment = string.IsNullOrWhiteSpace(comment) ? null : comment.Trim(),
             CreatedAt = DateTime.UtcNow
         };
 

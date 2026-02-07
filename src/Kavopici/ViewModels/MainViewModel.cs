@@ -18,8 +18,13 @@ public partial class MainViewModel : ObservableObject
     {
         _navigation = navigation;
         _navigation.CurrentViewModelChanged += OnCurrentViewModelChanged;
+    }
 
-        // Start at login
+    /// <summary>
+    /// Must be called after construction to avoid circular DI deadlock.
+    /// </summary>
+    public void NavigateToInitialView()
+    {
         _navigation.NavigateTo<LoginViewModel>();
     }
 
