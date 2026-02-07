@@ -347,3 +347,5 @@ The SQLite database file (`kavopici.db`) should be stored **next to the executab
 ├── Kavopici.exe
 └── kavopici.db       ← created automatically on first launch
 ```
+
+One remaining item for Windows: you'll need to run '''dotnet ef migrations add AddTastingNotes''' to generate the migration for the tasting notes entities (TastingNote + RatingTastingNote) before first launch.
