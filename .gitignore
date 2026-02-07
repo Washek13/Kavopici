@@ -1,0 +1,25 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.vs/
+.vs/
+
+## IDE
+.idea/
+*.sln.iml
+
+## SQLite
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Publish
+publish/
