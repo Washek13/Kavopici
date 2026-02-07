@@ -211,6 +211,11 @@
                                     <TextBlock Text="AKTUÁLNÍ VÝBĚR" Style="{StaticResource LabelStyle}" Margin="0,0,0,4" />
                                     <TextBlock Text="{Binding CurrentSession.Blend.Name}"
                                                Style="{StaticResource DisplayStyle}" />
+                                    <TextBlock Text="{Binding CurrentSession.Comment}"
+                                               Style="{StaticResource BodyStyle}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,4,0,0"
+                                               Visibility="{Binding CurrentSession.Comment, Converter={StaticResource NotNullToVis}}" />
                                 </StackPanel>
                             </Border>
 
@@ -221,6 +226,16 @@
                                       DisplayMemberPath="Name"
                                       Style="{StaticResource CoffeeComboBox}"
                                       Margin="0,0,0,12" />
+
+                            <!-- Comment -->
+                            <TextBlock Text="KOMENTÁŘ (NEPOVINNÝ)" Style="{StaticResource LabelStyle}" Margin="0,0,0,8" />
+                            <TextBox Text="{Binding SessionComment, UpdateSourceTrigger=PropertyChanged}"
+                                     Style="{StaticResource CoffeeTextBox}"
+                                     TextWrapping="Wrap"
+                                     AcceptsReturn="True"
+                                     MinHeight="48"
+                                     MaxHeight="100"
+                                     Margin="0,0,0,12" />
 
                             <StackPanel Orientation="Horizontal">
                                 <Button Content="NASTAVIT JAKO DNEŠNÍ KÁVU"

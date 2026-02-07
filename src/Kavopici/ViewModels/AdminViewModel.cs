@@ -52,6 +52,9 @@ public partial class AdminViewModel : ObservableObject
     private CoffeeBlend? selectedBlendOfDay;
 
     [ObservableProperty]
+    private string? sessionComment;
+
+    [ObservableProperty]
     private TastingSession? currentSession;
 
     [ObservableProperty]
@@ -266,7 +269,8 @@ public partial class AdminViewModel : ObservableObject
                 return;
             }
 
-            CurrentSession = await _sessionService.SetBlendOfTheDayAsync(SelectedBlendOfDay.Id);
+            CurrentSession = await _sessionService.SetBlendOfTheDayAsync(SelectedBlendOfDay.Id, SessionComment);
+            SessionComment = null;
             StatusMessage = $"Dnešní káva nastavena: {SelectedBlendOfDay.Name}";
         }
         catch (Exception ex)

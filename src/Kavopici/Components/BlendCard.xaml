@@ -5,11 +5,13 @@
              x:Name="Root">
     <UserControl.Resources>
         <converters:RoastLevelToStringConverter x:Key="RoastLevelConverter" />
+        <converters:NotNullToVisibilityConverter x:Key="NotNullToVis" />
     </UserControl.Resources>
 
     <Border Style="{StaticResource CardBorder}">
         <Grid>
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
@@ -38,20 +40,29 @@
                        Text="{Binding Roaster, ElementName=Root}"
                        Style="{StaticResource SubheadingStyle}" />
 
+            <!-- Comment -->
+            <TextBlock Grid.Row="3" Grid.ColumnSpan="3"
+                       Text="{Binding Comment, ElementName=Root}"
+                       Style="{StaticResource BodyStyle}"
+                       TextWrapping="Wrap"
+                       FontStyle="Italic"
+                       Margin="0,8,0,0"
+                       Visibility="{Binding Comment, ElementName=Root, Converter={StaticResource NotNullToVis}}" />
+
             <!-- Origin, Roast Level & Supplier -->
-            <StackPanel Grid.Row="4" Grid.Column="0">
+            <StackPanel Grid.Row="5" Grid.Column="0">
                 <TextBlock Text="PŮVOD" Style="{StaticResource LabelStyle}" Margin="0,0,0,4" />
                 <TextBlock Text="{Binding Origin, ElementName=Root, TargetNullValue='—'}"
                            Style="{StaticResource BodyStyle}" />
             </StackPanel>
 
-            <StackPanel Grid.Row="4" Grid.Column="1">
+            <StackPanel Grid.Row="5" Grid.Column="1">
                 <TextBlock Text="STUPEŇ PRAŽENÍ" Style="{StaticResource LabelStyle}" Margin="0,0,0,4" />
                 <TextBlock Text="{Binding RoastLevel, ElementName=Root, Converter={StaticResource RoastLevelConverter}}"
                            Style="{StaticResource BodyStyle}" />
             </StackPanel>
 
-            <StackPanel Grid.Row="4" Grid.Column="2">
+            <StackPanel Grid.Row="5" Grid.Column="2">
                 <TextBlock Text="DODAVATEL" Style="{StaticResource LabelStyle}" Margin="0,0,0,4" />
                 <TextBlock Text="{Binding SupplierName, ElementName=Root}"
                            Style="{StaticResource BodyStyle}" />

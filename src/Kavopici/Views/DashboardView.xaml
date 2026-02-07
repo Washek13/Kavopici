@@ -62,6 +62,7 @@
                     Origin="{Binding TodayBlend.Origin}"
                     RoastLevel="{Binding TodayBlend.RoastLevel}"
                     SupplierName="{Binding TodayBlend.Supplier.Name}"
+                    Comment="{Binding TodaySession.Comment}"
                     Visibility="{Binding HasBlendToday, Converter={StaticResource BoolToVis}}"
                     Margin="0,0,0,20" />
 
