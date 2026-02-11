@@ -13,7 +13,13 @@
     <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
         <Border Style="{StaticResource CardBorder}" MinWidth="400" MaxWidth="500" Padding="32">
             <StackPanel>
-                <!-- App title -->
+                <!-- App icon and title -->
+                <Image Source="/Kavopici.ico"
+                       Width="64" Height="64"
+                       HorizontalAlignment="Center"
+                       RenderOptions.BitmapScalingMode="HighQuality"
+                       Margin="0,0,0,12" />
+
                 <TextBlock Text="KÁVOPÍČI"
                            Style="{StaticResource TitleStyle}"
                            Foreground="{StaticResource CoffeeDarkBrush}"
@@ -28,8 +34,29 @@
 
                 <Separator Style="{StaticResource SeparatorLine}" Margin="0,0,0,24" />
 
+                <!-- No database selected: create or open -->
+                <StackPanel Visibility="{Binding IsDatabaseNotSelected, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="VYBERTE DATABÁZI" Style="{StaticResource LabelStyle}"
+                               Margin="0,0,0,12" />
+
+                    <TextBlock Text="Vytvořte novou databázi nebo otevřete existující:"
+                               Style="{StaticResource BodyStyle}"
+                               Margin="0,0,0,16" />
+
+                    <Button Content="VYTVOŘIT NOVOU DATABÁZI"
+                            Command="{Binding CreateNewDatabaseCommand}"
+                            Style="{StaticResource AccentButton}"
+                            HorizontalAlignment="Stretch"
+                            Margin="0,0,0,8" />
+
+                    <Button Content="OTEVŘÍT EXISTUJÍCÍ DATABÁZI"
+                            Command="{Binding OpenExistingDatabaseCommand}"
+                            Style="{StaticResource PrimaryButton}"
+                            HorizontalAlignment="Stretch" />
+                </StackPanel>
+
                 <!-- First run: create admin -->
-                <StackPanel Visibility="{Binding IsFirstRun, Converter={StaticResource BoolToVis}}">
+                <StackPanel Visibility="{Binding ShowFirstRun, Converter={StaticResource BoolToVis}}">
                     <TextBlock Text="PRVNÍ SPUŠTĚNÍ" Style="{StaticResource LabelStyle}"
                                Margin="0,0,0,12" />
 
@@ -47,8 +74,8 @@
                             HorizontalAlignment="Stretch" />
                 </StackPanel>
 
-                <!-- Normal login: select user (shown when NOT first run) -->
-                <StackPanel Visibility="{Binding IsFirstRun, Converter={StaticResource InverseBoolToVis}}">
+                <!-- Normal login: select user -->
+                <StackPanel Visibility="{Binding ShowNormalLogin, Converter={StaticResource BoolToVis}}">
                     <TextBlock Text="VYBERTE SVŮJ PROFIL" Style="{StaticResource LabelStyle}"
                                Margin="0,0,0,12" />
 
@@ -81,6 +108,25 @@
                            Margin="0,12,0,0"
                            TextWrapping="Wrap"
                            Visibility="{Binding ErrorMessage, Converter={StaticResource NotNullToVis}}" />
+
+                <!-- Database info footer (shown when a database IS selected) -->
+                <StackPanel Visibility="{Binding IsDatabaseNotSelected, Converter={StaticResource InverseBoolToVis}}"
+                            Margin="0,16,0,0">
+                    <Separator Style="{StaticResource SeparatorLine}" Margin="0,0,0,8" />
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="{Binding SelectedDatabasePath}"
+                                   Style="{StaticResource StatusStyle}"
+                                   HorizontalAlignment="Center"
+                                   MaxWidth="350"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding SelectedDatabasePath}"
+                                   Margin="0,0,0,4" />
+                        <Button Content="Zavřít databázi"
+                                Command="{Binding CloseDatabaseCommand}"
+                                Style="{StaticResource LinkButton}"
+                                HorizontalAlignment="Center" />
+                    </StackPanel>
+                </StackPanel>
             </StackPanel>
         </Border>
     </Grid>

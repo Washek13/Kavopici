@@ -21,6 +21,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="..\..\Kavopici.ico" Link="Kavopici.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.11" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.11">

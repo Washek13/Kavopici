@@ -1,4 +1,3 @@
-using System.IO;
 using System.Windows;
 using Kavopici.Data;
 using Kavopici.Services;
@@ -17,11 +16,9 @@ public partial class App : Application
         using IHost host = Host.CreateDefaultBuilder(args)
             .ConfigureServices((context, services) =>
             {
-                var dbPath = Path.Combine(AppContext.BaseDirectory, "kavopici.db");
-
-                services.AddDbContextFactory<KavopiciDbContext>(options =>
-                    options.UseSqlite($"Data Source={dbPath}")
-                        .AddInterceptors(new SqliteWalInterceptor()));
+                // Settings & Database
+                services.AddSingleton<IAppSettingsService, AppSettingsService>();
+                services.AddSingleton<IDbContextFactory<KavopiciDbContext>, KavopiciDbContextFactory>();
 
                 // Services
                 services.AddTransient<IUserService, UserService>();
@@ -49,24 +46,8 @@ public partial class App : Application
 
         host.Start();
 
-        // Apply migrations on startup
-        try
-        {
-            using var scope = host.Services.CreateScope();
-            var factory = scope.ServiceProvider
-                .GetRequiredService<IDbContextFactory<KavopiciDbContext>>();
-            using var db = factory.CreateDbContext();
-            db.Database.Migrate();
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(
-                $"Nelze se připojit k databázi. Zkontrolujte síťové připojení.\n\nChyba: {ex.Message}",
-                "Kávopíči — Chyba",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
-            return;
-        }
+        var settingsService = host.Services.GetRequiredService<IAppSettingsService>();
+        settingsService.Load();
 
         var app = new App();
         app.InitializeComponent();
