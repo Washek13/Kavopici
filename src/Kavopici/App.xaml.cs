@@ -1,4 +1,5 @@
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using Kavopici.Data;
 using Kavopici.Services;
@@ -17,11 +18,19 @@ public partial class App : Application
         using IHost host = Host.CreateDefaultBuilder(args)
             .ConfigureServices((context, services) =>
             {
-                var dbPath = Path.Combine(AppContext.BaseDirectory, "kavopici.db");
-
-                services.AddDbContextFactory<KavopiciDbContext>(options =>
-                    options.UseSqlite($"Data Source={dbPath}")
-                        .AddInterceptors(new SqliteWalInterceptor()));
+                // Settings (DB path stored in %APPDATA%/Kavopici)
+                var settingsService = new AppSettingsService();
+                settingsService.Load();
+                if (settingsService.DatabasePath is null)
+                {
+                    var defaultPath = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                        "Kavopici", "kavopici.db");
+                    Directory.CreateDirectory(Path.GetDirectoryName(defaultPath)!);
+                    settingsService.SetDatabasePath(defaultPath);
+                }
+                services.AddSingleton<IAppSettingsService>(settingsService);
+                services.AddSingleton<IDbContextFactory<KavopiciDbContext>, KavopiciDbContextFactory>();
 
                 // Services
                 services.AddTransient<IUserService, UserService>();
@@ -32,6 +41,7 @@ public partial class App : Application
                 services.AddTransient<ICsvExportService, CsvExportService>();
                 services.AddTransient<IPrintService, PrintService>();
                 services.AddSingleton<INavigationService, NavigationService>();
+                services.AddSingleton<IUpdateService, UpdateService>();
 
                 // ViewModels
                 services.AddTransient<LoginViewModel>();
@@ -76,6 +86,30 @@ public partial class App : Application
         mainViewModel.NavigateToInitialView();
 
         app.MainWindow.Show();
+
+        // Check for updates in the background
+        _ = Task.Run(async () =>
+        {
+            var updateService = host.Services.GetRequiredService<IUpdateService>();
+            var update = await updateService.CheckForUpdateAsync();
+            if (update is not null)
+            {
+                app.Dispatcher.Invoke(() =>
+                {
+                    var result = MessageBox.Show(
+                        $"Je dostupná nová verze {update.Version}.\n\n{update.ReleaseNotes}\n\nChcete aktualizovat?",
+                        "Kávopíči — Aktualizace",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Information);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        _ = updateService.DownloadAndInstallUpdateAsync(update);
+                    }
+                });
+            }
+        });
+
         app.Run();
     }
 }
