@@ -95,6 +95,16 @@ jobs:
           $manifest = $manifest -replace 'Version="[\d\.]+"', ('Version="' + $env:VERSION_QUAD + '"')
           [System.IO.File]::WriteAllText($dstPath, $manifest, $utf8NoBom)
 
+      - name: Debug manifest
+        shell: pwsh
+        run: |
+          $dstPath = Join-Path (Resolve-Path "publish") "AppxManifest.xml"
+          $bytes = [System.IO.File]::ReadAllBytes($dstPath)
+          Write-Host "First 20 bytes: $($bytes[0..19] -join ', ')"
+          Write-Host "First 100 chars:"
+          Write-Host ([System.Text.Encoding]::UTF8.GetString($bytes, 0, [Math]::Min(100, $bytes.Length)))
+          Write-Host "VERSION_QUAD was: $env:VERSION_QUAD"
+
       - name: Create MSIX package
         shell: pwsh
         run: |
