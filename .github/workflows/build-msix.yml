@@ -88,7 +88,8 @@ jobs:
         run: |
           $manifest = Get-Content "src/Kavopici/Package.appxmanifest" -Raw
           $manifest = $manifest -replace 'Version="[\d\.]+"', "Version=`"${{ steps.version.outputs.VERSION_QUAD }}`""
-          Set-Content "publish/AppxManifest.xml" $manifest
+          $utf8NoBom = New-Object System.Text.UTF8Encoding $false
+          [System.IO.File]::WriteAllText("publish/AppxManifest.xml", $manifest, $utf8NoBom)
 
       - name: Create MSIX package
         shell: pwsh
