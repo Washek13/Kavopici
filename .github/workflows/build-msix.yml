@@ -92,7 +92,7 @@ jobs:
           $srcPath = Resolve-Path "src/Kavopici/Package.appxmanifest"
           $dstPath = Join-Path (Resolve-Path "publish") "AppxManifest.xml"
           $manifest = [System.IO.File]::ReadAllText($srcPath, $utf8NoBom)
-          $manifest = $manifest -replace 'Version="[\d\.]+"', ('Version="' + $env:VERSION_QUAD + '"')
+          $manifest = $manifest -creplace '(?<=Identity[\s\S]*?)Version="[\d\.]+"', ('Version="' + $env:VERSION_QUAD + '"')
           [System.IO.File]::WriteAllText($dstPath, $manifest, $utf8NoBom)
 
       - name: Debug manifest
