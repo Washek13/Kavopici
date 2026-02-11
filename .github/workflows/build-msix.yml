@@ -112,6 +112,7 @@ jobs:
           files: |
             Kavopici-${{ steps.version.outputs.VERSION }}.msix
             Kavopici.cer
+            Install-Certificate.ps1
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
