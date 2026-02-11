@@ -86,10 +86,12 @@ jobs:
       - name: Prepare manifest
         shell: pwsh
         run: |
-          $manifest = Get-Content "src/Kavopici/Package.appxmanifest" -Raw
-          $manifest = $manifest -replace 'Version="[\d\.]+"', "Version=`"${{ steps.version.outputs.VERSION_QUAD }}`""
           $utf8NoBom = New-Object System.Text.UTF8Encoding $false
-          [System.IO.File]::WriteAllText("publish/AppxManifest.xml", $manifest, $utf8NoBom)
+          $srcPath = Resolve-Path "src/Kavopici/Package.appxmanifest"
+          $dstPath = Join-Path (Resolve-Path "publish") "AppxManifest.xml"
+          $manifest = [System.IO.File]::ReadAllText($srcPath, $utf8NoBom)
+          $manifest = $manifest -replace 'Version="[\d\.]+"', "Version=`"${{ steps.version.outputs.VERSION_QUAD }}`""
+          [System.IO.File]::WriteAllText($dstPath, $manifest, $utf8NoBom)
 
       - name: Create MSIX package
         shell: pwsh
