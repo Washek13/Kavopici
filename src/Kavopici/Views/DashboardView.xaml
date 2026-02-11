@@ -55,7 +55,24 @@
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="20">
 
-                <!-- Today's blend card -->
+                <!-- Secret blend placeholder (shown before voting) -->
+                <Border Style="{StaticResource CardBorder}"
+                        Margin="0,0,0,20"
+                        Visibility="{Binding ShowBlendSecret, Converter={StaticResource BoolToVis}}">
+                    <StackPanel>
+                        <TextBlock Text="DNEŠNÍ KÁVA" Style="{StaticResource LabelStyle}"
+                                   Margin="0,0,0,8" />
+                        <TextBlock Text="?"
+                                   Style="{StaticResource DisplayStyle}"
+                                   Margin="0,0,0,4" />
+                        <TextBlock Text="Ohodnoťte dnešní kávu naslepo — informace o směsi se zobrazí po odeslání hodnocení."
+                                   Style="{StaticResource BodyStyle}"
+                                   TextWrapping="Wrap"
+                                   FontStyle="Italic" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Today's blend card (revealed after voting) -->
                 <components:BlendCard
                     BlendName="{Binding TodayBlend.Name}"
                     Roaster="{Binding TodayBlend.Roaster}"
@@ -63,7 +80,7 @@
                     RoastLevel="{Binding TodayBlend.RoastLevel}"
                     SupplierName="{Binding TodayBlend.Supplier.Name}"
                     Comment="{Binding TodaySession.Comment}"
-                    Visibility="{Binding HasBlendToday, Converter={StaticResource BoolToVis}}"
+                    Visibility="{Binding IsBlendRevealed, Converter={StaticResource BoolToVis}}"
                     Margin="0,0,0,20" />
 
                 <!-- No blend message -->

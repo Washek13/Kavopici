@@ -55,6 +55,10 @@ public partial class DashboardViewModel : ObservableObject
     [ObservableProperty]
     private bool isEditing;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowBlendSecret))]
+    private bool isBlendRevealed;
+
     // Highlights
     [ObservableProperty]
     private string? topBlendName;
@@ -92,6 +96,7 @@ public partial class DashboardViewModel : ObservableObject
     public bool IsAdmin => CurrentUser?.IsAdmin == true;
     public string UserDisplayName => CurrentUser?.Name ?? string.Empty;
     public bool HasBlendToday => TodaySession != null;
+    public bool ShowBlendSecret => HasBlendToday && !IsBlendRevealed;
     public bool CanShowRating => HasBlendToday && !HasRated;
 
     public DashboardViewModel(ISessionService sessionService, IRatingService ratingService,
@@ -117,6 +122,7 @@ public partial class DashboardViewModel : ObservableObject
             TodayBlend = TodaySession?.Blend;
 
             OnPropertyChanged(nameof(HasBlendToday));
+            OnPropertyChanged(nameof(ShowBlendSecret));
 
             // Load tasting notes
             var notes = await _ratingService.GetAllTastingNotesAsync();
@@ -132,6 +138,7 @@ public partial class DashboardViewModel : ObservableObject
                 if (ExistingRating != null)
                 {
                     HasRated = true;
+                    IsBlendRevealed = true;
                     SelectedStars = ExistingRating.Stars;
                     Comment = ExistingRating.Comment;
                     StatusMessage = "Vaše hodnocení bylo uloženo.";
@@ -144,6 +151,7 @@ public partial class DashboardViewModel : ObservableObject
                 else
                 {
                     HasRated = false;
+                    IsBlendRevealed = false;
                     SelectedStars = 0;
                     Comment = null;
                 }
@@ -219,6 +227,7 @@ public partial class DashboardViewModel : ObservableObject
             }
 
             HasRated = true;
+            IsBlendRevealed = true;
             StatusMessage = "Vaše hodnocení bylo uloženo.";
             OnPropertyChanged(nameof(CanShowRating));
             SubmitRatingCommand.NotifyCanExecuteChanged();
