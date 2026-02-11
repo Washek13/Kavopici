@@ -66,6 +66,11 @@ jobs:
         shell: pwsh
         run: |
           choco install imagemagick -y --no-progress
+          New-Item -ItemType Directory -Force -Path "publish/Images"
+
+          # Extract the largest frame from the ICO into a single PNG
+          magick "Kavopici.ico[0]" -flatten source.png
+
           $sizes = @{
             "StoreLogo" = "50x50"
             "Square44x44Logo" = "44x44"
@@ -74,9 +79,8 @@ jobs:
             "Wide310x150Logo" = "310x150"
             "LargeTile" = "310x310"
           }
-          New-Item -ItemType Directory -Force -Path "publish/Images"
           foreach ($item in $sizes.GetEnumerator()) {
-            magick convert Kavopici.ico -resize $($item.Value)! -background "#6F4E37" -gravity center -extent $($item.Value) "publish/Images/$($item.Key).png"
+            magick source.png -resize "$($item.Value)" -background "#6F4E37" -gravity center -extent "$($item.Value)" "publish/Images/$($item.Key).png"
           }
 
       - name: Prepare manifest
