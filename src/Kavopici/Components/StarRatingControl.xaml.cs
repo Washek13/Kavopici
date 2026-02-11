@@ -149,6 +149,8 @@ public partial class StarRatingControl : UserControl
         {
             star.IsHitTestVisible = !IsReadOnly;
             star.Cursor = IsReadOnly ? System.Windows.Input.Cursors.Arrow : System.Windows.Input.Cursors.Hand;
+            star.MinWidth = IsReadOnly ? 0 : 40;
+            star.MinHeight = IsReadOnly ? 0 : 40;
         }
     }
 }
