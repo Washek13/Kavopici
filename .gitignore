@@ -23,3 +23,8 @@ Thumbs.db
 
 ## Publish
 publish/
+
+## MSIX / Certificates
+*.msix
+*.pfx
+*.cer
