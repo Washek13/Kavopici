@@ -47,19 +47,14 @@ jobs:
             -p:Version=${{ steps.version.outputs.VERSION }} `
             -o publish/
 
-      - name: Create self-signed certificate
+      - name: Restore signing certificate
         shell: pwsh
         run: |
+          $pfxBytes = [Convert]::FromBase64String("${{ secrets.CERT_PFX_BASE64 }}")
+          [System.IO.File]::WriteAllBytes("cert.pfx", $pfxBytes)
+          # Import to extract the public .cer for the release
           $password = ConvertTo-SecureString -String "${{ secrets.CERT_PASSWORD }}" -Force -AsPlainText
-          $cert = New-SelfSignedCertificate `
-            -Type Custom `
-            -Subject "CN=Washek13" `
-            -KeyUsage DigitalSignature `
-            -FriendlyName "Kavopici Certificate" `
-            -CertStoreLocation "Cert:\CurrentUser\My" `
-            -TextExtension @("2.5.29.37={text}1.3.6.1.5.5.7.3.3", "2.5.29.19={text}")
-          Export-PfxCertificate -Cert $cert -FilePath "cert.pfx" -Password $password
-          # Also export the public certificate for sideloading
+          $cert = Import-PfxCertificate -FilePath "cert.pfx" -CertStoreLocation "Cert:\CurrentUser\My" -Password $password
           Export-Certificate -Cert $cert -FilePath "Kavopici.cer" -Type CERT
 
       - name: Generate tile images from icon
