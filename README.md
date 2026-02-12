@@ -55,7 +55,7 @@ Kávopíči je webová aplikace pro kancelářské degustace kávy. Administrát
 | UI | Blazor Server (Interactive SSR), vlastní CSS |
 | Databáze | SQLite (WAL mód, busy timeout 5 s) |
 | ORM | Entity Framework Core 8.0 |
-| Balení | MSIX (self-contained, win-x64) |
+| Balení | MSIX (Windows), self-contained (multi-platform: win-x64, osx-x64, osx-arm64) |
 | Testování | xUnit, Coverlet |
 | CI/CD | GitHub Actions |
 
@@ -138,8 +138,14 @@ dotnet test tests/Kavopici.Tests/Kavopici.Tests.csproj
 ### Publikace
 
 ```bash
-dotnet publish src/Kavopici.Web/Kavopici.Web.csproj \
-  -c Release -r win-x64 --self-contained
+# Windows (win-x64)
+dotnet publish src/Kavopici.Web/Kavopici.Web.csproj -c Release -r win-x64 --self-contained
+
+# macOS Intel (osx-x64)
+dotnet publish src/Kavopici.Web/Kavopici.Web.csproj -c Release -r osx-x64 --self-contained
+
+# macOS Apple Silicon (osx-arm64)
+dotnet publish src/Kavopici.Web/Kavopici.Web.csproj -c Release -r osx-arm64 --self-contained
 ```
 
 ---

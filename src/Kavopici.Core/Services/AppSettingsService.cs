@@ -33,8 +33,47 @@ public class AppSettingsService : IAppSettingsService
 
     public void SetDatabasePath(string? path)
     {
-        _settings.DatabasePath = path;
+        _settings.DatabasePath = string.IsNullOrEmpty(path) ? null : ExpandPath(path);
         Save();
+    }
+
+    public static string ExpandPath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+            return path;
+
+        var trimmed = path.Trim();
+
+        // Handle tilde expansion (Unix/macOS/Linux)
+        if (trimmed.StartsWith("~/") || trimmed == "~")
+        {
+            var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            trimmed = trimmed.Length == 1 ? home : Path.Combine(home, trimmed.Substring(2));
+        }
+
+        // Expand environment variables (%VAR% on Windows, $VAR on Unix)
+        trimmed = Environment.ExpandEnvironmentVariables(trimmed);
+
+        // Convert to absolute path if relative
+        try
+        {
+            return Path.GetFullPath(trimmed);
+        }
+        catch
+        {
+            // If path is invalid, return original trimmed path and let caller handle
+            return trimmed;
+        }
+    }
+
+    public static string GetPlatformPlaceholderPath()
+    {
+        if (OperatingSystem.IsWindows())
+            return @"C:\Users\jmeno\Documents\kavopici.db";
+        else if (OperatingSystem.IsMacOS())
+            return "~/Documents/kavopici.db";
+        else // Linux or other Unix
+            return "~/Documents/kavopici.db";
     }
 
     private void Save()
