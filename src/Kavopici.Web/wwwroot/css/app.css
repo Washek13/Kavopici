@@ -195,6 +195,17 @@ textarea { resize: vertical; min-height: 60px; }
     border-radius: 10px;
     padding: 18px;
 }
+.blend-card-wrapper.clickable {
+    cursor: pointer;
+    transition: transform 0.15s;
+}
+.blend-card-wrapper.clickable:hover {
+    transform: translateY(-2px);
+}
+.blend-card-wrapper.clickable:hover .blend-card {
+    border-color: var(--coffee-brown);
+    box-shadow: 0 2px 8px rgba(111, 78, 55, 0.15);
+}
 .blend-name { font-family: 'Georgia', serif; color: var(--coffee-dark); margin-bottom: 10px; }
 .blend-details { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; }
 .blend-detail .label { font-weight: 600; color: var(--coffee-medium); }
@@ -380,6 +391,14 @@ textarea { resize: vertical; min-height: 60px; }
     color: var(--cream);
     border-radius: 10px;
     padding: 16px;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+.highlight-card.clickable {
+    cursor: pointer;
+}
+.highlight-card.clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(44, 24, 16, 0.3);
 }
 .highlight-card .highlight-label { font-size: 12px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; }
 .highlight-card .highlight-value { font-family: 'Georgia', serif; font-size: 20px; margin-top: 4px; }
