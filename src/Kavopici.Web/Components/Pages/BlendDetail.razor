@@ -54,7 +54,7 @@ else
         @if (blendStats.RatingCount > 0)
         {
             <h3>Rozložení hodnocení</h3>
-            @{ var maxCount = blendStats.Distribution.Max(); }
+            var maxCount = blendStats.Distribution.Max();
             @for (int i = 4; i >= 0; i--)
             {
                 var count = blendStats.Distribution[i];
