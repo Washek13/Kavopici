@@ -288,17 +288,6 @@ namespace Kavopici.Migrations
                     b.Navigation("TastingNote");
                 });
 
-            modelBuilder.Entity("Kavopici.Models.TastingSession", b =>
-                {
-                    b.HasOne("Kavopici.Models.CoffeeBlend", "Blend")
-                        .WithMany("Sessions")
-                        .HasForeignKey("BlendId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Blend");
-                });
-
             modelBuilder.Entity("Kavopici.Models.CoffeeBlend", b =>
                 {
                     b.Navigation("Ratings");
