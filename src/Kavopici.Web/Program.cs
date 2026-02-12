@@ -15,7 +15,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddDbContextFactory<KavopiciDbContext>(options =>
-    options.UseSqlite($"Data Source={dbPath}")
+    options.UseSqlite($"Data Source={dbPath};Pooling=False")
         .AddInterceptors(new SqliteWalInterceptor()));
 
 // Core services
