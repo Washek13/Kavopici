@@ -1,0 +1,166 @@
+@page "/statistics"
+@inject IStatisticsService StatisticsService
+@inject ICsvExportService CsvExportService
+@inject AppState AppState
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+@if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
+
+<h1>Statistiky</h1>
+
+@if (errorMessage != null)
+{
+    <div class="msg-error">@errorMessage</div>
+}
+
+<div class="tab-bar">
+    <button class="tab-btn @(tab == 0 ? "active" : "")" @onclick="() => tab = 0">Přehled směsí</button>
+    <button class="tab-btn @(tab == 1 ? "active" : "")" @onclick="() => tab = 1">Moje hodnocení</button>
+</div>
+
+@if (isLoading)
+{
+    <div class="loading">Načítání...</div>
+}
+else if (tab == 0)
+{
+    <div class="flex items-center justify-between mb-16">
+        <div class="btn-group">
+            <button class="btn btn-outline" @onclick="() => Nav.NavigateTo(\"/comparison\")">Porovnání směsí</button>
+            <button class="btn btn-outline" @onclick="ExportCsv">Export CSV</button>
+        </div>
+    </div>
+
+    @if (blendStats.Count == 0)
+    {
+        <div class="panel text-center">
+            <p class="text-muted">Zatím žádné statistiky.</p>
+        </div>
+    }
+    else
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th @onclick="() => SortBy(\"BlendName\")">Směs</th>
+                    <th @onclick="() => SortBy(\"AverageRating\")">Průměr</th>
+                    <th @onclick="() => SortBy(\"RatingCount\")">Počet</th>
+                    <th @onclick="() => SortBy(\"Roaster\")">Pražírna</th>
+                    <th @onclick="() => SortBy(\"SupplierName\")">Dodavatel</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var stat in blendStats)
+                {
+                    <tr style="cursor:pointer;" @onclick="() => Nav.NavigateTo($\"/blend/{stat.BlendId}\")">
+                        <td><strong>@stat.BlendName</strong></td>
+                        <td>
+                            <span style="color:var(--amber-gold);font-weight:600;">
+                                @(stat.RatingCount > 0 ? stat.AverageRating.ToString("F1") : "—")
+                            </span>
+                            @if (stat.RatingCount > 0)
+                            {
+                                <span> &#9733;</span>
+                            }
+                        </td>
+                        <td>@stat.RatingCount</td>
+                        <td>@stat.Roaster</td>
+                        <td>@stat.SupplierName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+else
+{
+    @if (userRatings.Count == 0)
+    {
+        <div class="panel text-center">
+            <p class="text-muted">Zatím jste nic nehodnotili.</p>
+        </div>
+    }
+    else
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Směs</th>
+                    <th>Hodnocení</th>
+                    <th>Komentář</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var r in userRatings)
+                {
+                    <tr>
+                        <td>@r.Session.Date.ToString("d. M. yyyy")</td>
+                        <td>@r.Blend.Name</td>
+                        <td>
+                            <span style="color:var(--amber-gold);">
+                                @(new string('★', r.Stars))@(new string('☆', 5 - r.Stars))
+                            </span>
+                        </td>
+                        <td class="text-muted">@(r.Comment ?? "—")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    private int tab;
+    private List<BlendStatistics> blendStats = new();
+    private List<Rating> userRatings = new();
+    private bool isLoading = true;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AppState.IsLoggedIn) return;
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+            blendStats = await StatisticsService.GetBlendStatisticsAsync();
+
+            if (AppState.CurrentUser != null)
+                userRatings = await StatisticsService.GetUserRatingHistoryAsync(AppState.CurrentUser.Id);
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+        finally { isLoading = false; }
+    }
+
+    private void SortBy(string column)
+    {
+        blendStats = column switch
+        {
+            "BlendName" => blendStats.OrderBy(s => s.BlendName).ToList(),
+            "AverageRating" => blendStats.OrderByDescending(s => s.AverageRating).ToList(),
+            "RatingCount" => blendStats.OrderByDescending(s => s.RatingCount).ToList(),
+            "Roaster" => blendStats.OrderBy(s => s.Roaster).ToList(),
+            "SupplierName" => blendStats.OrderBy(s => s.SupplierName).ToList(),
+            _ => blendStats
+        };
+    }
+
+    private async Task ExportCsv()
+    {
+        try
+        {
+            errorMessage = null;
+            var bytes = await CsvExportService.GenerateCsvBytesAsync();
+            var fileName = $"kavopici_export_{DateTime.Now:yyyy-MM-dd}.csv";
+            await JS.InvokeVoidAsync("downloadFile", fileName, "text/csv", bytes);
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+}

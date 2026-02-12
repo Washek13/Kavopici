@@ -1,0 +1,144 @@
+@page "/"
+@inject IUserService UserService
+@inject AppState AppState
+@inject NavigationManager Nav
+
+<div class="login-container">
+    <div class="login-title">KAVOPICI</div>
+    <div class="login-subtitle">Kávový deník vaší kanceláře</div>
+
+    @if (errorMessage != null)
+    {
+        <div class="msg-error" style="max-width:500px;width:100%;">@errorMessage</div>
+    }
+
+    @if (isLoading)
+    {
+        <div class="loading">Načítání...</div>
+    }
+    else if (isFirstRun)
+    {
+        <div class="card" style="max-width:400px;width:100%;">
+            <h2>Vítejte!</h2>
+            <p class="mb-16">Vytvořte prvního administrátora pro zahájení.</p>
+            <div class="form-group">
+                <label>Jméno administrátora</label>
+                <input type="text" @bind="newAdminName" @bind:event="oninput"
+                       @onkeydown="HandleAdminKeyDown" placeholder="Zadejte jméno..." />
+            </div>
+            <button class="btn btn-primary w-full" @onclick="CreateFirstAdmin"
+                    disabled="@string.IsNullOrWhiteSpace(newAdminName)">
+                Vytvořit a pokračovat
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="user-grid">
+            @foreach (var user in users)
+            {
+                <div class="user-card @(selectedUser?.Id == user.Id ? "selected" : "")"
+                     @onclick="() => SelectUser(user)"
+                     @ondblclick="() => LoginUser(user)">
+                    <UserInitials Name="@user.Name" Size="48" />
+                    <span style="font-weight:600;">@user.Name</span>
+                    @if (user.IsAdmin)
+                    {
+                        <span style="font-size:11px;color:var(--amber-gold);">Admin</span>
+                    }
+                </div>
+            }
+        </div>
+
+        @if (selectedUser != null)
+        {
+            <button class="btn btn-primary mt-16" @onclick="LoginSelected">
+                Přihlásit jako @selectedUser.Name
+            </button>
+        }
+    }
+</div>
+
+@code {
+    private List<User> users = new();
+    private User? selectedUser;
+    private bool isFirstRun;
+    private bool isLoading = true;
+    private string newAdminName = "";
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // If already logged in, go to dashboard
+        if (AppState.IsLoggedIn)
+        {
+            Nav.NavigateTo("/dashboard");
+            return;
+        }
+
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
+            var hasUsers = await UserService.HasAnyUsersAsync();
+            isFirstRun = !hasUsers;
+            if (hasUsers)
+                users = await UserService.GetActiveUsersAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private void SelectUser(User user) => selectedUser = user;
+
+    private void LoginUser(User user)
+    {
+        AppState.SetUser(user);
+        Nav.NavigateTo("/dashboard");
+    }
+
+    private void LoginSelected()
+    {
+        if (selectedUser != null)
+            LoginUser(selectedUser);
+    }
+
+    private async Task CreateFirstAdmin()
+    {
+        try
+        {
+            errorMessage = null;
+            if (string.IsNullOrWhiteSpace(newAdminName))
+            {
+                errorMessage = "Zadejte jméno administrátora.";
+                return;
+            }
+            var admin = await UserService.CreateUserAsync(newAdminName.Trim(), isAdmin: true);
+            isFirstRun = false;
+            newAdminName = "";
+            await LoadUsers();
+            selectedUser = users.FirstOrDefault(u => u.Id == admin.Id);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task HandleAdminKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await CreateFirstAdmin();
+    }
+}
