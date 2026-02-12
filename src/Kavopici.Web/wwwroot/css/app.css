@@ -50,6 +50,13 @@ html, body {
     letter-spacing: 2px;
     color: var(--amber-gold);
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.header-icon {
+    width: 28px;
+    height: 28px;
 }
 
 .header-nav { display: flex; gap: 4px; flex: 1; }
@@ -321,6 +328,11 @@ textarea { resize: vertical; min-height: 60px; }
     align-items: center;
     justify-content: center;
     min-height: 80vh;
+}
+.login-icon {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 12px;
 }
 .login-title {
     font-family: 'Georgia', serif;
