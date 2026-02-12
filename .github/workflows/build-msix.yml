@@ -1,0 +1,118 @@
+name: Build MSIX Package
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Extract version from tag
+        id: version
+        shell: pwsh
+        run: |
+          if ("${{ github.ref_name }}" -match '^v') {
+            $tag = "${{ github.ref_name }}".TrimStart('v')
+          } else {
+            $tag = "1.0.0"
+          }
+          echo "VERSION=$tag" >> $env:GITHUB_OUTPUT
+          echo "VERSION_QUAD=$tag.0" >> $env:GITHUB_OUTPUT
+
+      - name: Restore dependencies
+        run: dotnet restore src/Kavopici/Kavopici.csproj -r win-x64
+
+      - name: Publish application
+        shell: pwsh
+        run: |
+          dotnet publish src/Kavopici/Kavopici.csproj `
+            -c Release `
+            -r win-x64 `
+            --self-contained `
+            -p:PublishSingleFile=false `
+            -p:Version=${{ steps.version.outputs.VERSION }} `
+            -o publish/
+
+      - name: Restore signing certificate
+        shell: pwsh
+        run: |
+          $pfxBytes = [Convert]::FromBase64String("${{ secrets.CERT_PFX_BASE64 }}")
+          [System.IO.File]::WriteAllBytes("cert.pfx", $pfxBytes)
+          # Import to extract the public .cer for the release
+          $password = ConvertTo-SecureString -String "${{ secrets.CERT_PASSWORD }}" -Force -AsPlainText
+          $cert = Import-PfxCertificate -FilePath "cert.pfx" -CertStoreLocation "Cert:\CurrentUser\My" -Password $password
+          Export-Certificate -Cert $cert -FilePath "Kavopici.cer" -Type CERT
+
+      - name: Generate tile images from icon
+        shell: pwsh
+        run: |
+          choco install imagemagick -y --no-progress
+          New-Item -ItemType Directory -Force -Path "publish/Images"
+
+          # Extract the largest frame from the ICO into a single PNG
+          magick "Kavopici.ico[0]" -flatten source.png
+
+          $sizes = @{
+            "StoreLogo" = "50x50"
+            "Square44x44Logo" = "44x44"
+            "SmallTile" = "71x71"
+            "Square150x150Logo" = "150x150"
+            "Wide310x150Logo" = "310x150"
+            "LargeTile" = "310x310"
+          }
+          foreach ($item in $sizes.GetEnumerator()) {
+            magick source.png -resize "$($item.Value)" -background "#6F4E37" -gravity center -extent "$($item.Value)" "publish/Images/$($item.Key).png"
+          }
+
+      - name: Prepare manifest
+        shell: pwsh
+        env:
+          VERSION_QUAD: ${{ steps.version.outputs.VERSION_QUAD }}
+        run: |
+          $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+          $srcPath = Resolve-Path "src/Kavopici/Package.appxmanifest"
+          $dstPath = Join-Path (Resolve-Path "publish") "AppxManifest.xml"
+          $manifest = [System.IO.File]::ReadAllText($srcPath, $utf8NoBom)
+          $manifest = $manifest -creplace '(?<=Identity[\s\S]*?)Version="[\d\.]+"', ('Version="' + $env:VERSION_QUAD + '"')
+          [System.IO.File]::WriteAllText($dstPath, $manifest, $utf8NoBom)
+
+      - name: Create MSIX package
+        shell: pwsh
+        run: |
+          $makeappx = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\10.*\x64\makeappx.exe" |
+            Sort-Object FullName -Descending | Select-Object -First 1
+          & $makeappx.FullName pack /d publish /p "Kavopici-${{ steps.version.outputs.VERSION }}.msix" /o
+
+      - name: Sign MSIX package
+        shell: pwsh
+        run: |
+          $signtool = Get-ChildItem "C:\Program Files (x86)\Windows Kits\10\bin\10.*\x64\signtool.exe" |
+            Sort-Object FullName -Descending | Select-Object -First 1
+          $password = "${{ secrets.CERT_PASSWORD }}"
+          & $signtool.FullName sign /f cert.pfx /p $password /fd SHA256 /td SHA256 "Kavopici-${{ steps.version.outputs.VERSION }}.msix"
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            Kavopici-${{ steps.version.outputs.VERSION }}.msix
+            Kavopici.cer
+            Install-Certificate.ps1
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
