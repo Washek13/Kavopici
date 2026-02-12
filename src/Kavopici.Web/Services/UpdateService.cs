@@ -29,6 +29,10 @@ public class UpdateService : IUpdateService
 
     public async Task<UpdateInfo?> CheckForUpdateAsync()
     {
+        // MSIX updates are only supported on Windows
+        if (!OperatingSystem.IsWindows())
+            return null;
+
         try
         {
             var url = $"https://api.github.com/repos/{GitHubOwner}/{GitHubRepo}/releases/latest";
@@ -61,6 +65,10 @@ public class UpdateService : IUpdateService
     public async Task DownloadAndInstallUpdateAsync(
         UpdateInfo update, IProgress<double>? progress = null)
     {
+        // MSIX installation is only supported on Windows
+        if (!OperatingSystem.IsWindows())
+            throw new PlatformNotSupportedException("Auto-update is only supported on Windows");
+
         var tempPath = Path.Combine(Path.GetTempPath(), $"Kavopici-{update.Version}.msix");
 
         using var response = await Http.GetAsync(

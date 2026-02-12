@@ -8,7 +8,11 @@ Start every session by reading `README.md` for full project context.
 dotnet build Kavopici.sln                                    # Build
 dotnet test tests/Kavopici.Tests/Kavopici.Tests.csproj       # Tests
 dotnet run --project src/Kavopici.Web/Kavopici.Web.csproj    # Run (http://localhost:5201)
-dotnet publish src/Kavopici.Web/Kavopici.Web.csproj -c Release -r win-x64 --self-contained  # Publish
+
+# Publish
+dotnet publish src/Kavopici.Web/Kavopici.Web.csproj -c Release -r win-x64 --self-contained      # Windows
+dotnet publish src/Kavopici.Web/Kavopici.Web.csproj -c Release -r osx-x64 --self-contained      # macOS Intel
+dotnet publish src/Kavopici.Web/Kavopici.Web.csproj -c Release -r osx-arm64 --self-contained    # macOS Apple Silicon
 ```
 
 ## Architecture
