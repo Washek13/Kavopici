@@ -1,0 +1,367 @@
+@page "/admin"
+@inject IUserService UserService
+@inject IBlendService BlendService
+@inject ISessionService SessionService
+@inject ICsvExportService CsvExportService
+@inject AppState AppState
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+@if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
+@if (!AppState.IsAdmin) { Nav.NavigateTo("/dashboard"); return; }
+
+<h1>Správa</h1>
+
+@if (errorMessage != null)
+{
+    <div class="msg-error">@errorMessage</div>
+}
+@if (statusMessage != null)
+{
+    <div class="msg-success">@statusMessage</div>
+}
+
+<div class="tab-bar">
+    <button class="tab-btn @(tab == 0 ? "active" : "")" @onclick="() => tab = 0">Uživatelé</button>
+    <button class="tab-btn @(tab == 1 ? "active" : "")" @onclick="() => tab = 1">Směsi</button>
+    <button class="tab-btn @(tab == 2 ? "active" : "")" @onclick="() => tab = 2">Káva dne</button>
+</div>
+
+@* === Users Tab === *@
+@if (tab == 0)
+{
+    <div class="card">
+        <h2>Přidat uživatele</h2>
+        <div class="flex gap-8 items-center">
+            <input type="text" @bind="newUserName" @bind:event="oninput" placeholder="Jméno..."
+                   style="flex:1;" @onkeydown="HandleUserKeyDown" />
+            <button class="btn btn-primary" @onclick="AddUser"
+                    disabled="@string.IsNullOrWhiteSpace(newUserName)">Přidat</button>
+        </div>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Jméno</th>
+                <th>Role</th>
+                <th>Akce</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in allUsers)
+            {
+                <tr>
+                    <td>
+                        <div class="flex items-center gap-8">
+                            <UserInitials Name="@user.Name" Size="28" />
+                            @user.Name
+                        </div>
+                    </td>
+                    <td>@(user.IsAdmin ? "Admin" : "Uživatel")</td>
+                    <td>
+                        <div class="btn-group">
+                            <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
+                                    @onclick="() => ToggleAdmin(user)">
+                                @(user.IsAdmin ? "Odebrat admin" : "Přidat admin")
+                            </button>
+                            <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;"
+                                    @onclick="() => DeactivateUser(user)">
+                                Deaktivovat
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@* === Blends Tab === *@
+@if (tab == 1)
+{
+    <div class="card">
+        <h2>Přidat směs</h2>
+        <div class="form-group">
+            <label>Název</label>
+            <input type="text" @bind="newBlendName" placeholder="Název směsi..." />
+        </div>
+        <div class="form-group">
+            <label>Pražírna</label>
+            <input type="text" @bind="newBlendRoaster" placeholder="Název pražírny..." />
+        </div>
+        <div class="form-group">
+            <label>Původ (volitelný)</label>
+            <input type="text" @bind="newBlendOrigin" placeholder="Země původu..." />
+        </div>
+        <div class="form-group">
+            <label>Stupeň pražení</label>
+            <select @bind="newBlendRoastLevel">
+                <option value="@RoastLevel.Light">Lehké</option>
+                <option value="@RoastLevel.MediumLight">Středně lehké</option>
+                <option value="@RoastLevel.Medium">Střední</option>
+                <option value="@RoastLevel.MediumDark">Středně tmavé</option>
+                <option value="@RoastLevel.Dark">Tmavé</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Dodavatel</label>
+            <select @bind="newBlendSupplierId">
+                <option value="0">— vyberte —</option>
+                @foreach (var u in allUsers)
+                {
+                    <option value="@u.Id">@u.Name</option>
+                }
+            </select>
+        </div>
+        <button class="btn btn-primary" @onclick="AddBlend">Přidat směs</button>
+    </div>
+
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Název</th>
+                <th>Pražírna</th>
+                <th>Pražení</th>
+                <th>Dodavatel</th>
+                <th>Akce</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var blend in allBlends)
+            {
+                <tr>
+                    <td><strong>@blend.Name</strong></td>
+                    <td>@blend.Roaster</td>
+                    <td>@RoastLevelText(blend.RoastLevel)</td>
+                    <td>@blend.Supplier.Name</td>
+                    <td>
+                        <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;"
+                                @onclick="() => DeactivateBlend(blend)">
+                            Odebrat
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@* === Blend of Day Tab === *@
+@if (tab == 2)
+{
+    <div class="card">
+        <h2>Nastavit kávu dne</h2>
+
+        @if (currentSession != null)
+        {
+            <div class="panel mb-16">
+                <strong>Aktuální:</strong> @currentSession.Blend.Name
+                (@currentSession.Date.ToString("d. M. yyyy"))
+                @if (!string.IsNullOrEmpty(currentSession.Comment))
+                {
+                    <span class="text-muted"> — @currentSession.Comment</span>
+                }
+            </div>
+        }
+
+        <div class="form-group">
+            <label>Směs</label>
+            <select @bind="selectedBlendOfDayId">
+                <option value="0">— vyberte směs —</option>
+                @foreach (var b in allBlends)
+                {
+                    <option value="@b.Id">@b.Name (@b.Roaster)</option>
+                }
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Komentář (volitelný)</label>
+            <textarea @bind="sessionComment" placeholder="Poznámka k dnešnímu ochutnávání..."></textarea>
+        </div>
+        <button class="btn btn-accent" @onclick="SetBlendOfDay"
+                disabled="@(selectedBlendOfDayId == 0)">
+            Nastavit jako kávu dne
+        </button>
+    </div>
+
+    <div class="card">
+        <div class="flex items-center justify-between mb-16">
+            <h2 style="margin-bottom:0;">Nástroje</h2>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-outline" @onclick="ExportCsv">Export CSV</button>
+        </div>
+    </div>
+}
+
+@code {
+    private int tab;
+    private List<User> allUsers = new();
+    private List<CoffeeBlend> allBlends = new();
+    private TastingSession? currentSession;
+
+    // User form
+    private string newUserName = "";
+
+    // Blend form
+    private string newBlendName = "";
+    private string newBlendRoaster = "";
+    private string? newBlendOrigin;
+    private RoastLevel newBlendRoastLevel = RoastLevel.Medium;
+    private int newBlendSupplierId;
+
+    // Blend of day form
+    private int selectedBlendOfDayId;
+    private string? sessionComment;
+
+    private string? errorMessage;
+    private string? statusMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AppState.IsLoggedIn || !AppState.IsAdmin) return;
+        await LoadAll();
+    }
+
+    private async Task LoadAll()
+    {
+        await Task.WhenAll(LoadUsers(), LoadBlends(), LoadCurrentSession());
+    }
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            var users = await UserService.GetAllUsersAsync();
+            allUsers = users.Where(u => u.IsActive).ToList();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task LoadBlends()
+    {
+        try { allBlends = await BlendService.GetActiveBlendsAsync(); }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task LoadCurrentSession()
+    {
+        try { currentSession = await SessionService.GetTodaySessionAsync(); }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task AddUser()
+    {
+        try
+        {
+            errorMessage = null;
+            if (string.IsNullOrWhiteSpace(newUserName)) { errorMessage = "Zadejte jméno uživatele."; return; }
+            await UserService.CreateUserAsync(newUserName.Trim());
+            newUserName = "";
+            statusMessage = "Uživatel byl přidán.";
+            await LoadUsers();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task HandleUserKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await AddUser();
+    }
+
+    private async Task DeactivateUser(User user)
+    {
+        try
+        {
+            errorMessage = null;
+            await UserService.DeactivateUserAsync(user.Id);
+            statusMessage = $"Uživatel {user.Name} byl deaktivován.";
+            await LoadUsers();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task ToggleAdmin(User user)
+    {
+        try
+        {
+            errorMessage = null;
+            await UserService.ToggleAdminAsync(user.Id);
+            await LoadUsers();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task AddBlend()
+    {
+        try
+        {
+            errorMessage = null;
+            if (string.IsNullOrWhiteSpace(newBlendName)) { errorMessage = "Zadejte název směsi."; return; }
+            if (string.IsNullOrWhiteSpace(newBlendRoaster)) { errorMessage = "Zadejte název pražírny."; return; }
+            if (newBlendSupplierId == 0) { errorMessage = "Vyberte dodavatele."; return; }
+
+            await BlendService.CreateBlendAsync(newBlendName.Trim(), newBlendRoaster.Trim(),
+                newBlendOrigin?.Trim(), newBlendRoastLevel, newBlendSupplierId);
+
+            newBlendName = "";
+            newBlendRoaster = "";
+            newBlendOrigin = null;
+            newBlendRoastLevel = RoastLevel.Medium;
+            newBlendSupplierId = 0;
+            statusMessage = "Směs byla přidána.";
+            await LoadBlends();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task DeactivateBlend(CoffeeBlend blend)
+    {
+        try
+        {
+            errorMessage = null;
+            await BlendService.DeactivateBlendAsync(blend.Id);
+            statusMessage = $"Směs {blend.Name} byla odstraněna.";
+            await LoadBlends();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task SetBlendOfDay()
+    {
+        try
+        {
+            errorMessage = null;
+            if (selectedBlendOfDayId == 0) { errorMessage = "Vyberte směs."; return; }
+            currentSession = await SessionService.SetBlendOfTheDayAsync(selectedBlendOfDayId, sessionComment);
+            sessionComment = null;
+            var blend = allBlends.FirstOrDefault(b => b.Id == selectedBlendOfDayId);
+            statusMessage = $"Dnešní káva nastavena: {blend?.Name ?? ""}";
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task ExportCsv()
+    {
+        try
+        {
+            errorMessage = null;
+            var bytes = await CsvExportService.GenerateCsvBytesAsync();
+            var fileName = $"kavopici_export_{DateTime.Now:yyyy-MM-dd}.csv";
+            await JS.InvokeVoidAsync("downloadFile", fileName, "text/csv", bytes);
+            statusMessage = "Data byla exportována.";
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private static string RoastLevelText(RoastLevel level) => level switch
+    {
+        RoastLevel.Light => "Lehké",
+        RoastLevel.MediumLight => "Středně lehké",
+        RoastLevel.Medium => "Střední",
+        RoastLevel.MediumDark => "Středně tmavé",
+        RoastLevel.Dark => "Tmavé",
+        _ => level.ToString()
+    };
+}
