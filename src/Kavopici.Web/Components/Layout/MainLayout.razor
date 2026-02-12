@@ -1,0 +1,51 @@
+@inherits LayoutComponentBase
+@inject AppState AppState
+@inject NavigationManager Nav
+
+<div class="app-container">
+    @if (AppState.IsLoggedIn)
+    {
+        <header class="app-header">
+            <div class="header-brand" @onclick="GoToDashboard">KAVOPICI</div>
+            <nav class="header-nav">
+                <button class="nav-btn" @onclick="GoToDashboard">Nástěnka</button>
+                <button class="nav-btn" @onclick="GoToStatistics">Statistiky</button>
+                @if (AppState.IsAdmin)
+                {
+                    <button class="nav-btn" @onclick="GoToAdmin">Správa</button>
+                }
+            </nav>
+            <div class="header-user">
+                <UserInitials Name="@AppState.CurrentUser!.Name" />
+                <span class="user-name">@AppState.CurrentUser!.Name</span>
+                <button class="btn btn-sm" @onclick="Logout">Odhlásit</button>
+            </div>
+        </header>
+    }
+
+    <main class="app-main">
+        @Body
+    </main>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        AppState.OnChange += StateHasChanged;
+    }
+
+    private void GoToDashboard() => Nav.NavigateTo("/dashboard");
+    private void GoToStatistics() => Nav.NavigateTo("/statistics");
+    private void GoToAdmin() => Nav.NavigateTo("/admin");
+
+    private void Logout()
+    {
+        AppState.Logout();
+        Nav.NavigateTo("/");
+    }
+
+    public void Dispose()
+    {
+        AppState.OnChange -= StateHasChanged;
+    }
+}

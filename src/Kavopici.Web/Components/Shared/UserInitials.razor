@@ -1,0 +1,19 @@
+<span class="user-initials" title="@Name" style="width:@(Size)px;height:@(Size)px;font-size:@(Size * 0.45)px;line-height:@(Size)px;">
+    @GetInitials()
+</span>
+
+@code {
+    [Parameter, EditorRequired] public string Name { get; set; } = "";
+    [Parameter] public int Size { get; set; } = 36;
+
+    private string GetInitials()
+    {
+        var parts = Name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length switch
+        {
+            0 => "?",
+            1 => parts[0][..1].ToUpper(),
+            _ => $"{parts[0][..1]}{parts[^1][..1]}".ToUpper()
+        };
+    }
+}
