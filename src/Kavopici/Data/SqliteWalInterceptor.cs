@@ -20,7 +20,7 @@ public class SqliteWalInterceptor : DbConnectionInterceptor
     private static void ExecutePragmas(DbConnection connection)
     {
         using var command = connection.CreateCommand();
-        command.CommandText = "PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;";
+        command.CommandText = "PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA synchronous=NORMAL;";
         command.ExecuteNonQuery();
     }
 }
