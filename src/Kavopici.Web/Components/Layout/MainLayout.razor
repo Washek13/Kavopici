@@ -1,8 +1,27 @@
 @inherits LayoutComponentBase
 @inject AppState AppState
+@inject UpdateState UpdateState
+@inject IUpdateService UpdateService
 @inject NavigationManager Nav
 
 <div class="app-container">
+    @if (UpdateState.IsUpdateAvailable)
+    {
+        <div class="update-banner">
+            <span>Je dostupná nová verze @UpdateState.AvailableUpdate!.Version.</span>
+            @if (isDownloading)
+            {
+                <span>Stahování...</span>
+            }
+            else
+            {
+                <button class="btn btn-sm" style="background:var(--amber-gold);color:var(--coffee-dark);margin-left:12px;" @onclick="InstallUpdate">
+                    Aktualizovat
+                </button>
+            }
+        </div>
+    }
+
     @if (AppState.IsLoggedIn)
     {
         <header class="app-header">
@@ -29,9 +48,24 @@
 </div>
 
 @code {
+    private bool isDownloading;
+
     protected override void OnInitialized()
     {
         AppState.OnChange += StateHasChanged;
+        UpdateState.OnChange += OnUpdateStateChanged;
+    }
+
+    private void OnUpdateStateChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task InstallUpdate()
+    {
+        if (UpdateState.AvailableUpdate is null) return;
+        isDownloading = true;
+        await UpdateService.DownloadAndInstallUpdateAsync(UpdateState.AvailableUpdate);
     }
 
     private void GoToDashboard() => Nav.NavigateTo("/dashboard");
@@ -47,5 +81,6 @@
     public void Dispose()
     {
         AppState.OnChange -= StateHasChanged;
+        UpdateState.OnChange -= OnUpdateStateChanged;
     }
 }

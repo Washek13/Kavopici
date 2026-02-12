@@ -25,6 +25,8 @@ builder.Services.AddTransient<ICsvExportService, CsvExportService>();
 
 // Web-specific services (scoped per circuit/session)
 builder.Services.AddScoped<AppState>();
+builder.Services.AddSingleton<IUpdateService, UpdateService>();
+builder.Services.AddSingleton<UpdateState>();
 
 var app = builder.Build();
 
@@ -49,6 +51,18 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<Kavopici.Web.Components.App>()
     .AddInteractiveServerRenderMode();
+
+// Check for updates in the background
+_ = Task.Run(async () =>
+{
+    var updateService = app.Services.GetRequiredService<IUpdateService>();
+    var update = await updateService.CheckForUpdateAsync();
+    if (update is not null)
+    {
+        var updateState = app.Services.GetRequiredService<UpdateState>();
+        updateState.SetAvailableUpdate(update);
+    }
+});
 
 // Auto-open browser
 var url = app.Urls.FirstOrDefault() ?? "http://localhost:5201";

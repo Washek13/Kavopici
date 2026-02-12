@@ -412,6 +412,18 @@ textarea { resize: vertical; min-height: 60px; }
     font-size: 16px;
 }
 
+/* === Update Banner === */
+.update-banner {
+    background: var(--coffee-dark);
+    color: var(--cream);
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
 /* === Responsive === */
 @media (max-width: 640px) {
     .app-main { padding: 12px; }
