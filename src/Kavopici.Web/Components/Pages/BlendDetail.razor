@@ -6,7 +6,7 @@
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 
-<button class="btn btn-outline mb-16" @onclick="() => Nav.NavigateTo(\"/statistics\")">
+<button class="btn btn-outline mb-16" @onclick="GoBack">
     &larr; Zpět na statistiky
 </button>
 
@@ -54,15 +54,15 @@ else
         @if (blendStats.RatingCount > 0)
         {
             <h3>Rozložení hodnocení</h3>
+            @{ var maxCount = blendStats.Distribution.Max(); }
             @for (int i = 4; i >= 0; i--)
             {
                 var count = blendStats.Distribution[i];
-                var maxCount = blendStats.Distribution.Max();
                 var widthPct = maxCount > 0 ? (count / (double)maxCount) * 100 : 0;
                 <div class="distribution-row">
                     <span class="distribution-label">@(i + 1) &#9733;</span>
                     <div class="distribution-bar-bg">
-                        <div class="distribution-bar" style="width:@widthPct.ToString("F0")%"></div>
+                        <div class="distribution-bar" style="@($"width:{widthPct:F0}%")"></div>
                     </div>
                     <span class="distribution-count">@count</span>
                 </div>
@@ -137,6 +137,8 @@ else
         catch (Exception ex) { errorMessage = ex.Message; }
         finally { isLoading = false; }
     }
+
+    private void GoBack() => Nav.NavigateTo("/statistics");
 
     private static string RoastLevelText(RoastLevel level) => level switch
     {

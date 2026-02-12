@@ -27,7 +27,7 @@ else if (tab == 0)
 {
     <div class="flex items-center justify-between mb-16">
         <div class="btn-group">
-            <button class="btn btn-outline" @onclick="() => Nav.NavigateTo(\"/comparison\")">Porovnání směsí</button>
+            <button class="btn btn-outline" @onclick="GoToComparison">Porovnání směsí</button>
             <button class="btn btn-outline" @onclick="ExportCsv">Export CSV</button>
         </div>
     </div>
@@ -43,17 +43,17 @@ else if (tab == 0)
         <table class="data-table">
             <thead>
                 <tr>
-                    <th @onclick="() => SortBy(\"BlendName\")">Směs</th>
-                    <th @onclick="() => SortBy(\"AverageRating\")">Průměr</th>
-                    <th @onclick="() => SortBy(\"RatingCount\")">Počet</th>
-                    <th @onclick="() => SortBy(\"Roaster\")">Pražírna</th>
-                    <th @onclick="() => SortBy(\"SupplierName\")">Dodavatel</th>
+                    <th @onclick="@(() => SortBy("BlendName"))">Směs</th>
+                    <th @onclick="@(() => SortBy("AverageRating"))">Průměr</th>
+                    <th @onclick="@(() => SortBy("RatingCount"))">Počet</th>
+                    <th @onclick="@(() => SortBy("Roaster"))">Pražírna</th>
+                    <th @onclick="@(() => SortBy("SupplierName"))">Dodavatel</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var stat in blendStats)
                 {
-                    <tr style="cursor:pointer;" @onclick="() => Nav.NavigateTo($\"/blend/{stat.BlendId}\")">
+                    <tr style="cursor:pointer;" @onclick="@(() => GoToBlendDetail(stat.BlendId))">
                         <td><strong>@stat.BlendName</strong></td>
                         <td>
                             <span style="color:var(--amber-gold);font-weight:600;">
@@ -100,7 +100,7 @@ else
                         <td>@r.Blend.Name</td>
                         <td>
                             <span style="color:var(--amber-gold);">
-                                @(new string('★', r.Stars))@(new string('☆', 5 - r.Stars))
+                                @(new string('\u2605', r.Stars))@(new string('\u2606', 5 - r.Stars))
                             </span>
                         </td>
                         <td class="text-muted">@(r.Comment ?? "—")</td>
@@ -151,6 +151,9 @@ else
             _ => blendStats
         };
     }
+
+    private void GoToComparison() => Nav.NavigateTo("/comparison");
+    private void GoToBlendDetail(int blendId) => Nav.NavigateTo($"/blend/{blendId}");
 
     private async Task ExportCsv()
     {
