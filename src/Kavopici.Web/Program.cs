@@ -6,17 +6,14 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Database path: configurable, defaults to kavopici.db next to the executable
-var dbPath = builder.Configuration["DatabasePath"] ?? "kavopici.db";
-if (!Path.IsPathRooted(dbPath))
-    dbPath = Path.Combine(AppContext.BaseDirectory, dbPath);
+// Settings (DB path stored in %APPDATA%/Kavopici/settings.json)
+var settingsService = new AppSettingsService();
+settingsService.Load();
+builder.Services.AddSingleton<IAppSettingsService>(settingsService);
+builder.Services.AddSingleton<IDbContextFactory<KavopiciDbContext>, KavopiciDbContextFactory>();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
-
-builder.Services.AddDbContextFactory<KavopiciDbContext>(options =>
-    options.UseSqlite($"Data Source={dbPath};Pooling=False")
-        .AddInterceptors(new SqliteWalInterceptor()));
 
 // Core services
 builder.Services.AddTransient<IUserService, UserService>();
@@ -31,12 +28,20 @@ builder.Services.AddScoped<AppState>();
 
 var app = builder.Build();
 
-// Apply migrations on startup
-using (var scope = app.Services.CreateScope())
+// Apply migrations on startup (only if a database is already configured)
+if (!string.IsNullOrEmpty(settingsService.DatabasePath) && File.Exists(settingsService.DatabasePath))
 {
-    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<KavopiciDbContext>>();
-    using var db = factory.CreateDbContext();
-    db.Database.Migrate();
+    try
+    {
+        using var scope = app.Services.CreateScope();
+        var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<KavopiciDbContext>>();
+        using var db = factory.CreateDbContext();
+        db.Database.Migrate();
+    }
+    catch
+    {
+        // Migration errors will be handled when Login page tries to load users
+    }
 }
 
 app.UseStaticFiles();

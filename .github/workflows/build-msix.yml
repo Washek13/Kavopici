@@ -34,12 +34,12 @@ jobs:
           echo "VERSION_QUAD=$tag.0" >> $env:GITHUB_OUTPUT
 
       - name: Restore dependencies
-        run: dotnet restore src/Kavopici/Kavopici.csproj -r win-x64
+        run: dotnet restore src/Kavopici.Web/Kavopici.Web.csproj -r win-x64
 
       - name: Publish application
         shell: pwsh
         run: |
-          dotnet publish src/Kavopici/Kavopici.csproj `
+          dotnet publish src/Kavopici.Web/Kavopici.Web.csproj `
             -c Release `
             -r win-x64 `
             --self-contained `
@@ -84,7 +84,7 @@ jobs:
           VERSION_QUAD: ${{ steps.version.outputs.VERSION_QUAD }}
         run: |
           $utf8NoBom = [System.Text.UTF8Encoding]::new($false)
-          $srcPath = Resolve-Path "src/Kavopici/Package.appxmanifest"
+          $srcPath = Resolve-Path "src/Kavopici.Web/Package.appxmanifest"
           $dstPath = Join-Path (Resolve-Path "publish") "AppxManifest.xml"
           $manifest = [System.IO.File]::ReadAllText($srcPath, $utf8NoBom)
           $manifest = $manifest -creplace '(?<=Identity[\s\S]*?)Version="[\d\.]+"', ('Version="' + $env:VERSION_QUAD + '"')

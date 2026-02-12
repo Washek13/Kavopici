@@ -1,5 +1,7 @@
 @page "/"
 @inject IUserService UserService
+@inject IAppSettingsService AppSettings
+@inject IDbContextFactory<KavopiciDbContext> DbContextFactory
 @inject AppState AppState
 @inject NavigationManager Nav
 
@@ -15,6 +17,28 @@
     @if (isLoading)
     {
         <div class="loading">Načítání...</div>
+    }
+    else if (isDatabaseNotSelected)
+    {
+        <div class="card" style="max-width:400px;width:100%;">
+            <h2>Vyberte databázi</h2>
+            <p class="mb-16">Vytvořte novou databázi nebo otevřete existující:</p>
+            <div class="form-group">
+                <label>Cesta k databázi</label>
+                <input type="text" @bind="databasePathInput" @bind:event="oninput"
+                       placeholder="C:\cesta\kavopici.db" />
+            </div>
+            <div class="btn-group" style="flex-direction:column;">
+                <button class="btn btn-accent w-full" @onclick="CreateNewDatabase"
+                        disabled="@string.IsNullOrWhiteSpace(databasePathInput)">
+                    Vytvořit novou databázi
+                </button>
+                <button class="btn btn-primary w-full" @onclick="OpenExistingDatabase"
+                        disabled="@string.IsNullOrWhiteSpace(databasePathInput)">
+                    Otevřít existující databázi
+                </button>
+            </div>
+        </div>
     }
     else if (isFirstRun)
     {
@@ -57,6 +81,20 @@
             </button>
         }
     }
+
+    @if (!isDatabaseNotSelected && !isLoading && selectedDatabasePath != null)
+    {
+        <div style="margin-top:16px;text-align:center;">
+            <div class="text-muted" style="font-size:12px;max-width:350px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
+                 title="@selectedDatabasePath">
+                @selectedDatabasePath
+            </div>
+            <button class="btn" style="background:none;color:var(--coffee-brown);font-size:13px;text-decoration:underline;padding:4px;"
+                    @onclick="CloseDatabase">
+                Zavřít databázi
+            </button>
+        </div>
+    }
 </div>
 
 @code {
@@ -64,12 +102,14 @@
     private User? selectedUser;
     private bool isFirstRun;
     private bool isLoading = true;
+    private bool isDatabaseNotSelected;
+    private string? selectedDatabasePath;
+    private string databasePathInput = "";
     private string newAdminName = "";
     private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        // If already logged in, go to dashboard
         if (AppState.IsLoggedIn)
         {
             Nav.NavigateTo("/dashboard");
@@ -85,19 +125,117 @@
         {
             isLoading = true;
             errorMessage = null;
+
+            var dbPath = AppSettings.DatabasePath;
+            if (string.IsNullOrEmpty(dbPath) || !File.Exists(dbPath))
+            {
+                if (!string.IsNullOrEmpty(dbPath) && !File.Exists(dbPath))
+                    AppSettings.SetDatabasePath(null);
+
+                isDatabaseNotSelected = true;
+                isFirstRun = false;
+                selectedDatabasePath = null;
+                return;
+            }
+
+            isDatabaseNotSelected = false;
+            selectedDatabasePath = dbPath;
+
+            await Task.Run(() =>
+            {
+                using var db = DbContextFactory.CreateDbContext();
+                db.Database.Migrate();
+            });
+
             var hasUsers = await UserService.HasAnyUsersAsync();
             isFirstRun = !hasUsers;
+
             if (hasUsers)
                 users = await UserService.GetActiveUsersAsync();
         }
         catch (Exception ex)
         {
-            errorMessage = ex.Message;
+            errorMessage = $"Chyba při otevírání databáze: {ex.Message}";
+            isDatabaseNotSelected = true;
+            isFirstRun = false;
+            selectedDatabasePath = null;
+            AppSettings.SetDatabasePath(null);
         }
         finally
         {
             isLoading = false;
         }
+    }
+
+    private async Task CreateNewDatabase()
+    {
+        try
+        {
+            errorMessage = null;
+            var path = databasePathInput.Trim();
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                errorMessage = "Zadejte cestu k databázi.";
+                return;
+            }
+
+            if (!path.EndsWith(".db", StringComparison.OrdinalIgnoreCase))
+                path += ".db";
+
+            var dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(dir))
+                Directory.CreateDirectory(dir);
+
+            if (File.Exists(path))
+                File.Delete(path);
+
+            AppSettings.SetDatabasePath(path);
+            databasePathInput = "";
+            await LoadUsers();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Chyba při vytváření databáze: {ex.Message}";
+        }
+    }
+
+    private async Task OpenExistingDatabase()
+    {
+        try
+        {
+            errorMessage = null;
+            var path = databasePathInput.Trim();
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                errorMessage = "Zadejte cestu k databázi.";
+                return;
+            }
+
+            if (!File.Exists(path))
+            {
+                errorMessage = "Soubor neexistuje. Zkontrolujte cestu.";
+                return;
+            }
+
+            AppSettings.SetDatabasePath(path);
+            databasePathInput = "";
+            await LoadUsers();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Chyba při otevírání databáze: {ex.Message}";
+        }
+    }
+
+    private void CloseDatabase()
+    {
+        AppSettings.SetDatabasePath(null);
+        users.Clear();
+        selectedUser = null;
+        selectedDatabasePath = null;
+        isDatabaseNotSelected = true;
+        isFirstRun = false;
+        errorMessage = null;
     }
 
     private void SelectUser(User user) => selectedUser = user;
