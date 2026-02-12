@@ -436,7 +436,46 @@ textarea { resize: vertical; min-height: 60px; }
     font-size: 14px;
 }
 
+/* === Flavor Wheel Banner === */
+.flavor-wheel-banner {
+    background: var(--off-white);
+    border: 1px solid var(--coffee-light);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+}
+
+.flavor-wheel-banner .banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.flavor-wheel-banner .banner-icon {
+    font-size: 1.5rem;
+}
+
+.flavor-wheel-banner .banner-text {
+    flex: 1;
+    min-width: 200px;
+    color: var(--coffee-dark);
+}
+
 /* === Responsive === */
+@media (max-width: 768px) {
+    .flavor-wheel-banner .banner-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .flavor-wheel-banner .btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+
 @media (max-width: 640px) {
     .app-main { padding: 12px; }
     .highlights { grid-template-columns: 1fr; }
