@@ -1,0 +1,181 @@
+@inject IRatingService RatingService
+@inject AppState AppState
+
+@if (errorMessage != null)
+{
+    <div class="msg-error">@errorMessage</div>
+}
+@if (statusMessage != null)
+{
+    <div class="msg-success">@statusMessage</div>
+}
+
+@if (!hasRated || isEditing)
+{
+    <div class="form-group">
+        <label>Vaše hodnocení</label>
+        <StarRating Value="@selectedStars" ValueChanged="OnStarsChanged" />
+    </div>
+
+    <div class="form-group">
+        <label>Komentář (volitelný)</label>
+        <textarea @bind="comment" placeholder="Jak vám káva chutnala?"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label>Chuťové poznámky</label>
+        <div class="tasting-notes">
+            @foreach (var note in availableNotes)
+            {
+                <span class="note-tag @(selectedNoteIds.Contains(note.Id) ? "selected" : "")"
+                      @onclick="() => ToggleNote(note.Id)">
+                    @note.Name
+                </span>
+            }
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn btn-accent" @onclick="SubmitRating"
+                disabled="@(selectedStars < 1)">
+            @(isEditing ? "Uložit změny" : "Odeslat hodnocení")
+        </button>
+        @if (isEditing)
+        {
+            <button class="btn btn-outline" @onclick="CancelEdit">Zrušit</button>
+        }
+    </div>
+}
+else
+{
+    <div class="panel">
+        <div class="flex items-center justify-between">
+            <div>
+                <StarRating Value="@selectedStars" ReadOnly="true" />
+                @if (!string.IsNullOrEmpty(comment))
+                {
+                    <p class="mt-8" style="font-style:italic;color:var(--coffee-medium);">@comment</p>
+                }
+                @if (selectedNoteIds.Count > 0)
+                {
+                    <div class="tasting-notes mt-8">
+                        @foreach (var note in availableNotes.Where(n => selectedNoteIds.Contains(n.Id)))
+                        {
+                            <span class="note-tag selected readonly">@note.Name</span>
+                        }
+                    </div>
+                }
+            </div>
+            <button class="btn btn-outline" @onclick="StartEdit">Upravit</button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public int SessionId { get; set; }
+    [Parameter, EditorRequired] public int BlendId { get; set; }
+    [Parameter] public Rating? ExistingRating { get; set; }
+    [Parameter] public EventCallback OnRatingSubmitted { get; set; }
+
+    private List<TastingNote> availableNotes = new();
+    private HashSet<int> selectedNoteIds = new();
+    private int selectedStars;
+    private string? comment;
+    private bool hasRated;
+    private bool isEditing;
+    private string? errorMessage;
+    private string? statusMessage;
+
+    private Rating? currentRating;
+
+    protected override async Task OnInitializedAsync()
+    {
+        availableNotes = await RatingService.GetAllTastingNotesAsync();
+        PopulateFromRating(ExistingRating);
+    }
+
+    private void PopulateFromRating(Rating? rating)
+    {
+        currentRating = rating;
+        if (rating != null)
+        {
+            hasRated = true;
+            selectedStars = rating.Stars;
+            comment = rating.Comment;
+
+            if (rating.RatingTastingNotes != null)
+                selectedNoteIds = new HashSet<int>(rating.RatingTastingNotes.Select(rtn => rtn.TastingNoteId));
+            else
+                selectedNoteIds.Clear();
+        }
+        else
+        {
+            hasRated = false;
+            selectedStars = 0;
+            comment = null;
+            selectedNoteIds.Clear();
+        }
+    }
+
+    private void OnStarsChanged(int stars) => selectedStars = stars;
+
+    private void ToggleNote(int id)
+    {
+        if (!selectedNoteIds.Remove(id))
+            selectedNoteIds.Add(id);
+    }
+
+    private async Task SubmitRating()
+    {
+        try
+        {
+            errorMessage = null;
+            if (AppState.CurrentUser == null) return;
+
+            if (isEditing && currentRating != null)
+            {
+                currentRating = await RatingService.UpdateRatingAsync(currentRating.Id, selectedStars, comment);
+                isEditing = false;
+            }
+            else
+            {
+                currentRating = await RatingService.SubmitRatingAsync(
+                    BlendId, AppState.CurrentUser.Id, SessionId, selectedStars, comment);
+            }
+
+            if (selectedNoteIds.Count > 0 && currentRating != null)
+                await RatingService.SetRatingNotesAsync(currentRating.Id, selectedNoteIds.ToList());
+
+            hasRated = true;
+            statusMessage = "Vaše hodnocení bylo uloženo.";
+
+            await OnRatingSubmitted.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private async Task StartEdit()
+    {
+        if (currentRating != null)
+        {
+            var noteIds = await RatingService.GetRatingNoteIdsAsync(currentRating.Id);
+            selectedNoteIds = new HashSet<int>(noteIds);
+        }
+        isEditing = true;
+        hasRated = false;
+    }
+
+    private void CancelEdit()
+    {
+        if (currentRating != null)
+        {
+            selectedStars = currentRating.Stars;
+            comment = currentRating.Comment;
+        }
+        isEditing = false;
+        hasRated = true;
+    }
+}

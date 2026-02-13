@@ -481,6 +481,19 @@ textarea { resize: vertical; min-height: 60px; }
     color: var(--coffee-dark);
 }
 
+/* === Inline Rating Form (Statistics retroactive voting) === */
+.inline-rating-cell {
+    padding: 0 !important;
+    border-top: none !important;
+}
+.inline-rating-form {
+    background: var(--off-white);
+    border: 1px solid var(--coffee-light);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 8px 0;
+}
+
 /* === Responsive === */
 @media (max-width: 768px) {
     .flavor-wheel-banner .banner-content {

@@ -28,6 +28,18 @@ public class SessionService : ISessionService
             .FirstOrDefaultAsync();
     }
 
+    public async Task<TastingSession?> GetMostRecentUnratedSessionAsync(int userId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        return await context.TastingSessions
+            .Where(s => s.Date < Today && s.IsActive)
+            .Where(s => !context.Ratings.Any(r => r.SessionId == s.Id && r.UserId == userId))
+            .Include(s => s.Blend)
+                .ThenInclude(b => b.Supplier)
+            .OrderByDescending(s => s.Date)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<TastingSession> SetBlendOfTheDayAsync(int blendId, string? comment = null)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
