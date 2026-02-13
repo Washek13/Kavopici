@@ -8,7 +8,15 @@
     @if (UpdateState.IsUpdateAvailable)
     {
         <div class="update-banner">
-            <span>Je dostupná nová verze @UpdateState.AvailableUpdate!.Version.</span>
+            <div class="update-banner-content">
+                <span class="update-banner-version">Je dostupná nová verze @UpdateState.AvailableUpdate!.Version.</span>
+                @if (!string.IsNullOrWhiteSpace(UpdateState.AvailableUpdate!.ReleaseNotes))
+                {
+                    <div class="update-banner-notes">
+                        @UpdateState.AvailableUpdate.ReleaseNotes
+                    </div>
+                }
+            </div>
             @if (isDownloading)
             {
                 <span>Stahování...</span>
