@@ -80,5 +80,112 @@ public class StatisticsServiceTests : IDisposable
         Assert.Equal(0, stats[0].RatingCount);
     }
 
+    [Fact]
+    public async Task GetBlendStatisticsAsync_MultipleBlends_OrderedByAverageDesc()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blendA = await _blendService.CreateBlendAsync("BlendA", "Roaster", null, RoastLevel.Medium, user.Id);
+        var blendB = await _blendService.CreateBlendAsync("BlendB", "Roaster", null, RoastLevel.Dark, user.Id);
+
+        var session = await _sessionService.SetBlendOfTheDayAsync(blendA.Id);
+        await _ratingService.SubmitRatingAsync(blendA.Id, user.Id, session.Id, 2, null);
+
+        var session2 = await _sessionService.SetBlendOfTheDayAsync(blendB.Id);
+        await _ratingService.SubmitRatingAsync(blendB.Id, user.Id, session2.Id, 5, null);
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        Assert.Equal(2, stats.Count);
+        Assert.Equal("BlendB", stats[0].BlendName);
+        Assert.Equal("BlendA", stats[1].BlendName);
+    }
+
+    [Fact]
+    public async Task GetBlendStatisticsAsync_VerifiesAllRecordFields()
+    {
+        var user = await _userService.CreateUserAsync("Jan", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync(
+            "Ethiopia Yirgacheffe", "Doubleshot", "Ethiopia", RoastLevel.Light, user.Id);
+        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+        await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session.Id, 4, null);
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        Assert.Single(stats);
+        var s = stats[0];
+        Assert.Equal(blend.Id, s.BlendId);
+        Assert.Equal("Ethiopia Yirgacheffe", s.BlendName);
+        Assert.Equal("Doubleshot", s.Roaster);
+        Assert.Equal("Ethiopia", s.Origin);
+        Assert.Equal(RoastLevel.Light, s.RoastLevel);
+        Assert.Equal("Jan", s.SupplierName);
+        Assert.Equal(4.0, s.AverageRating);
+        Assert.Equal(1, s.RatingCount);
+        Assert.Equal(new[] { 0, 0, 0, 1, 0 }, s.Distribution);
+    }
+
+    [Fact]
+    public async Task GetBlendStatisticsAsync_AllSameStars_DistributionCorrect()
+    {
+        var user1 = await _userService.CreateUserAsync("User1", isAdmin: true);
+        var user2 = await _userService.CreateUserAsync("User2");
+        var user3 = await _userService.CreateUserAsync("User3");
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user1.Id);
+        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+
+        await _ratingService.SubmitRatingAsync(blend.Id, user1.Id, session.Id, 3, null);
+        await _ratingService.SubmitRatingAsync(blend.Id, user2.Id, session.Id, 3, null);
+        await _ratingService.SubmitRatingAsync(blend.Id, user3.Id, session.Id, 3, null);
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        Assert.Single(stats);
+        Assert.Equal(3.0, stats[0].AverageRating);
+        Assert.Equal(3, stats[0].RatingCount);
+        Assert.Equal(new[] { 0, 0, 3, 0, 0 }, stats[0].Distribution);
+    }
+
+    [Fact]
+    public async Task GetUserRatingHistoryAsync_ReturnsWithBlendAndSession()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+        await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session.Id, 4, null);
+
+        var history = await _statisticsService.GetUserRatingHistoryAsync(user.Id);
+
+        Assert.Single(history);
+        Assert.NotNull(history[0].Blend);
+        Assert.NotNull(history[0].Session);
+    }
+
+    [Fact]
+    public async Task GetUserRatingHistoryAsync_NoRatings_ReturnsEmpty()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+
+        var history = await _statisticsService.GetUserRatingHistoryAsync(user.Id);
+
+        Assert.Empty(history);
+    }
+
+    [Fact]
+    public async Task GetUserRatingHistoryAsync_OnlySpecifiedUsersRatings()
+    {
+        var user1 = await _userService.CreateUserAsync("User1", isAdmin: true);
+        var user2 = await _userService.CreateUserAsync("User2");
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user1.Id);
+        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+
+        await _ratingService.SubmitRatingAsync(blend.Id, user1.Id, session.Id, 4, null);
+        await _ratingService.SubmitRatingAsync(blend.Id, user2.Id, session.Id, 3, null);
+
+        var history = await _statisticsService.GetUserRatingHistoryAsync(user1.Id);
+
+        Assert.Single(history);
+        Assert.Equal(4, history[0].Stars);
+    }
+
     public void Dispose() => _factory.Dispose();
 }

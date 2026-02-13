@@ -2,6 +2,7 @@ using Kavopici.Models;
 using Kavopici.Models.Enums;
 using Kavopici.Services;
 using Kavopici.Tests.Helpers;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 
 namespace Kavopici.Tests.Services;
@@ -48,12 +49,17 @@ public class SessionServiceTests : IDisposable
         var blend1 = await _blendService.CreateBlendAsync("Blend1", "Roaster", null, RoastLevel.Medium, user.Id);
         var blend2 = await _blendService.CreateBlendAsync("Blend2", "Roaster", null, RoastLevel.Dark, user.Id);
 
-        await _sessionService.SetBlendOfTheDayAsync(blend1.Id);
+        var session1 = await _sessionService.SetBlendOfTheDayAsync(blend1.Id);
         var session2 = await _sessionService.SetBlendOfTheDayAsync(blend2.Id);
 
         var todaySession = await _sessionService.GetTodaySessionAsync();
         Assert.NotNull(todaySession);
         Assert.Equal(blend2.Id, todaySession!.BlendId);
+
+        // Explicitly verify old session is deactivated
+        using var context = _factory.CreateDbContext();
+        var oldSession = await context.TastingSessions.FirstAsync(s => s.Id == session1.Id);
+        Assert.False(oldSession.IsActive);
     }
 
     [Fact]
@@ -71,6 +77,67 @@ public class SessionServiceTests : IDisposable
         Assert.Equal("Test", session.Blend.Name);
         Assert.NotNull(session.Blend.Supplier);
         Assert.Equal("User", session.Blend.Supplier.Name);
+    }
+
+    [Fact]
+    public async Task SetBlendOfTheDayAsync_WithComment_StoresComment()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id, "Dnes testujeme");
+
+        Assert.Equal("Dnes testujeme", session.Comment);
+    }
+
+    [Fact]
+    public async Task SetBlendOfTheDayAsync_WhitespaceComment_StoresNull()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id, "   ");
+
+        Assert.Null(session.Comment);
+    }
+
+    [Fact]
+    public async Task SetBlendOfTheDayAsync_CommentTrimmed()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id, "  Dobrá káva  ");
+
+        Assert.Equal("Dobrá káva", session.Comment);
+    }
+
+    [Fact]
+    public async Task GetSessionHistoryAsync_ReturnsAllSessions()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend1 = await _blendService.CreateBlendAsync("Blend1", "Roaster", null, RoastLevel.Medium, user.Id);
+        var blend2 = await _blendService.CreateBlendAsync("Blend2", "Roaster", null, RoastLevel.Dark, user.Id);
+
+        await _sessionService.SetBlendOfTheDayAsync(blend1.Id);
+        await _sessionService.SetBlendOfTheDayAsync(blend2.Id);
+
+        var history = await _sessionService.GetSessionHistoryAsync();
+
+        Assert.Equal(2, history.Count);
+        Assert.All(history, s =>
+        {
+            Assert.NotNull(s.Blend);
+            Assert.NotNull(s.Blend.Supplier);
+        });
+    }
+
+    [Fact]
+    public async Task GetSessionHistoryAsync_EmptyDb_ReturnsEmpty()
+    {
+        var history = await _sessionService.GetSessionHistoryAsync();
+
+        Assert.Empty(history);
     }
 
     public void Dispose() => _factory.Dispose();

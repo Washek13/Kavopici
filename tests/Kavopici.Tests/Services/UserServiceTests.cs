@@ -120,5 +120,101 @@ public class UserServiceTests : IDisposable
         Assert.True(result);
     }
 
+    [Fact]
+    public async Task CreateUserAsync_WhitespaceOnlyName_Throws()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _service.CreateUserAsync("   "));
+    }
+
+    [Fact]
+    public async Task CreateUserAsync_TrimsName()
+    {
+        var user = await _service.CreateUserAsync("  Test User  ");
+
+        Assert.Equal("Test User", user.Name);
+    }
+
+    [Fact]
+    public async Task CreateUserAsync_DuplicateTrimmedName_Throws()
+    {
+        await _service.CreateUserAsync("Test");
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.CreateUserAsync("  Test  "));
+    }
+
+    [Fact]
+    public async Task GetAllUsersAsync_ReturnsActiveAndInactive()
+    {
+        var admin = await _service.CreateUserAsync("Admin", isAdmin: true);
+        var user = await _service.CreateUserAsync("User");
+        await _service.DeactivateUserAsync(user.Id);
+
+        var all = await _service.GetAllUsersAsync();
+
+        Assert.Equal(2, all.Count);
+    }
+
+    [Fact]
+    public async Task GetAllUsersAsync_OrderedByName()
+    {
+        await _service.CreateUserAsync("Zuzka", isAdmin: true);
+        await _service.CreateUserAsync("Adam");
+        await _service.CreateUserAsync("Martin");
+
+        var all = await _service.GetAllUsersAsync();
+
+        Assert.Equal("Adam", all[0].Name);
+        Assert.Equal("Martin", all[1].Name);
+        Assert.Equal("Zuzka", all[2].Name);
+    }
+
+    [Fact]
+    public async Task IsLastAdminAsync_SingleAdmin_ReturnsTrue()
+    {
+        var admin = await _service.CreateUserAsync("Admin", isAdmin: true);
+
+        var result = await _service.IsLastAdminAsync(admin.Id);
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task IsLastAdminAsync_MultipleAdmins_ReturnsFalse()
+    {
+        var admin1 = await _service.CreateUserAsync("Admin1", isAdmin: true);
+        var admin2 = await _service.CreateUserAsync("Admin2", isAdmin: true);
+
+        var result = await _service.IsLastAdminAsync(admin1.Id);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task IsLastAdminAsync_NonAdmin_ReturnsFalse()
+    {
+        await _service.CreateUserAsync("Admin", isAdmin: true);
+        var user = await _service.CreateUserAsync("User");
+
+        var result = await _service.IsLastAdminAsync(user.Id);
+
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task DeactivateUserAsync_NonExistentUser_Throws()
+    {
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.DeactivateUserAsync(9999));
+    }
+
+    [Fact]
+    public async Task ToggleAdminAsync_NonExistentUser_Throws()
+    {
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _service.ToggleAdminAsync(9999));
+    }
+
     public void Dispose() => _factory.Dispose();
 }
