@@ -187,5 +187,99 @@ public class StatisticsServiceTests : IDisposable
         Assert.Equal(4, history[0].Stars);
     }
 
+    // --- GetUserSessionHistoryAsync tests ---
+
+    private async Task<TastingSession> CreatePastSessionAsync(int blendId, DateOnly date)
+    {
+        using var context = _factory.CreateDbContext();
+        var session = new TastingSession
+        {
+            BlendId = blendId,
+            Date = date,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        context.TastingSessions.Add(session);
+        await context.SaveChangesAsync();
+        return session;
+    }
+
+    [Fact]
+    public async Task GetUserSessionHistoryAsync_NoSessions_ReturnsEmpty()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+
+        var result = await _statisticsService.GetUserSessionHistoryAsync(user.Id);
+
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task GetUserSessionHistoryAsync_MixedRatedAndUnrated_ReturnsAll()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        var twoDaysAgo = DateOnly.FromDateTime(DateTime.Today.AddDays(-2));
+        var yesterday = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
+        var session1 = await CreatePastSessionAsync(blend.Id, twoDaysAgo);
+        var session2 = await CreatePastSessionAsync(blend.Id, yesterday);
+
+        // Rate only the first session
+        await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session1.Id, 4, "Good");
+
+        var result = await _statisticsService.GetUserSessionHistoryAsync(user.Id);
+
+        Assert.Equal(2, result.Count);
+
+        var rated = result.First(r => r.Session.Id == session1.Id);
+        Assert.True(rated.HasRated);
+        Assert.NotNull(rated.UserRating);
+        Assert.Equal(4, rated.UserRating!.Stars);
+
+        var unrated = result.First(r => r.Session.Id == session2.Id);
+        Assert.False(unrated.HasRated);
+        Assert.Null(unrated.UserRating);
+    }
+
+    [Fact]
+    public async Task GetUserSessionHistoryAsync_OrderedByDateDesc()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        var threeDaysAgo = DateOnly.FromDateTime(DateTime.Today.AddDays(-3));
+        var twoDaysAgo = DateOnly.FromDateTime(DateTime.Today.AddDays(-2));
+        var yesterday = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
+        await CreatePastSessionAsync(blend.Id, twoDaysAgo);
+        await CreatePastSessionAsync(blend.Id, threeDaysAgo);
+        await CreatePastSessionAsync(blend.Id, yesterday);
+
+        var result = await _statisticsService.GetUserSessionHistoryAsync(user.Id);
+
+        Assert.Equal(3, result.Count);
+        Assert.Equal(yesterday, result[0].Session.Date);
+        Assert.Equal(twoDaysAgo, result[1].Session.Date);
+        Assert.Equal(threeDaysAgo, result[2].Session.Date);
+    }
+
+    [Fact]
+    public async Task GetUserSessionHistoryAsync_IncludesBlendDetails()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("TestBlend", "TestRoaster", "Origin", RoastLevel.Medium, user.Id);
+
+        var yesterday = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
+        await CreatePastSessionAsync(blend.Id, yesterday);
+
+        var result = await _statisticsService.GetUserSessionHistoryAsync(user.Id);
+
+        Assert.Single(result);
+        Assert.NotNull(result[0].Session.Blend);
+        Assert.Equal("TestBlend", result[0].Session.Blend.Name);
+        Assert.NotNull(result[0].Session.Blend.Supplier);
+        Assert.Equal("User", result[0].Session.Blend.Supplier.Name);
+    }
+
     public void Dispose() => _factory.Dispose();
 }

@@ -75,10 +75,10 @@ else if (tab == 0)
 }
 else
 {
-    @if (userRatings.Count == 0)
+    @if (userSessions.Count == 0)
     {
         <div class="panel text-center">
-            <p class="text-muted">Zatím jste nic nehodnotili.</p>
+            <p class="text-muted">Zatím žádná degustace.</p>
         </div>
     }
     else
@@ -93,18 +93,53 @@ else
                 </tr>
             </thead>
             <tbody>
-                @foreach (var r in userRatings)
+                @foreach (var item in userSessions)
                 {
+                    var sessionId = item.Session.Id;
+                    var isRevealed = item.HasRated || revealedSessions.Contains(sessionId);
+                    var isExpanded = expandedSessions.Contains(sessionId);
+
                     <tr>
-                        <td>@r.Session.Date.ToString("d. M. yyyy")</td>
-                        <td>@r.Blend.Name</td>
+                        <td>@item.Session.Date.ToString("d. M. yyyy")</td>
                         <td>
-                            <span style="color:var(--amber-gold);">
-                                @(new string('\u2605', r.Stars))@(new string('\u2606', MaxStars - r.Stars))
-                            </span>
+                            @if (isRevealed)
+                            {
+                                <strong>@item.Session.Blend.Name</strong>
+                            }
+                            else
+                            {
+                                <em class="text-muted">Tajné hlasování</em>
+                            }
                         </td>
-                        <td class="text-muted">@(r.Comment ?? "—")</td>
+                        <td>
+                            @if (item.HasRated)
+                            {
+                                <span style="color:var(--amber-gold);">
+                                    @(new string('\u2605', item.UserRating!.Stars))@(new string('\u2606', MaxStars - item.UserRating!.Stars))
+                                </span>
+                            }
+                            else if (!isExpanded)
+                            {
+                                <button class="btn btn-outline btn-sm" @onclick="() => ExpandRatingForm(sessionId)">
+                                    Ohodnotit
+                                </button>
+                            }
+                        </td>
+                        <td class="text-muted">@(item.HasRated ? (item.UserRating!.Comment ?? "—") : "—")</td>
                     </tr>
+
+                    @if (!item.HasRated && isExpanded)
+                    {
+                        <tr>
+                            <td colspan="4" class="inline-rating-cell">
+                                <div class="inline-rating-form">
+                                    <RatingForm SessionId="@sessionId"
+                                                BlendId="@item.Session.BlendId"
+                                                OnRatingSubmitted="() => OnRetroRatingSubmitted(sessionId)" />
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>
@@ -116,7 +151,9 @@ else
 
     private int tab;
     private List<BlendStatistics> blendStats = new();
-    private List<Rating> userRatings = new();
+    private List<SessionWithRating> userSessions = new();
+    private HashSet<int> expandedSessions = new();
+    private HashSet<int> revealedSessions = new();
     private bool isLoading = true;
     private string? errorMessage;
 
@@ -142,10 +179,25 @@ else
             blendStats = await StatisticsService.GetBlendStatisticsAsync();
 
             if (AppState.CurrentUser != null)
-                userRatings = await StatisticsService.GetUserRatingHistoryAsync(AppState.CurrentUser.Id);
+                userSessions = await StatisticsService.GetUserSessionHistoryAsync(AppState.CurrentUser.Id);
         }
         catch (Exception ex) { errorMessage = ex.Message; }
         finally { isLoading = false; }
+    }
+
+    private void ExpandRatingForm(int sessionId)
+    {
+        expandedSessions.Add(sessionId);
+    }
+
+    private async Task OnRetroRatingSubmitted(int sessionId)
+    {
+        revealedSessions.Add(sessionId);
+        expandedSessions.Remove(sessionId);
+
+        // Reload to update the rated status
+        if (AppState.CurrentUser != null)
+            userSessions = await StatisticsService.GetUserSessionHistoryAsync(AppState.CurrentUser.Id);
     }
 
     private void SortBy(string column)

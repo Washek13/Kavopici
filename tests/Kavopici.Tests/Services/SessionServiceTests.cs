@@ -140,5 +140,98 @@ public class SessionServiceTests : IDisposable
         Assert.Empty(history);
     }
 
+    // --- GetMostRecentUnratedSessionAsync tests ---
+
+    private async Task<TastingSession> CreatePastSessionAsync(int blendId, DateOnly date)
+    {
+        using var context = _factory.CreateDbContext();
+        var session = new TastingSession
+        {
+            BlendId = blendId,
+            Date = date,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+        context.TastingSessions.Add(session);
+        await context.SaveChangesAsync();
+        return session;
+    }
+
+    [Fact]
+    public async Task GetMostRecentUnratedSessionAsync_NoSessions_ReturnsNull()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+
+        var result = await _sessionService.GetMostRecentUnratedSessionAsync(user.Id);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetMostRecentUnratedSessionAsync_AllRated_ReturnsNull()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+        var ratingService = new RatingService(_factory);
+
+        var yesterday = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
+        var session = await CreatePastSessionAsync(blend.Id, yesterday);
+
+        await ratingService.SubmitRatingAsync(blend.Id, user.Id, session.Id, 4, null);
+
+        var result = await _sessionService.GetMostRecentUnratedSessionAsync(user.Id);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetMostRecentUnratedSessionAsync_HasUnrated_ReturnsMostRecent()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        var twoDaysAgo = DateOnly.FromDateTime(DateTime.Today.AddDays(-2));
+        var yesterday = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
+        await CreatePastSessionAsync(blend.Id, twoDaysAgo);
+        await CreatePastSessionAsync(blend.Id, yesterday);
+
+        var result = await _sessionService.GetMostRecentUnratedSessionAsync(user.Id);
+
+        Assert.NotNull(result);
+        Assert.Equal(yesterday, result!.Date);
+    }
+
+    [Fact]
+    public async Task GetMostRecentUnratedSessionAsync_IgnoresTodaySession()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        // Create today's session — should be ignored
+        await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+
+        var result = await _sessionService.GetMostRecentUnratedSessionAsync(user.Id);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetMostRecentUnratedSessionAsync_IncludesBlendAndSupplier()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("TestBlend", "TestRoaster", "Origin", RoastLevel.Medium, user.Id);
+
+        var yesterday = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
+        await CreatePastSessionAsync(blend.Id, yesterday);
+
+        var result = await _sessionService.GetMostRecentUnratedSessionAsync(user.Id);
+
+        Assert.NotNull(result);
+        Assert.NotNull(result!.Blend);
+        Assert.Equal("TestBlend", result.Blend.Name);
+        Assert.NotNull(result.Blend.Supplier);
+        Assert.Equal("User", result.Blend.Supplier.Name);
+    }
+
     public void Dispose() => _factory.Dispose();
 }

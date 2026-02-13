@@ -59,4 +59,30 @@ public class StatisticsService : IStatisticsService
             .OrderByDescending(r => r.CreatedAt)
             .ToListAsync();
     }
+
+    public async Task<List<SessionWithRating>> GetUserSessionHistoryAsync(int userId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var sessions = await context.TastingSessions
+            .Where(s => s.IsActive)
+            .Include(s => s.Blend)
+                .ThenInclude(b => b.Supplier)
+            .OrderByDescending(s => s.Date)
+            .ToListAsync();
+
+        var sessionIds = sessions.Select(s => s.Id).ToList();
+
+        var userRatings = await context.Ratings
+            .Where(r => r.UserId == userId && sessionIds.Contains(r.SessionId))
+            .Include(r => r.RatingTastingNotes)
+                .ThenInclude(rtn => rtn.TastingNote)
+            .ToDictionaryAsync(r => r.SessionId);
+
+        return sessions.Select(s =>
+        {
+            userRatings.TryGetValue(s.Id, out var rating);
+            return new SessionWithRating(s, rating, rating != null);
+        }).ToList();
+    }
 }

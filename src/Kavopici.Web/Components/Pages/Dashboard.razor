@@ -13,10 +13,6 @@
 {
     <div class="msg-error">@errorMessage</div>
 }
-@if (statusMessage != null)
-{
-    <div class="msg-success">@statusMessage</div>
-}
 
 @* Highlights *@
 @if (hasHighlights)
@@ -54,19 +50,12 @@
 {
     <div class="loading">Načítání...</div>
 }
-else if (todaySession == null)
-{
-    <div class="panel text-center">
-        <h2>Dnes žádná káva</h2>
-        <p class="text-muted">Administrátor dosud nenastavil dnešní směs.</p>
-    </div>
-}
-else
+else if (todaySession != null)
 {
     <div class="card">
         <h2>Káva dne — @todaySession.Date.ToString("d. M. yyyy")</h2>
 
-        @if (showSecret)
+        @if (showTodaySecret)
         {
             <div class="secret-overlay">
                 <h3>Tajné hlasování</h3>
@@ -81,81 +70,53 @@ else
         }
 
         <div class="mt-16">
-            @if (!hasRated || isEditing)
-            {
-                <div class="form-group">
-                    <label>Vaše hodnocení</label>
-                    <StarRating Value="@selectedStars" ValueChanged="OnStarsChanged" />
-                </div>
-
-                <div class="form-group">
-                    <label>Komentář (volitelný)</label>
-                    <textarea @bind="comment" placeholder="Jak vám káva chutnala?"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label>Chuťové poznámky</label>
-                    <div class="tasting-notes">
-                        @foreach (var note in availableNotes)
-                        {
-                            <span class="note-tag @(selectedNoteIds.Contains(note.Id) ? "selected" : "")"
-                                  @onclick="() => ToggleNote(note.Id)">
-                                @note.Name
-                            </span>
-                        }
-                    </div>
-                </div>
-
-                <div class="btn-group">
-                    <button class="btn btn-accent" @onclick="SubmitRating"
-                            disabled="@(selectedStars < 1)">
-                        @(isEditing ? "Uložit změny" : "Odeslat hodnocení")
-                    </button>
-                    @if (isEditing)
-                    {
-                        <button class="btn btn-outline" @onclick="CancelEdit">Zrušit</button>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="panel">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <StarRating Value="@selectedStars" ReadOnly="true" />
-                            @if (!string.IsNullOrEmpty(comment))
-                            {
-                                <p class="mt-8" style="font-style:italic;color:var(--coffee-medium);">@comment</p>
-                            }
-                            @if (selectedNoteIds.Count > 0)
-                            {
-                                <div class="tasting-notes mt-8">
-                                    @foreach (var note in availableNotes.Where(n => selectedNoteIds.Contains(n.Id)))
-                                    {
-                                        <span class="note-tag selected readonly">@note.Name</span>
-                                    }
-                                </div>
-                            }
-                        </div>
-                        <button class="btn btn-outline" @onclick="StartEdit">Upravit</button>
-                    </div>
-                </div>
-            }
+            <RatingForm SessionId="@todaySession.Id"
+                        BlendId="@todaySession.BlendId"
+                        ExistingRating="@existingRating"
+                        OnRatingSubmitted="OnTodayRatingSubmitted" />
         </div>
+    </div>
+}
+else if (missedSession != null)
+{
+    <div class="card">
+        <h2>Zmeškané hodnocení — @missedSession.Date.ToString("d. M. yyyy")</h2>
+
+        @if (!missedSessionRevealed)
+        {
+            <div class="secret-overlay">
+                <h3>Tajné hlasování</h3>
+                <p>Ohodnoťte kávu před odhalením detailů.</p>
+            </div>
+        }
+        else
+        {
+            <div class="blend-card-wrapper clickable" @onclick="GoToMissedBlend">
+                <BlendCard Blend="missedSession.Blend" SessionComment="@missedSession.Comment" />
+            </div>
+        }
+
+        <div class="mt-16">
+            <RatingForm SessionId="@missedSession.Id"
+                        BlendId="@missedSession.BlendId"
+                        OnRatingSubmitted="OnMissedRatingSubmitted" />
+        </div>
+    </div>
+}
+else
+{
+    <div class="panel text-center">
+        <h2>Dnes žádná káva</h2>
+        <p class="text-muted">Administrátor dosud nenastavil dnešní směs.</p>
     </div>
 }
 
 @code {
     private TastingSession? todaySession;
-    private List<TastingNote> availableNotes = new();
-    private HashSet<int> selectedNoteIds = new();
+    private TastingSession? missedSession;
     private Rating? existingRating;
-
-    private int selectedStars;
-    private string? comment;
-    private bool hasRated;
-    private bool isEditing;
-    private bool isBlendRevealed;
+    private bool todayBlendRevealed;
+    private bool missedSessionRevealed;
     private bool isLoading = true;
 
     private string? topBlendName;
@@ -165,9 +126,8 @@ else
     private bool hasHighlights;
 
     private string? errorMessage;
-    private string? statusMessage;
 
-    private bool showSecret => todaySession != null && !isBlendRevealed;
+    private bool showTodaySecret => todaySession != null && !todayBlendRevealed;
 
     protected override async Task OnInitializedAsync()
     {
@@ -181,12 +141,8 @@ else
         {
             isLoading = true;
             errorMessage = null;
-            statusMessage = null;
 
             todaySession = await SessionService.GetTodaySessionAsync();
-
-            var notes = await RatingService.GetAllTastingNotesAsync();
-            availableNotes = notes;
 
             if (todaySession != null && AppState.CurrentUser != null)
             {
@@ -195,22 +151,19 @@ else
 
                 if (existingRating != null)
                 {
-                    hasRated = true;
-                    isBlendRevealed = true;
-                    selectedStars = existingRating.Stars;
-                    comment = existingRating.Comment;
-
+                    todayBlendRevealed = true;
                     var noteIds = await RatingService.GetRatingNoteIdsAsync(existingRating.Id);
-                    selectedNoteIds = new HashSet<int>(noteIds);
+                    existingRating.RatingTastingNotes = noteIds.Select(id =>
+                        new RatingTastingNote { RatingId = existingRating.Id, TastingNoteId = id }).ToList();
                 }
                 else
                 {
-                    hasRated = false;
-                    isBlendRevealed = false;
-                    selectedStars = 0;
-                    comment = null;
-                    selectedNoteIds.Clear();
+                    todayBlendRevealed = false;
                 }
+            }
+            else if (todaySession == null && AppState.CurrentUser != null)
+            {
+                missedSession = await SessionService.GetMostRecentUnratedSessionAsync(AppState.CurrentUser.Id);
             }
 
             // Highlights
@@ -240,62 +193,18 @@ else
         }
     }
 
-    private void OnStarsChanged(int stars) => selectedStars = stars;
-    private void ToggleNote(int id)
+    private void OnTodayRatingSubmitted()
     {
-        if (!selectedNoteIds.Remove(id))
-            selectedNoteIds.Add(id);
+        todayBlendRevealed = true;
     }
 
-    private async Task SubmitRating()
+    private void OnMissedRatingSubmitted()
     {
-        try
-        {
-            errorMessage = null;
-            if (todaySession == null || AppState.CurrentUser == null) return;
-
-            if (isEditing && existingRating != null)
-            {
-                existingRating = await RatingService.UpdateRatingAsync(existingRating.Id, selectedStars, comment);
-                isEditing = false;
-            }
-            else
-            {
-                existingRating = await RatingService.SubmitRatingAsync(
-                    todaySession.BlendId, AppState.CurrentUser.Id, todaySession.Id, selectedStars, comment);
-            }
-
-            if (selectedNoteIds.Count > 0 && existingRating != null)
-                await RatingService.SetRatingNotesAsync(existingRating.Id, selectedNoteIds.ToList());
-
-            hasRated = true;
-            isBlendRevealed = true;
-            statusMessage = "Vaše hodnocení bylo uloženo.";
-        }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
-    }
-
-    private void StartEdit()
-    {
-        isEditing = true;
-        hasRated = false;
-    }
-
-    private void CancelEdit()
-    {
-        if (existingRating != null)
-        {
-            selectedStars = existingRating.Stars;
-            comment = existingRating.Comment;
-        }
-        isEditing = false;
-        hasRated = true;
+        missedSessionRevealed = true;
     }
 
     private void GoToTopBlend() => Nav.NavigateTo($"/blend/{topBlendId}");
     private void GoToTodayBlend() => Nav.NavigateTo($"/blend/{todaySession!.BlendId}");
+    private void GoToMissedBlend() => Nav.NavigateTo($"/blend/{missedSession!.BlendId}");
     private void GoToStatistics() => Nav.NavigateTo("/statistics?tab=ratings");
 }
