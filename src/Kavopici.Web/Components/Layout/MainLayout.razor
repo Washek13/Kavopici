@@ -40,6 +40,11 @@
             <div class="header-user">
                 <UserInitials Name="@AppState.CurrentUser!.Name" />
                 <span class="user-name">@AppState.CurrentUser!.Name</span>
+                <a href="@BugReportUrl" target="_blank" rel="noopener noreferrer"
+                   class="btn btn-sm" title="Nahlásit chybu"
+                   style="text-decoration:none;font-size:16px;line-height:1;">
+                    🪲
+                </a>
                 <button class="btn btn-sm" @onclick="Logout">Odhlásit</button>
             </div>
         </header>
@@ -79,6 +84,27 @@
     {
         AppState.Logout();
         Nav.NavigateTo("/");
+    }
+
+    private const string GitHubOwner = "Washek13";
+    private const string GitHubRepo = "Kavopici";
+
+    private string BugReportUrl => BuildBugReportUrl();
+
+    private string BuildBugReportUrl()
+    {
+        var version = System.Reflection.Assembly.GetExecutingAssembly()
+            .GetName().Version?.ToString() ?? "unknown";
+
+        var body = "## Popis chyby\n<!-- Popište, co se stalo -->\n\n"
+            + "## Kroky k reprodukci\n1.\n2.\n3.\n\n"
+            + "## Očekávané chování\n<!-- Co jste očekávali? -->\n\n"
+            + "## Skutečné chování\n<!-- Co se stalo místo toho? -->\n\n"
+            + "---\n"
+            + $"**Verze aplikace:** {version}";
+
+        var encodedBody = Uri.EscapeDataString(body);
+        return $"https://github.com/{GitHubOwner}/{GitHubRepo}/issues/new?labels=bug&body={encodedBody}";
     }
 
     public void Dispose()

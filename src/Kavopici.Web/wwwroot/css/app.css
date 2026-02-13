@@ -513,4 +513,5 @@ textarea { resize: vertical; min-height: 60px; }
     .highlights { grid-template-columns: 1fr; }
     .comparison-grid { grid-template-columns: 1fr; }
     .header-nav { display: none; }
+    .user-name { display: none; }
 }
