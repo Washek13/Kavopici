@@ -8,8 +8,6 @@
     <ApplicationIcon>..\..\Kavopici.ico</ApplicationIcon>
     <Version>1.0.0</Version>
     <SelfContained>true</SelfContained>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <EnableWindowsTargeting>true</EnableWindowsTargeting>
   </PropertyGroup>
 
   <ItemGroup>

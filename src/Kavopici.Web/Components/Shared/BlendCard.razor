@@ -1,12 +1,12 @@
 <div class="blend-card">
     <h3 class="blend-name">@Blend.Name</h3>
     <div class="blend-details">
-        <div class="blend-detail"><span class="label">Prazirna:</span> @Blend.Roaster</div>
+        <div class="blend-detail"><span class="label">Pražírna:</span> @Blend.Roaster</div>
         @if (!string.IsNullOrEmpty(Blend.Origin))
         {
             <div class="blend-detail"><span class="label">Původ:</span> @Blend.Origin</div>
         }
-        <div class="blend-detail"><span class="label">Pražení:</span> @RoastLevelText</div>
+        <div class="blend-detail"><span class="label">Pražení:</span> @Blend.RoastLevel.ToDisplayString()</div>
         <div class="blend-detail"><span class="label">Dodavatel:</span> @Blend.Supplier.Name</div>
     </div>
     @if (!string.IsNullOrEmpty(SessionComment))
@@ -19,13 +19,4 @@
     [Parameter, EditorRequired] public CoffeeBlend Blend { get; set; } = null!;
     [Parameter] public string? SessionComment { get; set; }
 
-    private string RoastLevelText => Blend.RoastLevel switch
-    {
-        RoastLevel.Light => "Lehké",
-        RoastLevel.MediumLight => "Středně lehké",
-        RoastLevel.Medium => "Střední",
-        RoastLevel.MediumDark => "Středně tmavé",
-        RoastLevel.Dark => "Tmavé",
-        _ => Blend.RoastLevel.ToString()
-    };
 }

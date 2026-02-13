@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text;
+using Kavopici.Models.Enums;
 
 namespace Kavopici.Services;
 
@@ -27,15 +28,7 @@ public class CsvExportService : ICsvExportService
 
         foreach (var s in stats)
         {
-            var roastLevel = s.RoastLevel switch
-            {
-                Models.Enums.RoastLevel.Light => "Lehké",
-                Models.Enums.RoastLevel.MediumLight => "Středně lehké",
-                Models.Enums.RoastLevel.Medium => "Střední",
-                Models.Enums.RoastLevel.MediumDark => "Středně tmavé",
-                Models.Enums.RoastLevel.Dark => "Tmavé",
-                _ => s.RoastLevel.ToString()
-            };
+            var roastLevel = s.RoastLevel.ToDisplayString();
 
             sb.AppendLine(string.Join(";",
                 Escape(s.BlendName),

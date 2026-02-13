@@ -1,351 +1,187 @@
 # Kávopíči
 
-**Sdílená desktopová aplikace pro hodnocení a porovnávání kávových směsí při firemních degustacích.**
+**Sdílená aplikace pro hodnocení a porovnávání kávových směsí při firemních degustacích.**
 
-> English: A shared desktop app for coworkers to rate and compare coffee blends during office tastings.
+> English: A shared app for coworkers to rate and compare coffee blends during office tastings.
 
-## Project Overview
+## O projektu
 
-### Problem Statement
+Kávopíči je webová aplikace pro kancelářské degustace kávy. Administrátor nastaví "kávu dne", kolegové ji ohodnotí (1–5 hvězdiček), přidají komentář a chuťové poznámky, a aplikace zobrazí souhrnné statistiky, žebříčky a porovnání směsí.
 
-Office coffee tasting sessions lack a structured way to collect ratings, track which blends people enjoy, and compare results over time. Paper notes get lost, spreadsheets are clunky, and there's no easy way to see aggregate preferences across the group.
+### Cílové skupiny
 
-### Target Users
-
-- **Admin** (1+ persons): Organizes the tastings — manages users, adds blends, selects today's blend. Any existing admin can grant/revoke admin rights to other users.
-- **Tasters** (5–20 coworkers): Rate the daily blend, leave comments, browse historical stats.
-
-### Deployment Model
-
-The app is a **single WPF executable** living on a **shared network drive**. All users launch the same `.exe`. Data is stored locally in the same network folder (e.g., SQLite database file or JSON). No server, no internet connection required.
+- **Admin** — spravuje uživatele, přidává směsi, nastavuje denní kávu, exportuje data.
+- **Degustátoři** (5–20 kolegů) — hodnotí kávu dne, prohlížejí statistiky a historii.
 
 ---
 
-## Core Functionality
+## Funkce
 
-### Primary Features (MVP)
+### Přihlášení
+- Výběr profilu ze seznamu (bez hesel — důvěryhodné prostředí).
+- Na prvním spuštění volba databáze (vytvoření nové nebo otevření existující) a vytvoření prvního administrátora.
 
-1. **User Authentication (lightweight)** — Select your profile from a list on launch. No passwords (trusted office environment). Admin is a designated role.
-2. **Blend Management** — Admin adds/removes coffee blends with metadata (name, roaster, origin, roast level). Each blend is linked to the coworker who supplied it.
-3. **Blend of the Day** — Admin selects which blend is being tasted today. This is prominently displayed for all users.
-4. **Rating & Comments** — Users rate the daily blend 1–5 stars and optionally add a text comment. One rating per user per blend-of-the-day session.
-5. **Statistics Dashboard** — View aggregate ratings per blend: average score, number of ratings, score distribution, ranking. Filter/sort by various criteria.
+### Nástěnka (Dashboard)
+- **Přehled** — kliknutelné karty s nejlépe hodnocenou směsí (→ detail) a počtem vlastních hodnocení (→ statistiky).
+- **Kolečko chutí kávy** — odkaz na interaktivní kolečko chutí pro lepší orientaci v chuťových profilech.
+- Zobrazení "Kávy dne" s informacemi o směsi (po ohodnocení kliknutelné pro přechod na detail).
+- **Tajné hlasování** — detaily směsi se odhalí až po ohodnocení.
+- Hodnocení 1–5 hvězdiček, volitelný komentář a výběr chuťových poznámek (Ovocná, Ořechová, Čokoládová, Karamelová, Květinová, Kořeněná, Citrusová, Medová).
+- Úprava vlastního hodnocení.
 
-### User Flow
+### Statistiky
+- Souhrnná tabulka směsí (průměr, počet, pražírna, dodavatel) — sortovatelná podle sloupců.
+- **Detail směsi** — rozložení hvězdiček, jednotlivá hodnocení s komentáři a poznámkami.
+- **Moje hodnocení** — historie vlastních hodnocení.
+- **Porovnání směsí** — dvě směsi vedle sebe s rozložením hodnocení.
+- **Export CSV** — stažení dat do souboru.
 
-```
-Launch app from network drive
-        │
-        ▼
-  ┌──────────────────┐
-  │ Výběr uživatele   │  (dropdown / list of registered users)
-  └───────┬──────────┘
-          │
-          ▼
-  ┌─────────────────────┐
-  │   Hlavní přehled     │
-  │                      │
-  │  Dnešní káva:        │  ← prominently displayed
-  │  [Název směsi]       │
-  │                      │
-  │  [★★★★☆ Hodnotit]   │  ← if not yet rated today
-  │  [Přidat komentář]  │
-  │                      │
-  │  [Statistiky]        │  ← navigate to stats view
-  │  [Správa]            │  ← visible only to admins
-  └─────────────────────┘
-```
+### Správa (admin)
+- **Uživatelé** — přidání, deaktivace, přidělení/odebrání admin práv (poslední admin nelze odebrat).
+- **Směsi** — přidání (název, pražírna, původ, stupeň pražení, dodavatel) a odebrání (soft delete).
+- **Káva dne** — výběr směsi a volitelný komentář k sezení.
+- **Export CSV** — export statistik.
 
-**Admin Flow:**
-1. Open Admin Panel (Správa)
-2. Manage Users → Add name / Remove user / Toggle admin rights for any user
-3. Manage Blends → Add blend (name, roaster, origin, roast level, supplier) / Remove blend
-4. Set Blend of the Day → Pick from registered blends
+### Automatické aktualizace
+- Kontrola nových verzí přes GitHub Releases na pozadí při startu.
+- Stažení a instalace MSIX balíčku přímo z aplikace.
 
-**Taster Flow:**
-1. Select profile on launch
-2. See today's blend → Rate it (1–5 stars) + optional comment
-3. Browse statistics → See rankings, averages, own rating history
+---
 
-### Key Interactions
+## Technologie
 
-| Action | Result |
+| Vrstva | Technologie |
 |---|---|
-| User rates a blend | Star rating + optional comment saved. UI confirms submission. Rating button becomes "Upravit hodnocení" for that session. |
-| Admin sets blend of the day | All users see the new blend on their dashboard. Previous ratings remain in history. |
-| Admin grants/revokes admin rights | Target user immediately gains or loses access to the admin panel on next navigation/refresh. |
-| User views statistics | Sorted table/chart of all blends with avg rating, count, distribution. Clickable for detail view with individual comments. |
-| Admin adds a blend | Blend appears in the selectable list. Linked to the coworker who supplied it. |
-| Admin removes a user | User no longer appears in profile selection. Historical ratings preserved (marked as inactive). |
+| Framework | .NET 8, ASP.NET Core |
+| UI | Blazor Server (Interactive SSR), vlastní CSS |
+| Databáze | SQLite (WAL mód, busy timeout 5 s) |
+| ORM | Entity Framework Core 8.0 |
+| Balení | MSIX (Windows), self-contained (multi-platform: win-x64, osx-x64, osx-arm64) |
+| Testování | xUnit, Coverlet |
+| CI/CD | GitHub Actions |
 
 ---
 
-## Technical Specifications
-
-### Platform
-
-**WPF (.NET 8)** desktop application. Single executable + data files on a shared network folder.
-
-### Tech Stack
-
-| Component | Choice | Rationale |
-|---|---|---|
-| Framework | WPF (.NET 8) | Native Windows, rich UI, single exe deployment |
-| Data Storage | SQLite | Single file DB, no server needed, concurrent read support |
-| ORM | Entity Framework Core + SQLite provider | Simplifies data access, migrations |
-| Charting | LiveCharts2 or OxyPlot | WPF-native charting for statistics |
-| Packaging | Single-file publish (`dotnet publish -c Release -r win-x64 --self-contained`) | One exe, no install |
-
-### Data Model
+## Architektura
 
 ```
-┌──────────────┐     ┌──────────────────┐     ┌──────────────┐
-│    User       │     │   CoffeeBlend     │     │   Rating      │
-├──────────────┤     ├──────────────────┤     ├──────────────┤
-│ Id (int, PK)  │     │ Id (int, PK)      │     │ Id (int, PK)  │
-│ Name (string) │     │ Name (string)     │     │ BlendId (FK)  │
-│ IsAdmin (bool) │     │ Roaster (string)  │     │ UserId (FK)   │
-│ IsActive (bool)│     │ Origin (string?)  │     │ SessionId(FK) │
-│ CreatedAt     │     │ RoastLevel (enum) │     │ Stars (1-5)   │
-└──────────────┘     │ SupplierId (FK→User)│    │ Comment (str?)│
-                      │ IsActive (bool)    │     │ CreatedAt     │
-                      │ CreatedAt          │     └──────────────┘
-                      └──────────────────┘
-                                                  ┌──────────────────┐
-                                                  │  TastingSession   │
-                                                  ├──────────────────┤
-                                                  │ Id (int, PK)      │
-                                                  │ BlendId (FK)      │
-                                                  │ Date (DateOnly)   │
-                                                  │ IsActive (bool)   │
-                                                  │ CreatedAt         │
-                                                  └──────────────────┘
-```
-
-**Key relationships:**
-- A `TastingSession` represents one "blend of the day" event. One per day (enforced by app logic, not hard constraint — admin can change mid-day).
-- A `Rating` belongs to one `User` and one `TastingSession`. Unique constraint on `(UserId, SessionId)` — one rating per user per session.
-- A `CoffeeBlend` has a `Supplier` (FK to `User`) — the coworker who brought it.
-
-**RoastLevel enum:** `Light`, `MediumLight`, `Medium`, `MediumDark`, `Dark`
-
-### State Management
-
-- **All state lives in SQLite** on the network drive. No local caching.
-- **File locking:** SQLite handles concurrent reads well. Writes are serialized by SQLite's locking. For this scale (5–20 users, infrequent writes), this is sufficient.
-- **No real-time sync:** Users see updated data on navigation/refresh. A manual "Refresh" button on the dashboard is sufficient. No polling or file watchers needed for MVP.
-
-### External Dependencies
-
-None. Fully offline, self-contained.
-
----
-
-## UI/UX Requirements
-
-### Layout — Main Views
-
-**1. Výběr uživatele (startup — Profile Selection)**
-- Simple list or dropdown of active users
-- "Enter" or double-click to proceed
-- No password field
-
-**2. Hlavní přehled (Dashboard — main view after login)**
-- Header: App name "Kávopíči", logged-in user name, Refresh button (Obnovit), Logout button (Odhlásit)
-- Prominent card: "Dnešní káva" — blend name, roaster, origin, roast level, supplier name
-- If no blend set today: "Dnes nebyla vybrána žádná káva" message
-- Rating section: 5 clickable stars + comment text box + Submit button (Odeslat)
-- If already rated: show current rating with "Upravit" option
-- Navigation: "Statistiky" button, "Správa" button (admins only)
-
-**3. Statistiky (Statistics View)**
-- Table: Název směsi | Průměrné hodnocení | Počet hodnocení | Dodavatel | visual bar for avg
-- Sortable by any column
-- Click a blend → Detail view: list of individual ratings with comments, score distribution chart
-- Optional: "Moje hodnocení" tab showing the logged-in user's rating history
-
-**4. Správa (Admin Panel)**
-- Tabs or sections:
-  - **Uživatelé**: List with Add/Remove buttons. Add = text input for name. Toggle admin role (checkbox or button) for each user.
-  - **Směsi**: List with Add/Remove buttons. Add = form (name, roaster, origin, roast level dropdown, supplier dropdown).
-  - **Káva dne**: Dropdown to select blend → "Nastavit jako dnešní kávu" button. Shows current selection.
-
-### Key Reusable Components
-
-- `StarRating` — clickable 5-star component (input mode + display mode)
-- `BlendCard` — displays blend info (name, roaster, origin, roast, supplier)
-- `StatsTable` — sortable data grid for blend statistics
-- `BlendDetailView` — expanded view with ratings list + chart
-
-### Design Principles
-
-- **Minimal, clean UI.** This is a quick lunch-break interaction. No onboarding, no tutorials. Everything on-screen should be obvious.
-- **Large touch-friendly targets** for the star rating (some users may be on touchscreen laptops).
-- **Coffee-inspired color palette:** warm browns, cream/off-white backgrounds, dark text. Accent color for stars (amber/gold).
-- **Fast interaction:** Rating the daily blend should take under 10 seconds from app launch.
-
-### Responsive Behavior
-
-Not applicable — WPF desktop app. Design for a minimum window size of **800×600px**. Allow resizing but use a reasonable max-width for content (~1000px centered).
-
----
-
-## Implementation Priorities
-
-### Phase 1 — MVP
-
-1. SQLite database setup with EF Core migrations
-2. Profile selection screen
-3. Admin: CRUD users
-4. Admin: CRUD coffee blends (with supplier assignment)
-5. Admin: Set blend of the day
-6. User: Rate blend of the day (1–5 stars + comment)
-7. User: View statistics table (avg rating, count per blend)
-8. Single-file publish for network drive deployment
-
-**Estimated scope:** Core app is functional. Users can rate, admin can manage, everyone sees stats.
-
-### Phase 2 — Polish
-
-1. Statistics detail view (individual ratings, comments, distribution chart)
-2. "My Ratings" history view
-3. Edit/update existing rating within the same session
-4. Visual polish — coffee-themed styling, star animation
-5. Blend of the Day history (past sessions list)
-6. Data export (CSV) for the admin
-
-### Phase 3 — Nice to Have
-
-1. Leaderboard / "Most Popular Blend" highlights
-2. User avatars or initials
-3. Tasting notes vocabulary (predefined tags: fruity, nutty, chocolatey, etc.)
-4. Head-to-head blend comparison view
-5. Print-friendly stats report
-
-### Out of Scope
-
-- **No authentication / passwords** — trusted office LAN environment
-- **No real-time updates / SignalR / push** — manual refresh is fine
-- **No web or mobile version** — WPF only
-- **No cloud sync or remote access**
-- **No multi-language support** — Czech only (all UI strings in Czech)
-
----
-
-## Success Criteria
-
-### Functional Requirements
-
-- [ ] Admin can add/remove users and blends
-- [ ] Admin can grant/revoke admin rights to any other user
-- [ ] At least one admin must always exist (prevent last admin from losing rights)
-- [ ] Admin can assign a supplier to each blend
-- [ ] Admin can set the blend of the day
-- [ ] Users can select their profile and rate the daily blend (1–5 stars)
-- [ ] Users can add an optional comment to their rating
-- [ ] Users can view aggregate statistics for all blends
-- [ ] One rating per user per tasting session (enforced)
-- [ ] App runs from a network drive without installation
-- [ ] Multiple users can use the app concurrently without data corruption
-
-### Performance Targets
-
-- App launch to profile selection: **< 3 seconds**
-- Submitting a rating: **< 1 second**
-- Loading statistics view: **< 2 seconds** (for up to 50 blends, 500 ratings)
-- SQLite file size should stay under **10 MB** for years of typical use
-
-### Testing Approach
-
-- **Manual testing:** Primary approach. Test concurrent access from 2–3 machines on the same network folder.
-- **Unit tests:** Data access layer — verify rating uniqueness constraint, CRUD operations, statistics calculations.
-- **Concurrency test:** Two users submit ratings simultaneously. Verify both are saved correctly.
-- **Edge cases:** See error handling section below.
-
----
-
-## Development Notes
-
-### Known Constraints
-
-- **UI Language:** All user-facing strings must be in Czech. Code, comments, and variable names remain in English.
-- **First-run bootstrapping:** On first launch (empty database), the app must prompt to create the first user who is automatically granted admin rights. Without this, no one can access the admin panel.
-- **SQLite concurrent writes:** SQLite uses file-level locking. With WAL mode enabled, concurrent reads are fine. Concurrent writes are serialized but at this scale (seconds apart) there should be no issues. Use WAL mode (`PRAGMA journal_mode=WAL`) and set a reasonable busy timeout (`PRAGMA busy_timeout=5000`).
-- **Network drive latency:** File I/O over SMB/CIFS is slower than local disk. Keep DB queries minimal. Don't hold connections open unnecessarily.
-- **.NET runtime:** Self-contained publish bundles the runtime (~60–80 MB exe). This is acceptable for a network drive. Alternatively, require .NET 8 runtime pre-installed and publish framework-dependent (~1 MB) — depends on the environment.
-- **Single point of failure:** The SQLite file is the single source of truth. If the network drive goes down, the app is unavailable. No mitigation needed beyond standard IT backup practices.
-
-### Security Considerations
-
-- **No authentication.** Anyone with network drive access can open the app and select any profile. This is by design for a trusted office environment.
-- **Admin role is trust-based.** Admin flag is stored in the DB. A technically savvy user could edit the SQLite file directly. Acceptable risk.
-- **No sensitive data.** The app stores names and coffee opinions. No PII concerns beyond employee names visible to all coworkers anyway.
-
-### Accessibility
-
-- Keyboard navigation for all interactions (Tab, Enter, arrow keys for star rating)
-- Sufficient color contrast for text
-- Star rating should have text labels (not just visual) for screen readers
-
-### Error Handling
-
-| Scenario | Handling |
-|---|---|
-| Network drive unavailable | Show clear error: "Nelze se připojit k databázi. Zkontrolujte síťové připojení." Retry button (Zkusit znovu). |
-| SQLite locked (concurrent write) | Retry with busy timeout (5s). If still locked, show "Databáze je zaneprázdněná, zkuste to znovu." |
-| Duplicate rating attempt | Prevent at UI level (disable submit if already rated). Enforce at DB level (unique constraint). Show message if constraint violated. |
-| No blend of the day set | Show "Dnes nebyla vybrána žádná káva" on dashboard. Disable rating UI. |
-| Admin removes a blend that has ratings | Soft delete (set `IsActive = false`). Blend disappears from selection but ratings preserved in stats. |
-| Admin removes a user | Soft delete. User disappears from profile list. Historical ratings preserved. |
-| Corrupt or missing DB file | On startup, if DB doesn't exist, create it with migrations. If corrupt, show error with path to DB file for manual recovery. |
-| Last admin tries to revoke own admin rights | Prevent: at least one admin must exist at all times. Show "Nelze odebrat práva poslednímu administrátorovi." |
-
----
-
-## File Structure (Suggested)
-
-```
-Kavopici/
-├── Kavopici.sln
+Kavopici.sln
 ├── src/
-│   └── Kavopici/
-│       ├── App.xaml / App.xaml.cs
-│       ├── Models/
-│       │   ├── User.cs
-│       │   ├── CoffeeBlend.cs
-│       │   ├── TastingSession.cs
-│       │   └── Rating.cs
-│       ├── Data/
-│       │   ├── KavopiciDbContext.cs
-│       │   └── Migrations/
-│       ├── ViewModels/
-│       │   ├── LoginViewModel.cs
-│       │   ├── DashboardViewModel.cs
-│       │   ├── StatisticsViewModel.cs
-│       │   └── AdminViewModel.cs
-│       ├── Views/
-│       │   ├── LoginView.xaml
-│       │   ├── DashboardView.xaml
-│       │   ├── StatisticsView.xaml
-│       │   └── AdminView.xaml
+│   ├── Kavopici.Core/          # Doménová logika, modely, služby, databáze
+│   │   ├── Models/             # User, CoffeeBlend, TastingSession, Rating, TastingNote, BlendStatistics
+│   │   ├── Data/               # KavopiciDbContext, DbContextFactory, SQLite WAL interceptor
+│   │   └── Services/           # UserService, BlendService, SessionService, RatingService,
+│   │                           # StatisticsService, CsvExportService, AppSettingsService, IUpdateService
+│   └── Kavopici.Web/           # ASP.NET Core aplikace (vstupní bod)
 │       ├── Components/
-│       │   ├── StarRating.xaml
-│       │   └── BlendCard.xaml
-│       └── Services/
-│           ├── IRatingService.cs
-│           └── RatingService.cs
+│       │   ├── Pages/          # Login, Dashboard, Statistics, BlendDetail, Comparison, Admin
+│       │   ├── Shared/         # StarRating, BlendCard, UserInitials
+│       │   └── Layout/         # MainLayout (navigace, update banner)
+│       ├── Services/           # AppState, UpdateService, UpdateState
+│       └── wwwroot/            # CSS, ikony, favicon
 └── tests/
-    └── Kavopici.Tests/
+    └── Kavopici.Tests/         # Unit testy (UserService, RatingService, SessionService, StatisticsService)
 ```
 
-### Database Location
-
-The SQLite database file (`kavopici.db`) should be stored **next to the executable** on the network drive. The app resolves its path relative to `Assembly.GetExecutingAssembly().Location`. This way, all users hitting the same exe also hit the same database.
+### Datový model
 
 ```
-\\server\share\Kavopici\
-├── Kavopici.exe
-└── kavopici.db       ← created automatically on first launch
+User                    CoffeeBlend              TastingSession
+├── Id                  ├── Id                   ├── Id
+├── Name (unique)       ├── Name                 ├── BlendId (FK)
+├── IsAdmin             ├── Roaster              ├── Date (DateOnly)
+├── IsActive            ├── Origin?              ├── IsActive
+└── CreatedAt           ├── RoastLevel (enum)    ├── Comment?
+                        ├── SupplierId (FK→User) └── CreatedAt
+                        ├── IsActive
+                        └── CreatedAt
+
+Rating                  TastingNote              RatingTastingNote
+├── Id                  ├── Id                   ├── RatingId (PK, FK)
+├── BlendId (FK)        └── Name (unique)        └── TastingNoteId (PK, FK)
+├── UserId (FK)
+├── SessionId (FK)
+├── Stars (1–5, check)
+├── Comment?
+└── CreatedAt
+
+Unique: (UserId, SessionId) — jedno hodnocení na uživatele za sezení.
 ```
 
-One remaining item for Windows: you'll need to run '''dotnet ef migrations add AddTastingNotes''' to generate the migration for the tasting notes entities (TastingNote + RatingTastingNote) before first launch.
+**RoastLevel**: `Light`, `MediumLight`, `Medium`, `MediumDark`, `Dark`
+
+---
+
+## Spuštění pro vývoj
+
+### Požadavky
+
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+
+### Build a spuštění
+
+```bash
+# Build celého řešení
+dotnet build Kavopici.sln
+
+# Spuštění aplikace
+dotnet run --project src/Kavopici.Web/Kavopici.Web.csproj
+```
+
+Aplikace se spustí na `http://localhost:5201` a automaticky otevře prohlížeč.
+
+### Testy
+
+```bash
+dotnet test tests/Kavopici.Tests/Kavopici.Tests.csproj
+```
+
+### Publikace
+
+```bash
+# Windows (win-x64)
+dotnet publish src/Kavopici.Web/Kavopici.Web.csproj -c Release -r win-x64 --self-contained
+
+# macOS Intel (osx-x64)
+dotnet publish src/Kavopici.Web/Kavopici.Web.csproj -c Release -r osx-x64 --self-contained
+
+# macOS Apple Silicon (osx-arm64)
+dotnet publish src/Kavopici.Web/Kavopici.Web.csproj -c Release -r osx-arm64 --self-contained
+```
+
+---
+
+## Instalace (pro uživatele)
+
+Aplikace se distribuuje jako MSIX balíček přes [GitHub Releases](https://github.com/Washek13/Kavopici/releases).
+
+### Prvotní instalace
+
+1. Ze stránky Releases stáhněte soubory `Kavopici.cer` a `Install-Certificate.ps1`.
+2. Spusťte `Install-Certificate.ps1` jako Administrátor — nainstaluje podpisový certifikát (stačí jednou).
+3. Stáhněte a otevřete `Kavopici-X.Y.Z.msix` — nainstaluje aplikaci.
+
+### Aktualizace
+
+Aplikace kontroluje nové verze automaticky. Pokud je dostupná aktualizace, v záhlaví se zobrazí banner s tlačítkem "Aktualizovat".
+
+---
+
+## Konfigurace
+
+- **Cesta k databázi** — ukládá se do `%APPDATA%/Kavopici/settings.json`. Uživatel ji vybírá při prvním spuštění.
+- **SQLite pragmy** — WAL mód, busy timeout 5 s, synchronous NORMAL (nastaveno automaticky přes interceptor).
+- **Port** — `http://localhost:5201` (konfigurovatelný v `appsettings.json`).
+
+---
+
+## CI/CD
+
+GitHub Actions workflow (`.github/workflows/build-msix.yml`) se spouští při push tagu `v*`:
+
+1. Build a publish .NET aplikace.
+2. Generování tile obrázků z ikony.
+3. Vytvoření a podepsání MSIX balíčku.
+4. Publikace GitHub Release s balíčkem, certifikátem a instalačním skriptem.
+
+Secrets: `CERT_PFX_BASE64`, `CERT_PASSWORD`.

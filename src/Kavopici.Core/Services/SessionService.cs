@@ -13,12 +13,16 @@ public class SessionService : ISessionService
         _contextFactory = contextFactory;
     }
 
+    private static DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
+
+    private static string? TrimComment(string? comment)
+        => string.IsNullOrWhiteSpace(comment) ? null : comment.Trim();
+
     public async Task<TastingSession?> GetTodaySessionAsync()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
-        var today = DateOnly.FromDateTime(DateTime.Today);
         return await context.TastingSessions
-            .Where(s => s.Date == today && s.IsActive)
+            .Where(s => s.Date == Today && s.IsActive)
             .Include(s => s.Blend)
                 .ThenInclude(b => b.Supplier)
             .FirstOrDefaultAsync();
@@ -27,11 +31,10 @@ public class SessionService : ISessionService
     public async Task<TastingSession> SetBlendOfTheDayAsync(int blendId, string? comment = null)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
-        var today = DateOnly.FromDateTime(DateTime.Today);
 
         // Deactivate any existing session for today
         var existingSessions = await context.TastingSessions
-            .Where(s => s.Date == today && s.IsActive)
+            .Where(s => s.Date == Today && s.IsActive)
             .ToListAsync();
 
         foreach (var existing in existingSessions)
@@ -42,9 +45,9 @@ public class SessionService : ISessionService
         var session = new TastingSession
         {
             BlendId = blendId,
-            Date = today,
+            Date = Today,
             IsActive = true,
-            Comment = string.IsNullOrWhiteSpace(comment) ? null : comment.Trim(),
+            Comment = TrimComment(comment),
             CreatedAt = DateTime.UtcNow
         };
 

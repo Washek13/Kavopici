@@ -6,7 +6,8 @@
 @inject NavigationManager Nav
 
 <div class="login-container">
-    <div class="login-title">KAVOPICI</div>
+    <img src="icon-80.png" alt="Kávopíči" class="login-icon" />
+    <div class="login-title">KÁVOPÍČI</div>
     <div class="login-subtitle">Kávový deník vaší kanceláře</div>
 
     @if (errorMessage != null)
@@ -26,7 +27,7 @@
             <div class="form-group">
                 <label>Cesta k databázi</label>
                 <input type="text" @bind="databasePathInput" @bind:event="oninput"
-                       placeholder="C:\cesta\kavopici.db" />
+                       placeholder="@AppSettingsService.GetPlatformPlaceholderPath()" />
             </div>
             <div class="btn-group" style="flex-direction:column;">
                 <button class="btn btn-accent w-full" @onclick="CreateNewDatabase"
@@ -127,11 +128,9 @@
             errorMessage = null;
 
             var dbPath = AppSettings.DatabasePath;
-            if (string.IsNullOrEmpty(dbPath) || !File.Exists(dbPath))
-            {
-                if (!string.IsNullOrEmpty(dbPath) && !File.Exists(dbPath))
-                    AppSettings.SetDatabasePath(null);
 
+            if (string.IsNullOrEmpty(dbPath))
+            {
                 isDatabaseNotSelected = true;
                 isFirstRun = false;
                 selectedDatabasePath = null;
@@ -182,16 +181,27 @@
             if (!path.EndsWith(".db", StringComparison.OrdinalIgnoreCase))
                 path += ".db";
 
-            var dir = Path.GetDirectoryName(path);
+            // Expand path before using it for file operations
+            var expandedPath = AppSettingsService.ExpandPath(path);
+
+            var dir = Path.GetDirectoryName(expandedPath);
             if (!string.IsNullOrEmpty(dir))
                 Directory.CreateDirectory(dir);
 
-            if (File.Exists(path))
-                File.Delete(path);
+            if (File.Exists(expandedPath))
+                File.Delete(expandedPath);
 
             AppSettings.SetDatabasePath(path);
             databasePathInput = "";
             await LoadUsers();
+        }
+        catch (UnauthorizedAccessException)
+        {
+            errorMessage = "Nelze vytvořit databázi. Zkontrolujte oprávnění.";
+        }
+        catch (PathTooLongException)
+        {
+            errorMessage = "Cesta k databázi je příliš dlouhá.";
         }
         catch (Exception ex)
         {
@@ -211,7 +221,10 @@
                 return;
             }
 
-            if (!File.Exists(path))
+            // Expand path before checking if file exists
+            var expandedPath = AppSettingsService.ExpandPath(path);
+
+            if (!File.Exists(expandedPath))
             {
                 errorMessage = "Soubor neexistuje. Zkontrolujte cestu.";
                 return;
