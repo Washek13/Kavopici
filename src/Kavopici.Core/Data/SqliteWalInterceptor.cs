@@ -5,6 +5,9 @@ namespace Kavopici.Data;
 
 public class SqliteWalInterceptor : DbConnectionInterceptor
 {
+    private const string Pragmas =
+        "PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA synchronous=NORMAL;";
+
     public override void ConnectionOpened(DbConnection connection, ConnectionEndEventData eventData)
     {
         ExecutePragmas(connection);
@@ -20,7 +23,7 @@ public class SqliteWalInterceptor : DbConnectionInterceptor
     private static void ExecutePragmas(DbConnection connection)
     {
         using var command = connection.CreateCommand();
-        command.CommandText = "PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000; PRAGMA synchronous=NORMAL;";
+        command.CommandText = Pragmas;
         command.ExecuteNonQuery();
     }
 }

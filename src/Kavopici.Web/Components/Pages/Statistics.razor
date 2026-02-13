@@ -100,7 +100,7 @@ else
                         <td>@r.Blend.Name</td>
                         <td>
                             <span style="color:var(--amber-gold);">
-                                @(new string('\u2605', r.Stars))@(new string('\u2606', 5 - r.Stars))
+                                @(new string('\u2605', r.Stars))@(new string('\u2606', MaxStars - r.Stars))
                             </span>
                         </td>
                         <td class="text-muted">@(r.Comment ?? "—")</td>
@@ -112,6 +112,8 @@ else
 }
 
 @code {
+    private const int MaxStars = 5;
+
     private int tab;
     private List<BlendStatistics> blendStats = new();
     private List<Rating> userRatings = new();

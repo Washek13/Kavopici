@@ -133,7 +133,7 @@
                 <tr>
                     <td><strong>@blend.Name</strong></td>
                     <td>@blend.Roaster</td>
-                    <td>@RoastLevelText(blend.RoastLevel)</td>
+                    <td>@blend.RoastLevel.ToDisplayString()</td>
                     <td>@blend.Supplier.Name</td>
                     <td>
                         <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;"
@@ -355,13 +355,4 @@
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
-    private static string RoastLevelText(RoastLevel level) => level switch
-    {
-        RoastLevel.Light => "Lehké",
-        RoastLevel.MediumLight => "Středně lehké",
-        RoastLevel.Medium => "Střední",
-        RoastLevel.MediumDark => "Středně tmavé",
-        RoastLevel.Dark => "Tmavé",
-        _ => level.ToString()
-    };
 }

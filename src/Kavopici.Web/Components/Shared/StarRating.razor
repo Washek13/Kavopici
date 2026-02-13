@@ -1,6 +1,6 @@
 @* Interactive star rating component *@
 <div class="star-rating @(ReadOnly ? "readonly" : "interactive")">
-    @for (int i = 1; i <= 5; i++)
+    @for (int i = 1; i <= MaxStars; i++)
     {
         var starValue = i;
         <span class="star @(starValue <= Value ? "filled" : "empty") @(starValue <= _hoverValue && !ReadOnly ? "hover" : "")"
@@ -11,11 +11,13 @@
     }
     @if (Value > 0)
     {
-        <span class="star-value">@Value / 5</span>
+        <span class="star-value">@Value / @MaxStars</span>
     }
 </div>
 
 @code {
+    private const int MaxStars = 5;
+
     [Parameter] public int Value { get; set; }
     [Parameter] public EventCallback<int> ValueChanged { get; set; }
     [Parameter] public bool ReadOnly { get; set; }

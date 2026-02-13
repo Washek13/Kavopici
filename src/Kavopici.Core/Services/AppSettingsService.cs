@@ -67,14 +67,9 @@ public class AppSettingsService : IAppSettingsService
     }
 
     public static string GetPlatformPlaceholderPath()
-    {
-        if (OperatingSystem.IsWindows())
-            return @"C:\Users\jmeno\Documents\kavopici.db";
-        else if (OperatingSystem.IsMacOS())
-            return "~/Documents/kavopici.db";
-        else // Linux or other Unix
-            return "~/Documents/kavopici.db";
-    }
+        => OperatingSystem.IsWindows()
+            ? @"C:\Users\jmeno\Documents\kavopici.db"
+            : "~/Documents/kavopici.db";
 
     private void Save()
     {

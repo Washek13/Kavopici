@@ -10,6 +10,8 @@ public class UpdateService : IUpdateService
 {
     private const string GitHubOwner = "Washek13";
     private const string GitHubRepo = "Kavopici";
+    private const string GitHubApiUrl = $"https://api.github.com/repos/{GitHubOwner}/{GitHubRepo}/releases/latest";
+    private const int DownloadBufferSize = 81920; // 80 KB
 
     private readonly IHostApplicationLifetime _lifetime;
 
@@ -35,8 +37,7 @@ public class UpdateService : IUpdateService
 
         try
         {
-            var url = $"https://api.github.com/repos/{GitHubOwner}/{GitHubRepo}/releases/latest";
-            var release = await Http.GetFromJsonAsync<GitHubRelease>(url);
+            var release = await Http.GetFromJsonAsync<GitHubRelease>(GitHubApiUrl);
             if (release is null) return null;
 
             var currentVersion = GetCurrentVersion();
@@ -80,7 +81,7 @@ public class UpdateService : IUpdateService
         await using var fileStream = new FileStream(
             tempPath, FileMode.Create, FileAccess.Write, FileShare.None);
 
-        var buffer = new byte[81920];
+        var buffer = new byte[DownloadBufferSize];
         long totalRead = 0;
         int bytesRead;
         while ((bytesRead = await contentStream.ReadAsync(buffer)) > 0)

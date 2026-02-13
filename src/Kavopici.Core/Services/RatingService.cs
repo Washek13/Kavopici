@@ -6,12 +6,24 @@ namespace Kavopici.Services;
 
 public class RatingService : IRatingService
 {
+    private const int MinStars = 1;
+    private const int MaxStars = 5;
+
     private readonly IDbContextFactory<KavopiciDbContext> _contextFactory;
 
     public RatingService(IDbContextFactory<KavopiciDbContext> contextFactory)
     {
         _contextFactory = contextFactory;
     }
+
+    private static void ValidateStars(int stars)
+    {
+        if (stars < MinStars || stars > MaxStars)
+            throw new ArgumentException($"Hodnocení musí být v rozmezí {MinStars}–{MaxStars} hvězd.");
+    }
+
+    private static string? TrimComment(string? comment)
+        => string.IsNullOrWhiteSpace(comment) ? null : comment.Trim();
 
     public async Task<Rating?> GetUserRatingForSessionAsync(int userId, int sessionId)
     {
@@ -22,8 +34,7 @@ public class RatingService : IRatingService
 
     public async Task<Rating> SubmitRatingAsync(int blendId, int userId, int sessionId, int stars, string? comment)
     {
-        if (stars < 1 || stars > 5)
-            throw new ArgumentException("Hodnocení musí být v rozmezí 1–5 hvězd.");
+        ValidateStars(stars);
 
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -38,7 +49,7 @@ public class RatingService : IRatingService
             UserId = userId,
             SessionId = sessionId,
             Stars = stars,
-            Comment = string.IsNullOrWhiteSpace(comment) ? null : comment.Trim(),
+            Comment = TrimComment(comment),
             CreatedAt = DateTime.UtcNow
         };
 
@@ -49,8 +60,7 @@ public class RatingService : IRatingService
 
     public async Task<Rating> UpdateRatingAsync(int ratingId, int stars, string? comment)
     {
-        if (stars < 1 || stars > 5)
-            throw new ArgumentException("Hodnocení musí být v rozmezí 1–5 hvězd.");
+        ValidateStars(stars);
 
         await using var context = await _contextFactory.CreateDbContextAsync();
 
@@ -58,7 +68,7 @@ public class RatingService : IRatingService
             ?? throw new InvalidOperationException("Hodnocení nebylo nalezeno.");
 
         rating.Stars = stars;
-        rating.Comment = string.IsNullOrWhiteSpace(comment) ? null : comment.Trim();
+        rating.Comment = TrimComment(comment);
         await context.SaveChangesAsync();
         return rating;
     }
