@@ -31,20 +31,6 @@
     </div>
 }
 
-@* Flavor Wheel Banner *@
-<div class="flavor-wheel-banner">
-    <div class="banner-content">
-        <span class="banner-icon">☕</span>
-        <span class="banner-text">Nejste si jisti chutí? Podívejte se na kolečko chutí kávy</span>
-        <a href="https://notbadcoffee.com/flavor-wheel-en/"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="btn btn-outline btn-sm">
-            Otevřít kolečko chutí
-        </a>
-    </div>
-</div>
-
 @* Blend of the Day *@
 @if (isLoading)
 {
@@ -110,6 +96,20 @@ else
         <p class="text-muted">Administrátor dosud nenastavil dnešní směs.</p>
     </div>
 }
+
+@* Flavor Wheel Banner *@
+<div class="flavor-wheel-banner">
+    <div class="banner-content">
+        <span class="banner-icon">☕</span>
+        <span class="banner-text">Nejste si jisti chutí? Podívejte se na kolečko chutí kávy</span>
+        <a href="https://notbadcoffee.com/flavor-wheel-en/"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="btn btn-outline btn-sm">
+            Otevřít kolečko chutí
+        </a>
+    </div>
+</div>
 
 @code {
     private TastingSession? todaySession;
