@@ -5,10 +5,6 @@
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 
-<button class="btn btn-outline mb-16" @onclick="GoBack">
-    &larr; Zpět na statistiky
-</button>
-
 <h1>Porovnání směsí</h1>
 
 @if (errorMessage != null)
@@ -111,8 +107,6 @@ else
         catch (Exception ex) { errorMessage = ex.Message; }
         finally { isLoading = false; }
     }
-
-    private void GoBack() => Nav.NavigateTo("/statistics");
 
     private RenderFragment RenderDistribution(BlendStatistics stats) => __builder =>
     {

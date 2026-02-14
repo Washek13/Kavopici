@@ -6,10 +6,6 @@
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 
-<button class="btn btn-outline mb-16" @onclick="GoBack">
-    &larr; Zpět na statistiky
-</button>
-
 @if (errorMessage != null)
 {
     <div class="msg-error">@errorMessage</div>
@@ -137,7 +133,5 @@ else
         catch (Exception ex) { errorMessage = ex.Message; }
         finally { isLoading = false; }
     }
-
-    private void GoBack() => Nav.NavigateTo("/statistics");
 
 }
