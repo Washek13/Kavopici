@@ -455,13 +455,51 @@ textarea { resize: vertical; min-height: 60px; }
     font-size: 14px;
 }
 
+.update-banner-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.update-banner-version {
+    font-weight: 500;
+}
+
+.update-banner-notes {
+    font-size: 13px;
+    color: var(--cream);
+    opacity: 0.9;
+    max-height: 120px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    line-height: 1.4;
+    padding: 4px 0;
+}
+
 /* === Flavor Wheel Banner === */
 .flavor-wheel-banner {
+    display: block;
+    text-decoration: none;
+    color: inherit;
     background: var(--off-white);
     border: 1px solid var(--coffee-light);
     border-radius: 10px;
     padding: 16px 20px;
-    margin-bottom: 20px;
+    margin-top: 20px;
+    margin-bottom: 0;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.flavor-wheel-banner:hover {
+    transform: translateY(-2px);
+    border-color: var(--coffee-brown);
+    box-shadow: 0 2px 8px rgba(111, 78, 55, 0.15);
+}
+
+.flavor-wheel-banner:visited {
+    color: inherit;
 }
 
 .flavor-wheel-banner .banner-content {
@@ -499,12 +537,7 @@ textarea { resize: vertical; min-height: 60px; }
     .flavor-wheel-banner .banner-content {
         flex-direction: column;
         align-items: flex-start;
-        gap: 12px;
-    }
-
-    .flavor-wheel-banner .btn {
-        width: 100%;
-        text-align: center;
+        gap: 8px;
     }
 }
 
