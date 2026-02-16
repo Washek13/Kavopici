@@ -18,7 +18,7 @@ public class KavopiciDbContextFactory : IDbContextFactory<KavopiciDbContext>
             ?? throw new InvalidOperationException("Není vybrána žádná databáze.");
 
         var options = new DbContextOptionsBuilder<KavopiciDbContext>()
-            .UseSqlite($"Data Source={path}")
+            .UseSqlite($"Data Source={path};Cache=Shared")
             .AddInterceptors(new SqliteWalInterceptor())
             .Options;
 
