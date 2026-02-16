@@ -33,16 +33,27 @@ var app = builder.Build();
 // Apply migrations on startup (only if a database is already configured)
 if (!string.IsNullOrEmpty(settingsService.DatabasePath) && File.Exists(settingsService.DatabasePath))
 {
-    try
+    var migrated = false;
+    for (var attempt = 1; attempt <= 6 && !migrated; attempt++)
     {
-        using var scope = app.Services.CreateScope();
-        var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<KavopiciDbContext>>();
-        using var db = factory.CreateDbContext();
-        db.Database.Migrate();
-    }
-    catch
-    {
-        // Migration errors will be handled when Login page tries to load users
+        try
+        {
+            using var scope = app.Services.CreateScope();
+            var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<KavopiciDbContext>>();
+            await using var db = await factory.CreateDbContextAsync();
+            await db.Database.MigrateAsync();
+            migrated = true;
+        }
+        catch (Exception ex) when (attempt < 6)
+        {
+            Console.Error.WriteLine(
+                $"Database migration attempt {attempt}/6 failed: {ex.Message}. Retrying in 5s...");
+            await Task.Delay(5000);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Database migration failed: {ex.Message}");
+        }
     }
 }
 

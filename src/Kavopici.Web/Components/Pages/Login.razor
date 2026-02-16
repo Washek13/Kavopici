@@ -138,13 +138,17 @@
             }
 
             isDatabaseNotSelected = false;
-            selectedDatabasePath = dbPath;
 
-            await Task.Run(() =>
+            if (selectedDatabasePath != dbPath)
             {
-                using var db = DbContextFactory.CreateDbContext();
-                db.Database.Migrate();
-            });
+                await Task.Run(async () =>
+                {
+                    await using var db = await DbContextFactory.CreateDbContextAsync();
+                    await db.Database.MigrateAsync();
+                });
+            }
+
+            selectedDatabasePath = dbPath;
 
             var hasUsers = await UserService.HasAnyUsersAsync();
             isFirstRun = !hasUsers;
