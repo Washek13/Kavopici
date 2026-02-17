@@ -281,5 +281,88 @@ public class StatisticsServiceTests : IDisposable
         Assert.Equal("User", result[0].Session.Blend.Supplier.Name);
     }
 
+    // --- GetSupplierStatisticsAsync tests ---
+
+    [Fact]
+    public async Task GetSupplierStatisticsAsync_NoSessions_ReturnsEmpty()
+    {
+        var result = await _statisticsService.GetSupplierStatisticsAsync();
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task GetSupplierStatisticsAsync_MultipleSuppliersMultipleSessions_CountsCorrectly()
+    {
+        var supplier1 = await _userService.CreateUserAsync("Supplier1", isAdmin: true);
+        var supplier2 = await _userService.CreateUserAsync("Supplier2");
+
+        var blend1 = await _blendService.CreateBlendAsync("Blend1", "Roaster", null, RoastLevel.Medium, supplier1.Id);
+        var blend2 = await _blendService.CreateBlendAsync("Blend2", "Roaster", null, RoastLevel.Dark, supplier2.Id);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var yesterday = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
+        var twoDaysAgo = DateOnly.FromDateTime(DateTime.Today.AddDays(-2));
+
+        await CreatePastSessionAsync(blend1.Id, today);
+        await CreatePastSessionAsync(blend1.Id, yesterday);
+        await CreatePastSessionAsync(blend1.Id, twoDaysAgo);
+        await CreatePastSessionAsync(blend2.Id, today);
+
+        var result = await _statisticsService.GetSupplierStatisticsAsync();
+
+        Assert.Equal(2, result.Count);
+
+        var s1 = result.First(s => s.SupplierName == "Supplier1");
+        Assert.Equal(3, s1.TotalSessionCount);
+        Assert.Equal(3, s1.Last30DaysSessionCount);
+
+        var s2 = result.First(s => s.SupplierName == "Supplier2");
+        Assert.Equal(1, s2.TotalSessionCount);
+        Assert.Equal(1, s2.Last30DaysSessionCount);
+    }
+
+    [Fact]
+    public async Task GetSupplierStatisticsAsync_OldSessionsNotInLast30Days()
+    {
+        var supplier = await _userService.CreateUserAsync("Supplier", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Blend", "Roaster", null, RoastLevel.Medium, supplier.Id);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var oldDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-60));
+
+        await CreatePastSessionAsync(blend.Id, today);
+        await CreatePastSessionAsync(blend.Id, oldDate);
+
+        var result = await _statisticsService.GetSupplierStatisticsAsync();
+
+        Assert.Single(result);
+        Assert.Equal(2, result[0].TotalSessionCount);
+        Assert.Equal(1, result[0].Last30DaysSessionCount);
+    }
+
+    [Fact]
+    public async Task GetSupplierStatisticsAsync_OrderedByTotalDesc()
+    {
+        var supplier1 = await _userService.CreateUserAsync("SupplierA", isAdmin: true);
+        var supplier2 = await _userService.CreateUserAsync("SupplierB");
+
+        var blend1 = await _blendService.CreateBlendAsync("Blend1", "Roaster", null, RoastLevel.Medium, supplier1.Id);
+        var blend2 = await _blendService.CreateBlendAsync("Blend2", "Roaster", null, RoastLevel.Dark, supplier2.Id);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var yesterday = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
+
+        // supplier2 has more sessions
+        await CreatePastSessionAsync(blend1.Id, today);
+        await CreatePastSessionAsync(blend2.Id, today);
+        await CreatePastSessionAsync(blend2.Id, yesterday);
+
+        var result = await _statisticsService.GetSupplierStatisticsAsync();
+
+        Assert.Equal(2, result.Count);
+        Assert.Equal("SupplierB", result[0].SupplierName);
+        Assert.Equal("SupplierA", result[1].SupplierName);
+    }
+
     public void Dispose() => _factory.Dispose();
 }
