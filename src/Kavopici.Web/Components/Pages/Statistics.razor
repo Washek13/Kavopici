@@ -17,6 +17,7 @@
 <div class="tab-bar">
     <button class="tab-btn @(tab == 0 ? "active" : "")" @onclick="() => tab = 0">Přehled směsí</button>
     <button class="tab-btn @(tab == 1 ? "active" : "")" @onclick="() => tab = 1">Moje hodnocení</button>
+    <button class="tab-btn @(tab == 2 ? "active" : "")" @onclick="() => tab = 2">Přehled dodavatelů</button>
 </div>
 
 @if (isLoading)
@@ -73,7 +74,7 @@ else if (tab == 0)
         </table>
     }
 }
-else
+else if (tab == 1)
 {
     @if (userSessions.Count == 0)
     {
@@ -145,6 +146,37 @@ else
         </table>
     }
 }
+else if (tab == 2)
+{
+    @if (supplierStats.Count == 0)
+    {
+        <div class="panel text-center">
+            <p class="text-muted">Zatím žádní dodavatelé.</p>
+        </div>
+    }
+    else
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th @onclick="@(() => SortSupplierBy("SupplierName"))">Dodavatel</th>
+                    <th @onclick="@(() => SortSupplierBy("TotalSessionCount"))">Celkem</th>
+                    <th @onclick="@(() => SortSupplierBy("Last30DaysSessionCount"))">Posledních 30 dní</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var stat in supplierStats)
+                {
+                    <tr>
+                        <td><strong>@stat.SupplierName</strong></td>
+                        <td>@stat.TotalSessionCount</td>
+                        <td>@stat.Last30DaysSessionCount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
 
 @code {
     private const int MaxStars = 5;
@@ -152,6 +184,7 @@ else
     private int tab;
     private List<BlendStatistics> blendStats = new();
     private List<SessionWithRating> userSessions = new();
+    private List<SupplierStatistics> supplierStats = new();
     private HashSet<int> expandedSessions = new();
     private HashSet<int> revealedSessions = new();
     private bool isLoading = true;
@@ -166,6 +199,8 @@ else
         var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
         if (query["tab"] == "ratings")
             tab = 1;
+        else if (query["tab"] == "suppliers")
+            tab = 2;
 
         await LoadAsync();
     }
@@ -177,6 +212,7 @@ else
             isLoading = true;
             errorMessage = null;
             blendStats = await StatisticsService.GetBlendStatisticsAsync();
+            supplierStats = await StatisticsService.GetSupplierStatisticsAsync();
 
             if (AppState.CurrentUser != null)
                 userSessions = await StatisticsService.GetUserSessionHistoryAsync(AppState.CurrentUser.Id);
@@ -210,6 +246,17 @@ else
             "Roaster" => blendStats.OrderBy(s => s.Roaster).ToList(),
             "SupplierName" => blendStats.OrderBy(s => s.SupplierName).ToList(),
             _ => blendStats
+        };
+    }
+
+    private void SortSupplierBy(string column)
+    {
+        supplierStats = column switch
+        {
+            "SupplierName" => supplierStats.OrderBy(s => s.SupplierName).ToList(),
+            "TotalSessionCount" => supplierStats.OrderByDescending(s => s.TotalSessionCount).ToList(),
+            "Last30DaysSessionCount" => supplierStats.OrderByDescending(s => s.Last30DaysSessionCount).ToList(),
+            _ => supplierStats
         };
     }
 

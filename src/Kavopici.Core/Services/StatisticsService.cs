@@ -49,6 +49,30 @@ public class StatisticsService : IStatisticsService
         .ToList();
     }
 
+    public async Task<List<SupplierStatistics>> GetSupplierStatisticsAsync()
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var sessions = await context.TastingSessions
+            .Where(s => s.IsActive)
+            .Include(s => s.Blend)
+                .ThenInclude(b => b.Supplier)
+            .ToListAsync();
+
+        var cutoff = DateOnly.FromDateTime(DateTime.Today.AddDays(-30));
+
+        return sessions
+            .GroupBy(s => new { s.Blend.SupplierId, SupplierName = s.Blend.Supplier.Name })
+            .Select(g => new SupplierStatistics(
+                SupplierId: g.Key.SupplierId,
+                SupplierName: g.Key.SupplierName,
+                TotalSessionCount: g.Count(),
+                Last30DaysSessionCount: g.Count(s => s.Date >= cutoff)
+            ))
+            .OrderByDescending(s => s.TotalSessionCount)
+            .ToList();
+    }
+
     public async Task<List<Rating>> GetUserRatingHistoryAsync(int userId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
