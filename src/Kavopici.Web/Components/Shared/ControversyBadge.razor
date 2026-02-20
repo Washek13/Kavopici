@@ -1,0 +1,17 @@
+@if (Level.HasValue)
+{
+    var val = Level.Value;
+    var label = val < 0.5 ? "Shoda" : val < 1.5 ? "Mírný rozpor" : "Rozpor";
+    var color = val < 0.5 ? "var(--success-green)" : val < 1.5 ? "var(--warning-orange)" : "var(--error-red)";
+    <span style="@($"color:{color};font-weight:600;font-size:{FontSize}px;")">@label</span>
+}
+else if (ShowDash)
+{
+    <span>—</span>
+}
+
+@code {
+    [Parameter] public double? Level { get; set; }
+    [Parameter] public int FontSize { get; set; } = 14;
+    [Parameter] public bool ShowDash { get; set; }
+}

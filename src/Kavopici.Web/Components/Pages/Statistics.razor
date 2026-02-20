@@ -46,10 +46,12 @@ else if (tab == 0)
                 <tr>
                     <th @onclick="@(() => SortBy("BlendName"))">Směs</th>
                     <th @onclick="@(() => SortBy("AverageRating"))">Průměr</th>
+                    <th @onclick="@(() => SortBy("ControversyLevel"))">Kontroverznost</th>
                     <th @onclick="@(() => SortBy("RatingCount"))">Počet</th>
                     <th @onclick="@(() => SortBy("Roaster"))">Pražírna</th>
                     <th @onclick="@(() => SortBy("SupplierName"))">Dodavatel</th>
                     <th @onclick="@(() => SortBy("PricePerKg"))">Cena/kg</th>
+                    <th @onclick="@(() => SortBy("PricePerformance"))">Cena/★</th>
                 </tr>
             </thead>
             <tbody>
@@ -66,10 +68,12 @@ else if (tab == 0)
                                 <span> &#9733;</span>
                             }
                         </td>
+                        <td><ControversyBadge Level="stat.ControversyLevel" ShowDash="true" /></td>
                         <td>@stat.RatingCount</td>
                         <td>@stat.Roaster</td>
                         <td>@stat.SupplierName</td>
                         <td>@(stat.PricePerKg.HasValue ? $"{stat.PricePerKg.Value:F0} Kč" : "—")</td>
+                        <td>@(stat.PricePerformance.HasValue ? $"{stat.PricePerformance.Value:F0} Kč/★" : "—")</td>
                     </tr>
                 }
             </tbody>
@@ -93,7 +97,6 @@ else if (tab == 1)
                     <th>Směs</th>
                     <th>Poznámka</th>
                     <th>Hodnocení</th>
-                    <th>Komentář</th>
                 </tr>
             </thead>
             <tbody>
@@ -117,29 +120,23 @@ else if (tab == 1)
                         </td>
                         <td class="text-muted">@(item.Session.Comment ?? "—")</td>
                         <td>
-                            @if (item.HasRated)
-                            {
-                                <span style="color:var(--amber-gold);">
-                                    @(new string('\u2605', item.UserRating!.Stars))@(new string('\u2606', MaxStars - item.UserRating!.Stars))
-                                </span>
-                            }
-                            else if (!isExpanded)
+                            @if (!item.HasRated && !isExpanded)
                             {
                                 <button class="btn btn-outline btn-sm" @onclick="() => ExpandRatingForm(sessionId)">
                                     Ohodnotit
                                 </button>
                             }
                         </td>
-                        <td class="text-muted">@(item.HasRated ? (item.UserRating!.Comment ?? "—") : "—")</td>
                     </tr>
 
-                    @if (!item.HasRated && isExpanded)
+                    @if (item.HasRated || isExpanded)
                     {
                         <tr>
-                            <td colspan="5" class="inline-rating-cell">
+                            <td colspan="4" class="inline-rating-cell">
                                 <div class="inline-rating-form">
                                     <RatingForm SessionId="@sessionId"
                                                 BlendId="@item.Session.BlendId"
+                                                ExistingRating="@item.UserRating"
                                                 OnRatingSubmitted="() => OnRetroRatingSubmitted(sessionId)" />
                                 </div>
                             </td>
@@ -250,6 +247,8 @@ else if (tab == 2)
             "Roaster" => blendStats.OrderBy(s => s.Roaster).ToList(),
             "SupplierName" => blendStats.OrderBy(s => s.SupplierName).ToList(),
             "PricePerKg" => blendStats.OrderByDescending(s => s.PricePerKg ?? 0).ToList(),
+            "ControversyLevel" => blendStats.OrderByDescending(s => s.ControversyLevel ?? -1).ToList(),
+            "PricePerformance" => blendStats.OrderBy(s => s.PricePerformance ?? decimal.MaxValue).ToList(),
             _ => blendStats
         };
     }

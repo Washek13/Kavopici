@@ -31,11 +31,13 @@ Kávopíči je webová aplikace pro kancelářské degustace kávy. Administrát
 - **Zpětné hlasování** — pokud nebyla nastavena káva dne a uživatel neohodnotil poslední směsi, na nástěnce se zobrazí karty pro zpětné hodnocení.
 
 ### Statistiky
-- Souhrnná tabulka směsí (průměr, počet, pražírna, dodavatel) — sortovatelná podle sloupců.
+- Souhrnná tabulka směsí (průměr, **kontroverznost**, počet, pražírna, dodavatel, cena/kg, **cena/★**) — sortovatelná podle sloupců.
+- **Kontroverznost** — úroveň shody mezi hodnotiteli vypočtená z rozptylu hodnocení (Shoda / Mírný rozpor / Rozpor).
+- **Cena za hvězdičku** — poměr ceny za kilogram a průměrného hodnocení; nižší hodnota = lepší hodnota za peníze.
 - **Detail směsi** — rozložení hvězdiček, jednotlivá hodnocení s komentáři a poznámkami.
-- **Moje hodnocení** — historie všech degustací s možností zpětného ohodnocení zmeškaných směsí (tajné hlasování platí i zpětně).
+- **Moje hodnocení** — historie všech degustací s možností zpětného ohodnocení zmeškaných směsí a **úpravy existujících hodnocení** (tajné hlasování platí i zpětně).
 - **Porovnání směsí** — dvě směsi vedle sebe s rozložením hodnocení.
-- **Export CSV** — stažení dat do souboru.
+- **Export CSV** — stažení dat do souboru (včetně kontroverznosti a ceny/★).
 
 ### Správa (admin)
 - **Uživatelé** — přidání, deaktivace, přidělení/odebrání admin práv (poslední admin nelze odebrat).
@@ -76,7 +78,7 @@ Kavopici.sln
 │   └── Kavopici.Web/           # ASP.NET Core aplikace (vstupní bod)
 │       ├── Components/
 │       │   ├── Pages/          # Login, Dashboard, Statistics, BlendDetail, Comparison, Admin
-│       │   ├── Shared/         # StarRating, BlendCard, UserInitials
+│       │   ├── Shared/         # StarRating, BlendCard, UserInitials, ControversyBadge
 │       │   └── Layout/         # MainLayout (navigace, update banner)
 │       ├── Services/           # AppState, UpdateService, UpdateState
 │       └── wwwroot/            # CSS, ikony, favicon
