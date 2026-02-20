@@ -31,63 +31,84 @@
     </div>
 }
 
-@* Blend of the Day *@
+@* Blends of the Day *@
 @if (isLoading)
 {
     <div class="loading">Načítání...</div>
 }
-else if (todaySession != null)
+else if (todaySessions.Count > 0)
 {
-    <div class="card">
-        <h2>Káva dne — @todaySession.Date.ToString("d. M. yyyy")</h2>
+    @foreach (var session in todaySessions)
+    {
+        var sessionId = session.Id;
+        var isRevealed = revealedSessionIds.Contains(sessionId);
+        var existing = existingRatings.GetValueOrDefault(sessionId);
 
-        @if (showTodaySecret)
-        {
-            <div class="secret-overlay">
-                <h3>Tajné hlasování</h3>
-                <p>Ohodnoťte kávu před odhalením detailů.</p>
-            </div>
-        }
-        else
-        {
-            <div class="blend-card-wrapper clickable" @onclick="GoToTodayBlend">
-                <BlendCard Blend="todaySession.Blend" SessionComment="@todaySession.Comment" />
-            </div>
-        }
+        <div class="card">
+            <h2>Káva dne — @session.Date.ToString("d. M. yyyy")</h2>
 
-        <div class="mt-16">
-            <RatingForm SessionId="@todaySession.Id"
-                        BlendId="@todaySession.BlendId"
-                        ExistingRating="@existingRating"
-                        OnRatingSubmitted="OnTodayRatingSubmitted" />
+            @if (!isRevealed)
+            {
+                <div class="secret-overlay">
+                    <h3>Tajné hlasování</h3>
+                    @if (!string.IsNullOrEmpty(session.Comment))
+                    {
+                        <p style="font-size:1.1em;font-weight:600;margin:8px 0;">@session.Comment</p>
+                    }
+                    <p>Ohodnoťte kávu před odhalením detailů.</p>
+                </div>
+            }
+            else
+            {
+                <div class="blend-card-wrapper clickable" @onclick="() => GoToBlend(session.BlendId)">
+                    <BlendCard Blend="session.Blend" SessionComment="@session.Comment" />
+                </div>
+            }
+
+            <div class="mt-16">
+                <RatingForm SessionId="@sessionId"
+                            BlendId="@session.BlendId"
+                            ExistingRating="@existing"
+                            OnRatingSubmitted="() => OnTodayRatingSubmitted(sessionId)" />
+            </div>
         </div>
-    </div>
+    }
 }
-else if (missedSession != null)
+else if (missedSessions.Count > 0)
 {
-    <div class="card">
-        <h2>Zmeškané hodnocení — @missedSession.Date.ToString("d. M. yyyy")</h2>
+    @foreach (var session in missedSessions)
+    {
+        var sessionId = session.Id;
+        var isRevealed = revealedMissedSessionIds.Contains(sessionId);
 
-        @if (!missedSessionRevealed)
-        {
-            <div class="secret-overlay">
-                <h3>Tajné hlasování</h3>
-                <p>Ohodnoťte kávu před odhalením detailů.</p>
-            </div>
-        }
-        else
-        {
-            <div class="blend-card-wrapper clickable" @onclick="GoToMissedBlend">
-                <BlendCard Blend="missedSession.Blend" SessionComment="@missedSession.Comment" />
-            </div>
-        }
+        <div class="card">
+            <h2>Zmeškané hodnocení — @session.Date.ToString("d. M. yyyy")</h2>
 
-        <div class="mt-16">
-            <RatingForm SessionId="@missedSession.Id"
-                        BlendId="@missedSession.BlendId"
-                        OnRatingSubmitted="OnMissedRatingSubmitted" />
+            @if (!isRevealed)
+            {
+                <div class="secret-overlay">
+                    <h3>Tajné hlasování</h3>
+                    @if (!string.IsNullOrEmpty(session.Comment))
+                    {
+                        <p style="font-size:1.1em;font-weight:600;margin:8px 0;">@session.Comment</p>
+                    }
+                    <p>Ohodnoťte kávu před odhalením detailů.</p>
+                </div>
+            }
+            else
+            {
+                <div class="blend-card-wrapper clickable" @onclick="() => GoToBlend(session.BlendId)">
+                    <BlendCard Blend="session.Blend" SessionComment="@session.Comment" />
+                </div>
+            }
+
+            <div class="mt-16">
+                <RatingForm SessionId="@sessionId"
+                            BlendId="@session.BlendId"
+                            OnRatingSubmitted="() => OnMissedRatingSubmitted(sessionId)" />
+            </div>
         </div>
-    </div>
+    }
 }
 else
 {
@@ -109,11 +130,11 @@ else
 </a>
 
 @code {
-    private TastingSession? todaySession;
-    private TastingSession? missedSession;
-    private Rating? existingRating;
-    private bool todayBlendRevealed;
-    private bool missedSessionRevealed;
+    private List<TastingSession> todaySessions = new();
+    private List<TastingSession> missedSessions = new();
+    private Dictionary<int, Rating?> existingRatings = new();
+    private HashSet<int> revealedSessionIds = new();
+    private HashSet<int> revealedMissedSessionIds = new();
     private bool isLoading = true;
 
     private string? topBlendName;
@@ -123,8 +144,6 @@ else
     private bool hasHighlights;
 
     private string? errorMessage;
-
-    private bool showTodaySecret => todaySession != null && !todayBlendRevealed;
 
     protected override async Task OnInitializedAsync()
     {
@@ -139,28 +158,29 @@ else
             isLoading = true;
             errorMessage = null;
 
-            todaySession = await SessionService.GetTodaySessionAsync();
+            todaySessions = await SessionService.GetTodaySessionsAsync();
 
-            if (todaySession != null && AppState.CurrentUser != null)
+            if (todaySessions.Count > 0 && AppState.CurrentUser != null)
             {
-                existingRating = await RatingService.GetUserRatingForSessionAsync(
-                    AppState.CurrentUser.Id, todaySession.Id);
+                foreach (var session in todaySessions)
+                {
+                    var rating = await RatingService.GetUserRatingForSessionAsync(
+                        AppState.CurrentUser.Id, session.Id);
 
-                if (existingRating != null)
-                {
-                    todayBlendRevealed = true;
-                    var noteIds = await RatingService.GetRatingNoteIdsAsync(existingRating.Id);
-                    existingRating.RatingTastingNotes = noteIds.Select(id =>
-                        new RatingTastingNote { RatingId = existingRating.Id, TastingNoteId = id }).ToList();
-                }
-                else
-                {
-                    todayBlendRevealed = false;
+                    existingRatings[session.Id] = rating;
+
+                    if (rating != null)
+                    {
+                        revealedSessionIds.Add(session.Id);
+                        var noteIds = await RatingService.GetRatingNoteIdsAsync(rating.Id);
+                        rating.RatingTastingNotes = noteIds.Select(id =>
+                            new RatingTastingNote { RatingId = rating.Id, TastingNoteId = id }).ToList();
+                    }
                 }
             }
-            else if (todaySession == null && AppState.CurrentUser != null)
+            else if (todaySessions.Count == 0 && AppState.CurrentUser != null)
             {
-                missedSession = await SessionService.GetMostRecentUnratedSessionAsync(AppState.CurrentUser.Id);
+                missedSessions = await SessionService.GetMostRecentUnratedSessionsAsync(AppState.CurrentUser.Id);
             }
 
             // Highlights
@@ -190,18 +210,17 @@ else
         }
     }
 
-    private void OnTodayRatingSubmitted()
+    private void OnTodayRatingSubmitted(int sessionId)
     {
-        todayBlendRevealed = true;
+        revealedSessionIds.Add(sessionId);
     }
 
-    private void OnMissedRatingSubmitted()
+    private void OnMissedRatingSubmitted(int sessionId)
     {
-        missedSessionRevealed = true;
+        revealedMissedSessionIds.Add(sessionId);
     }
 
     private void GoToTopBlend() => Nav.NavigateTo($"/blend/{topBlendId}");
-    private void GoToTodayBlend() => Nav.NavigateTo($"/blend/{todaySession!.BlendId}");
-    private void GoToMissedBlend() => Nav.NavigateTo($"/blend/{missedSession!.BlendId}");
+    private void GoToBlend(int blendId) => Nav.NavigateTo($"/blend/{blendId}");
     private void GoToStatistics() => Nav.NavigateTo("/statistics?tab=ratings");
 }

@@ -151,20 +151,43 @@
 @if (tab == 2)
 {
     <div class="card">
-        <h2>Nastavit kávu dne</h2>
+        <h2>Kávy dne</h2>
 
-        @if (currentSession != null)
+        @if (currentSessions.Count > 0)
         {
-            <div class="panel mb-16">
-                <strong>Aktuální:</strong> @currentSession.Blend.Name
-                (@currentSession.Date.ToString("d. M. yyyy"))
-                @if (!string.IsNullOrEmpty(currentSession.Comment))
-                {
-                    <span class="text-muted"> — @currentSession.Comment</span>
-                }
+            <table class="data-table mb-16">
+                <thead>
+                    <tr>
+                        <th>Směs</th>
+                        <th>Poznámka</th>
+                        <th>Akce</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var session in currentSessions)
+                    {
+                        <tr>
+                            <td><strong>@session.Blend.Name</strong> (@session.Blend.Roaster)</td>
+                            <td class="text-muted">@(session.Comment ?? "—")</td>
+                            <td>
+                                <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;"
+                                        @onclick="() => RemoveBlendOfDay(session.Id)">
+                                    Odebrat
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="panel mb-16 text-center">
+                <p class="text-muted">Zatím nebyla nastavena žádná káva dne.</p>
             </div>
         }
 
+        <h3>Přidat kávu dne</h3>
         <div class="form-group">
             <label>Směs</label>
             <select @bind="selectedBlendOfDayId">
@@ -176,12 +199,12 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Komentář (volitelný)</label>
-            <textarea @bind="sessionComment" placeholder="Poznámka k dnešnímu ochutnávání..."></textarea>
+            <label>Poznámka (volitelná)</label>
+            <textarea @bind="sessionComment" placeholder="Poznámka pro degustátory (např. Vzorek A)..."></textarea>
         </div>
-        <button class="btn btn-accent" @onclick="SetBlendOfDay"
+        <button class="btn btn-accent" @onclick="AddBlendOfDay"
                 disabled="@(selectedBlendOfDayId == 0)">
-            Nastavit jako kávu dne
+            Přidat kávu dne
         </button>
     </div>
 
@@ -199,7 +222,7 @@
     private int tab;
     private List<User> allUsers = new();
     private List<CoffeeBlend> allBlends = new();
-    private TastingSession? currentSession;
+    private List<TastingSession> currentSessions = new();
 
     // User form
     private string newUserName = "";
@@ -226,7 +249,7 @@
 
     private async Task LoadAll()
     {
-        await Task.WhenAll(LoadUsers(), LoadBlends(), LoadCurrentSession());
+        await Task.WhenAll(LoadUsers(), LoadBlends(), LoadCurrentSessions());
     }
 
     private async Task LoadUsers()
@@ -245,9 +268,9 @@
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
-    private async Task LoadCurrentSession()
+    private async Task LoadCurrentSessions()
     {
-        try { currentSession = await SessionService.GetTodaySessionAsync(); }
+        try { currentSessions = await SessionService.GetTodaySessionsAsync(); }
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
@@ -328,16 +351,30 @@
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
-    private async Task SetBlendOfDay()
+    private async Task AddBlendOfDay()
     {
         try
         {
             errorMessage = null;
             if (selectedBlendOfDayId == 0) { errorMessage = "Vyberte směs."; return; }
-            currentSession = await SessionService.SetBlendOfTheDayAsync(selectedBlendOfDayId, sessionComment);
-            sessionComment = null;
+            await SessionService.AddBlendOfTheDayAsync(selectedBlendOfDayId, sessionComment);
             var blend = allBlends.FirstOrDefault(b => b.Id == selectedBlendOfDayId);
-            statusMessage = $"Dnešní káva nastavena: {blend?.Name ?? ""}";
+            statusMessage = $"Káva dne přidána: {blend?.Name ?? ""}";
+            sessionComment = null;
+            selectedBlendOfDayId = 0;
+            await LoadCurrentSessions();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task RemoveBlendOfDay(int sessionId)
+    {
+        try
+        {
+            errorMessage = null;
+            await SessionService.RemoveBlendOfTheDayAsync(sessionId);
+            statusMessage = "Káva dne byla odebrána.";
+            await LoadCurrentSessions();
         }
         catch (Exception ex) { errorMessage = ex.Message; }
     }

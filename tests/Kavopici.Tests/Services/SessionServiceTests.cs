@@ -22,20 +22,68 @@ public class SessionServiceTests : IDisposable
         _blendService = new BlendService(_factory);
     }
 
+    // --- GetTodaySessionsAsync tests ---
+
     [Fact]
-    public async Task GetTodaySessionAsync_NoSession_ReturnsNull()
+    public async Task GetTodaySessionsAsync_NoSession_ReturnsEmpty()
     {
-        var result = await _sessionService.GetTodaySessionAsync();
-        Assert.Null(result);
+        var result = await _sessionService.GetTodaySessionsAsync();
+        Assert.Empty(result);
     }
 
     [Fact]
-    public async Task SetBlendOfTheDayAsync_CreatesSession()
+    public async Task GetTodaySessionsAsync_ReturnsSingleSession()
     {
         var user = await _userService.CreateUserAsync("User", isAdmin: true);
         var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
 
-        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+        await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        var result = await _sessionService.GetTodaySessionsAsync();
+        Assert.Single(result);
+        Assert.Equal(blend.Id, result[0].BlendId);
+    }
+
+    [Fact]
+    public async Task GetTodaySessionsAsync_ReturnsMultipleSessions()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend1 = await _blendService.CreateBlendAsync("Blend1", "Roaster", null, RoastLevel.Medium, user.Id);
+        var blend2 = await _blendService.CreateBlendAsync("Blend2", "Roaster", null, RoastLevel.Dark, user.Id);
+
+        await _sessionService.AddBlendOfTheDayAsync(blend1.Id, "Vzorek A");
+        await _sessionService.AddBlendOfTheDayAsync(blend2.Id, "Vzorek B");
+
+        var result = await _sessionService.GetTodaySessionsAsync();
+        Assert.Equal(2, result.Count);
+    }
+
+    [Fact]
+    public async Task GetTodaySessionsAsync_IncludesBlendAndSupplier()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", "Origin", RoastLevel.Medium, user.Id);
+
+        await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        var result = await _sessionService.GetTodaySessionsAsync();
+
+        Assert.Single(result);
+        Assert.NotNull(result[0].Blend);
+        Assert.Equal("Test", result[0].Blend.Name);
+        Assert.NotNull(result[0].Blend.Supplier);
+        Assert.Equal("User", result[0].Blend.Supplier.Name);
+    }
+
+    // --- AddBlendOfTheDayAsync tests ---
+
+    [Fact]
+    public async Task AddBlendOfTheDayAsync_CreatesSession()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
 
         Assert.Equal(blend.Id, session.BlendId);
         Assert.Equal(DateOnly.FromDateTime(DateTime.Today), session.Date);
@@ -43,74 +91,131 @@ public class SessionServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task SetBlendOfTheDayAsync_DeactivatesPrevious()
+    public async Task AddBlendOfTheDayAsync_MultipleBlendsCoexist()
     {
         var user = await _userService.CreateUserAsync("User", isAdmin: true);
         var blend1 = await _blendService.CreateBlendAsync("Blend1", "Roaster", null, RoastLevel.Medium, user.Id);
         var blend2 = await _blendService.CreateBlendAsync("Blend2", "Roaster", null, RoastLevel.Dark, user.Id);
 
-        var session1 = await _sessionService.SetBlendOfTheDayAsync(blend1.Id);
-        var session2 = await _sessionService.SetBlendOfTheDayAsync(blend2.Id);
+        var session1 = await _sessionService.AddBlendOfTheDayAsync(blend1.Id);
+        var session2 = await _sessionService.AddBlendOfTheDayAsync(blend2.Id);
 
-        var todaySession = await _sessionService.GetTodaySessionAsync();
-        Assert.NotNull(todaySession);
-        Assert.Equal(blend2.Id, todaySession!.BlendId);
-
-        // Explicitly verify old session is deactivated
+        // Both sessions should be active
         using var context = _factory.CreateDbContext();
-        var oldSession = await context.TastingSessions.FirstAsync(s => s.Id == session1.Id);
-        Assert.False(oldSession.IsActive);
+        var s1 = await context.TastingSessions.FirstAsync(s => s.Id == session1.Id);
+        var s2 = await context.TastingSessions.FirstAsync(s => s.Id == session2.Id);
+        Assert.True(s1.IsActive);
+        Assert.True(s2.IsActive);
+
+        var todaySessions = await _sessionService.GetTodaySessionsAsync();
+        Assert.Equal(2, todaySessions.Count);
     }
 
     [Fact]
-    public async Task GetTodaySessionAsync_IncludesBlendAndSupplier()
-    {
-        var user = await _userService.CreateUserAsync("User", isAdmin: true);
-        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", "Origin", RoastLevel.Medium, user.Id);
-
-        await _sessionService.SetBlendOfTheDayAsync(blend.Id);
-
-        var session = await _sessionService.GetTodaySessionAsync();
-
-        Assert.NotNull(session);
-        Assert.NotNull(session!.Blend);
-        Assert.Equal("Test", session.Blend.Name);
-        Assert.NotNull(session.Blend.Supplier);
-        Assert.Equal("User", session.Blend.Supplier.Name);
-    }
-
-    [Fact]
-    public async Task SetBlendOfTheDayAsync_WithComment_StoresComment()
+    public async Task AddBlendOfTheDayAsync_DuplicateBlend_Throws()
     {
         var user = await _userService.CreateUserAsync("User", isAdmin: true);
         var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
 
-        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id, "Dnes testujeme");
+        await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.AddBlendOfTheDayAsync(blend.Id));
+    }
+
+    [Fact]
+    public async Task AddBlendOfTheDayAsync_WithComment_StoresComment()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id, "Dnes testujeme");
 
         Assert.Equal("Dnes testujeme", session.Comment);
     }
 
     [Fact]
-    public async Task SetBlendOfTheDayAsync_WhitespaceComment_StoresNull()
+    public async Task AddBlendOfTheDayAsync_WhitespaceComment_StoresNull()
     {
         var user = await _userService.CreateUserAsync("User", isAdmin: true);
         var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
 
-        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id, "   ");
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id, "   ");
 
         Assert.Null(session.Comment);
     }
 
     [Fact]
-    public async Task SetBlendOfTheDayAsync_CommentTrimmed()
+    public async Task AddBlendOfTheDayAsync_CommentTrimmed()
     {
         var user = await _userService.CreateUserAsync("User", isAdmin: true);
         var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
 
-        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id, "  Dobrá káva  ");
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id, "  Dobrá káva  ");
 
         Assert.Equal("Dobrá káva", session.Comment);
     }
+
+    // --- RemoveBlendOfTheDayAsync tests ---
+
+    [Fact]
+    public async Task RemoveBlendOfTheDayAsync_DeactivatesSession()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        await _sessionService.RemoveBlendOfTheDayAsync(session.Id);
+
+        using var context = _factory.CreateDbContext();
+        var updated = await context.TastingSessions.FirstAsync(s => s.Id == session.Id);
+        Assert.False(updated.IsActive);
+    }
+
+    [Fact]
+    public async Task RemoveBlendOfTheDayAsync_DoesNotAffectOthers()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend1 = await _blendService.CreateBlendAsync("Blend1", "Roaster", null, RoastLevel.Medium, user.Id);
+        var blend2 = await _blendService.CreateBlendAsync("Blend2", "Roaster", null, RoastLevel.Dark, user.Id);
+
+        var session1 = await _sessionService.AddBlendOfTheDayAsync(blend1.Id);
+        var session2 = await _sessionService.AddBlendOfTheDayAsync(blend2.Id);
+
+        await _sessionService.RemoveBlendOfTheDayAsync(session1.Id);
+
+        using var context = _factory.CreateDbContext();
+        var s1 = await context.TastingSessions.FirstAsync(s => s.Id == session1.Id);
+        var s2 = await context.TastingSessions.FirstAsync(s => s.Id == session2.Id);
+        Assert.False(s1.IsActive);
+        Assert.True(s2.IsActive);
+
+        var todaySessions = await _sessionService.GetTodaySessionsAsync();
+        Assert.Single(todaySessions);
+        Assert.Equal(blend2.Id, todaySessions[0].BlendId);
+    }
+
+    [Fact]
+    public async Task RemoveBlendOfTheDayAsync_NonExistentSession_Throws()
+    {
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.RemoveBlendOfTheDayAsync(999));
+    }
+
+    [Fact]
+    public async Task RemoveBlendOfTheDayAsync_AlreadyInactive_Throws()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        await _sessionService.RemoveBlendOfTheDayAsync(session.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.RemoveBlendOfTheDayAsync(session.Id));
+    }
+
+    // --- GetSessionHistoryAsync tests ---
 
     [Fact]
     public async Task GetSessionHistoryAsync_ReturnsAllSessions()
@@ -119,8 +224,8 @@ public class SessionServiceTests : IDisposable
         var blend1 = await _blendService.CreateBlendAsync("Blend1", "Roaster", null, RoastLevel.Medium, user.Id);
         var blend2 = await _blendService.CreateBlendAsync("Blend2", "Roaster", null, RoastLevel.Dark, user.Id);
 
-        await _sessionService.SetBlendOfTheDayAsync(blend1.Id);
-        await _sessionService.SetBlendOfTheDayAsync(blend2.Id);
+        await _sessionService.AddBlendOfTheDayAsync(blend1.Id);
+        await _sessionService.AddBlendOfTheDayAsync(blend2.Id);
 
         var history = await _sessionService.GetSessionHistoryAsync();
 
@@ -140,9 +245,9 @@ public class SessionServiceTests : IDisposable
         Assert.Empty(history);
     }
 
-    // --- GetMostRecentUnratedSessionAsync tests ---
+    // --- GetMostRecentUnratedSessionsAsync tests ---
 
-    private async Task<TastingSession> CreatePastSessionAsync(int blendId, DateOnly date)
+    private async Task<TastingSession> CreatePastSessionAsync(int blendId, DateOnly date, string? comment = null)
     {
         using var context = _factory.CreateDbContext();
         var session = new TastingSession
@@ -150,6 +255,7 @@ public class SessionServiceTests : IDisposable
             BlendId = blendId,
             Date = date,
             IsActive = true,
+            Comment = comment,
             CreatedAt = DateTime.UtcNow
         };
         context.TastingSessions.Add(session);
@@ -158,17 +264,17 @@ public class SessionServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task GetMostRecentUnratedSessionAsync_NoSessions_ReturnsNull()
+    public async Task GetMostRecentUnratedSessionsAsync_NoSessions_ReturnsEmpty()
     {
         var user = await _userService.CreateUserAsync("User", isAdmin: true);
 
-        var result = await _sessionService.GetMostRecentUnratedSessionAsync(user.Id);
+        var result = await _sessionService.GetMostRecentUnratedSessionsAsync(user.Id);
 
-        Assert.Null(result);
+        Assert.Empty(result);
     }
 
     [Fact]
-    public async Task GetMostRecentUnratedSessionAsync_AllRated_ReturnsNull()
+    public async Task GetMostRecentUnratedSessionsAsync_AllRated_ReturnsEmpty()
     {
         var user = await _userService.CreateUserAsync("User", isAdmin: true);
         var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
@@ -179,13 +285,13 @@ public class SessionServiceTests : IDisposable
 
         await ratingService.SubmitRatingAsync(blend.Id, user.Id, session.Id, 4, null);
 
-        var result = await _sessionService.GetMostRecentUnratedSessionAsync(user.Id);
+        var result = await _sessionService.GetMostRecentUnratedSessionsAsync(user.Id);
 
-        Assert.Null(result);
+        Assert.Empty(result);
     }
 
     [Fact]
-    public async Task GetMostRecentUnratedSessionAsync_HasUnrated_ReturnsMostRecent()
+    public async Task GetMostRecentUnratedSessionsAsync_HasUnrated_ReturnsMostRecentDay()
     {
         var user = await _userService.CreateUserAsync("User", isAdmin: true);
         var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
@@ -195,28 +301,66 @@ public class SessionServiceTests : IDisposable
         await CreatePastSessionAsync(blend.Id, twoDaysAgo);
         await CreatePastSessionAsync(blend.Id, yesterday);
 
-        var result = await _sessionService.GetMostRecentUnratedSessionAsync(user.Id);
+        var result = await _sessionService.GetMostRecentUnratedSessionsAsync(user.Id);
 
-        Assert.NotNull(result);
-        Assert.Equal(yesterday, result!.Date);
+        Assert.Single(result);
+        Assert.Equal(yesterday, result[0].Date);
     }
 
     [Fact]
-    public async Task GetMostRecentUnratedSessionAsync_IgnoresTodaySession()
+    public async Task GetMostRecentUnratedSessionsAsync_ReturnsAllFromSameDay()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend1 = await _blendService.CreateBlendAsync("Blend1", "Roaster", null, RoastLevel.Medium, user.Id);
+        var blend2 = await _blendService.CreateBlendAsync("Blend2", "Roaster", null, RoastLevel.Dark, user.Id);
+
+        var yesterday = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
+        await CreatePastSessionAsync(blend1.Id, yesterday, "Vzorek A");
+        await CreatePastSessionAsync(blend2.Id, yesterday, "Vzorek B");
+
+        var result = await _sessionService.GetMostRecentUnratedSessionsAsync(user.Id);
+
+        Assert.Equal(2, result.Count);
+        Assert.All(result, s => Assert.Equal(yesterday, s.Date));
+    }
+
+    [Fact]
+    public async Task GetMostRecentUnratedSessionsAsync_ExcludesRatedSessions()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend1 = await _blendService.CreateBlendAsync("Blend1", "Roaster", null, RoastLevel.Medium, user.Id);
+        var blend2 = await _blendService.CreateBlendAsync("Blend2", "Roaster", null, RoastLevel.Dark, user.Id);
+        var ratingService = new RatingService(_factory);
+
+        var yesterday = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
+        var session1 = await CreatePastSessionAsync(blend1.Id, yesterday);
+        await CreatePastSessionAsync(blend2.Id, yesterday);
+
+        // Rate only the first session
+        await ratingService.SubmitRatingAsync(blend1.Id, user.Id, session1.Id, 4, null);
+
+        var result = await _sessionService.GetMostRecentUnratedSessionsAsync(user.Id);
+
+        Assert.Single(result);
+        Assert.Equal(blend2.Id, result[0].BlendId);
+    }
+
+    [Fact]
+    public async Task GetMostRecentUnratedSessionsAsync_IgnoresTodaySession()
     {
         var user = await _userService.CreateUserAsync("User", isAdmin: true);
         var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
 
         // Create today's session — should be ignored
-        await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+        await _sessionService.AddBlendOfTheDayAsync(blend.Id);
 
-        var result = await _sessionService.GetMostRecentUnratedSessionAsync(user.Id);
+        var result = await _sessionService.GetMostRecentUnratedSessionsAsync(user.Id);
 
-        Assert.Null(result);
+        Assert.Empty(result);
     }
 
     [Fact]
-    public async Task GetMostRecentUnratedSessionAsync_IncludesBlendAndSupplier()
+    public async Task GetMostRecentUnratedSessionsAsync_IncludesBlendAndSupplier()
     {
         var user = await _userService.CreateUserAsync("User", isAdmin: true);
         var blend = await _blendService.CreateBlendAsync("TestBlend", "TestRoaster", "Origin", RoastLevel.Medium, user.Id);
@@ -224,13 +368,13 @@ public class SessionServiceTests : IDisposable
         var yesterday = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
         await CreatePastSessionAsync(blend.Id, yesterday);
 
-        var result = await _sessionService.GetMostRecentUnratedSessionAsync(user.Id);
+        var result = await _sessionService.GetMostRecentUnratedSessionsAsync(user.Id);
 
-        Assert.NotNull(result);
-        Assert.NotNull(result!.Blend);
-        Assert.Equal("TestBlend", result.Blend.Name);
-        Assert.NotNull(result.Blend.Supplier);
-        Assert.Equal("User", result.Blend.Supplier.Name);
+        Assert.Single(result);
+        Assert.NotNull(result[0].Blend);
+        Assert.Equal("TestBlend", result[0].Blend.Name);
+        Assert.NotNull(result[0].Blend.Supplier);
+        Assert.Equal("User", result[0].Blend.Supplier.Name);
     }
 
     public void Dispose() => _factory.Dispose();

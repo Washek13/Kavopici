@@ -24,11 +24,11 @@ Kávopíči je webová aplikace pro kancelářské degustace kávy. Administrát
 ### Nástěnka (Dashboard)
 - **Přehled** — kliknutelné karty s nejlépe hodnocenou směsí (→ detail) a počtem vlastních hodnocení (→ statistiky).
 - **Kolečko chutí kávy** — odkaz na interaktivní kolečko chutí pro lepší orientaci v chuťových profilech.
-- Zobrazení "Kávy dne" s informacemi o směsi (po ohodnocení kliknutelné pro přechod na detail).
-- **Tajné hlasování** — detaily směsi se odhalí až po ohodnocení.
+- Zobrazení "Káv dne" — administrátor může nastavit více směsí k degustaci, každá se zobrazí jako samostatná karta.
+- **Tajné hlasování** — detaily směsi se odhalí až po ohodnocení. Poznámka administrátora je viditelná i před hodnocením, aby uživatelé rozlišili jednotlivé vzorky.
 - Hodnocení 1–5 hvězdiček, volitelný komentář a výběr chuťových poznámek (Ovocná, Ořechová, Čokoládová, Karamelová, Květinová, Kořeněná, Citrusová, Medová).
 - Úprava vlastního hodnocení.
-- **Zpětné hlasování** — pokud nebyla nastavena káva dne a uživatel neohodnotil poslední směs, na nástěnce se zobrazí karta pro zpětné hodnocení.
+- **Zpětné hlasování** — pokud nebyla nastavena káva dne a uživatel neohodnotil poslední směsi, na nástěnce se zobrazí karty pro zpětné hodnocení.
 
 ### Statistiky
 - Souhrnná tabulka směsí (průměr, počet, pražírna, dodavatel) — sortovatelná podle sloupců.
@@ -40,7 +40,7 @@ Kávopíči je webová aplikace pro kancelářské degustace kávy. Administrát
 ### Správa (admin)
 - **Uživatelé** — přidání, deaktivace, přidělení/odebrání admin práv (poslední admin nelze odebrat).
 - **Směsi** — přidání (název, pražírna, původ, stupeň pražení, dodavatel) a odebrání (soft delete).
-- **Káva dne** — výběr směsi a volitelný komentář k sezení.
+- **Káva dne** — přidání a odebrání směsí pro denní degustaci (lze vybrat více směsí), volitelná poznámka ke každé.
 - **Export CSV** — export statistik.
 
 ### Automatické aktualizace

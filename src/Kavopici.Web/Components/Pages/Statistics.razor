@@ -89,6 +89,7 @@ else if (tab == 1)
                 <tr>
                     <th>Datum</th>
                     <th>Směs</th>
+                    <th>Poznámka</th>
                     <th>Hodnocení</th>
                     <th>Komentář</th>
                 </tr>
@@ -112,6 +113,7 @@ else if (tab == 1)
                                 <em class="text-muted">Tajné hlasování</em>
                             }
                         </td>
+                        <td class="text-muted">@(item.Session.Comment ?? "—")</td>
                         <td>
                             @if (item.HasRated)
                             {
@@ -132,7 +134,7 @@ else if (tab == 1)
                     @if (!item.HasRated && isExpanded)
                     {
                         <tr>
-                            <td colspan="4" class="inline-rating-cell">
+                            <td colspan="5" class="inline-rating-cell">
                                 <div class="inline-rating-form">
                                     <RatingForm SessionId="@sessionId"
                                                 BlendId="@item.Session.BlendId"
