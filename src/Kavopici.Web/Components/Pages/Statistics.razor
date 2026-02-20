@@ -46,11 +46,11 @@ else if (tab == 0)
                 <tr>
                     <th @onclick="@(() => SortBy("BlendName"))">Směs</th>
                     <th @onclick="@(() => SortBy("AverageRating"))">Průměr</th>
+                    <th @onclick="@(() => SortBy("ControversyLevel"))">Kontroverznost</th>
                     <th @onclick="@(() => SortBy("RatingCount"))">Počet</th>
                     <th @onclick="@(() => SortBy("Roaster"))">Pražírna</th>
                     <th @onclick="@(() => SortBy("SupplierName"))">Dodavatel</th>
                     <th @onclick="@(() => SortBy("PricePerKg"))">Cena/kg</th>
-                    <th @onclick="@(() => SortBy("ControversyLevel"))">Kontroverznost</th>
                     <th @onclick="@(() => SortBy("PricePerformance"))">Cena/★</th>
                 </tr>
             </thead>
@@ -68,11 +68,11 @@ else if (tab == 0)
                                 <span> &#9733;</span>
                             }
                         </td>
+                        <td><ControversyBadge Level="stat.ControversyLevel" ShowDash="true" /></td>
                         <td>@stat.RatingCount</td>
                         <td>@stat.Roaster</td>
                         <td>@stat.SupplierName</td>
                         <td>@(stat.PricePerKg.HasValue ? $"{stat.PricePerKg.Value:F0} Kč" : "—")</td>
-                        <td><ControversyBadge Level="stat.ControversyLevel" ShowDash="true" /></td>
                         <td>@(stat.PricePerformance.HasValue ? $"{stat.PricePerformance.Value:F0} Kč/★" : "—")</td>
                     </tr>
                 }
