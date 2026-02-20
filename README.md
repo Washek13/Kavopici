@@ -39,7 +39,7 @@ Kávopíči je webová aplikace pro kancelářské degustace kávy. Administrát
 
 ### Správa (admin)
 - **Uživatelé** — přidání, deaktivace, přidělení/odebrání admin práv (poslední admin nelze odebrat).
-- **Směsi** — přidání (název, pražírna, původ, stupeň pražení, dodavatel) a odebrání (soft delete).
+- **Směsi** — přidání (název, pražírna, původ, stupeň pražení, dodavatel, hmotnost, cena), úprava existujících směsí a odebrání (soft delete). Cena za 1 kg se automaticky vypočítá z hmotnosti a ceny.
 - **Káva dne** — přidání a odebrání směsí pro denní degustaci (lze vybrat více směsí), volitelná poznámka ke každé.
 - **Export CSV** — export statistik.
 
@@ -94,6 +94,9 @@ User                    CoffeeBlend              TastingSession
 ├── IsActive            ├── Origin?              ├── IsActive
 └── CreatedAt           ├── RoastLevel (enum)    ├── Comment?
                         ├── SupplierId (FK→User) └── CreatedAt
+                        ├── WeightGrams?
+                        ├── PriceCzk?
+                        ├── PricePerKg? (calc.)
                         ├── IsActive
                         └── CreatedAt
 

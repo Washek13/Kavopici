@@ -39,6 +39,10 @@ else
                     <div class="blend-details mb-8">
                         <div class="blend-detail"><span class="label">Pražírna:</span> @BlendA.Roaster</div>
                         <div class="blend-detail"><span class="label">Dodavatel:</span> @BlendA.SupplierName</div>
+                        @if (BlendA.PricePerKg.HasValue)
+                        {
+                            <div class="blend-detail"><span class="label">Cena/kg:</span> @BlendA.PricePerKg.Value.ToString("F0") Kč</div>
+                        }
                     </div>
                     <div class="flex items-center gap-8 mb-8">
                         <span style="font-size:28px;color:var(--amber-gold);font-family:Georgia,serif;">
@@ -72,6 +76,10 @@ else
                     <div class="blend-details mb-8">
                         <div class="blend-detail"><span class="label">Pražírna:</span> @BlendB.Roaster</div>
                         <div class="blend-detail"><span class="label">Dodavatel:</span> @BlendB.SupplierName</div>
+                        @if (BlendB.PricePerKg.HasValue)
+                        {
+                            <div class="blend-detail"><span class="label">Cena/kg:</span> @BlendB.PricePerKg.Value.ToString("F0") Kč</div>
+                        }
                     </div>
                     <div class="flex items-center gap-8 mb-8">
                         <span style="font-size:28px;color:var(--amber-gold);font-family:Georgia,serif;">

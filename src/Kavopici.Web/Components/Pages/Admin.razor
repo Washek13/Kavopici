@@ -114,6 +114,14 @@
                 }
             </select>
         </div>
+        <div class="form-group">
+            <label>Hmotnost (g) — volitelné</label>
+            <input type="number" @bind="newBlendWeightGrams" placeholder="např. 250" min="1" />
+        </div>
+        <div class="form-group">
+            <label>Cena (Kč) — volitelné</label>
+            <input type="number" @bind="newBlendPriceCzk" placeholder="např. 350" min="0" step="0.01" />
+        </div>
         <button class="btn btn-primary" @onclick="AddBlend">Přidat směs</button>
     </div>
 
@@ -124,24 +132,83 @@
                 <th>Pražírna</th>
                 <th>Pražení</th>
                 <th>Dodavatel</th>
+                <th>Cena/kg</th>
                 <th>Akce</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var blend in allBlends)
             {
-                <tr>
-                    <td><strong>@blend.Name</strong></td>
-                    <td>@blend.Roaster</td>
-                    <td>@blend.RoastLevel.ToDisplayString()</td>
-                    <td>@blend.Supplier.Name</td>
-                    <td>
-                        <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;"
-                                @onclick="() => DeactivateBlend(blend)">
-                            Odebrat
-                        </button>
-                    </td>
-                </tr>
+                @if (editingBlendId == blend.Id)
+                {
+                    <tr>
+                        <td><input type="text" @bind="editBlendName" style="width:100%;" /></td>
+                        <td><input type="text" @bind="editBlendRoaster" style="width:100%;" /></td>
+                        <td>
+                            <select @bind="editBlendRoastLevel">
+                                <option value="@RoastLevel.Light">Lehké</option>
+                                <option value="@RoastLevel.MediumLight">Středně lehké</option>
+                                <option value="@RoastLevel.Medium">Střední</option>
+                                <option value="@RoastLevel.MediumDark">Středně tmavé</option>
+                                <option value="@RoastLevel.Dark">Tmavé</option>
+                            </select>
+                        </td>
+                        <td>
+                            <select @bind="editBlendSupplierId">
+                                @foreach (var u in allUsers)
+                                {
+                                    <option value="@u.Id">@u.Name</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" @bind="editBlendWeightGrams" placeholder="g" min="1" style="width:70px;" />
+                            <input type="number" @bind="editBlendPriceCzk" placeholder="Kč" min="0" step="0.01" style="width:80px;margin-top:4px;" />
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-primary" style="padding:4px 10px;font-size:12px;"
+                                        @onclick="SaveBlendEdit">
+                                    Uložit
+                                </button>
+                                <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
+                                        @onclick="CancelBlendEdit">
+                                    Zrušit
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="6">
+                            <div class="form-group" style="margin:0;">
+                                <label>Původ (volitelný)</label>
+                                <input type="text" @bind="editBlendOrigin" placeholder="Země původu..." />
+                            </div>
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    <tr>
+                        <td><strong>@blend.Name</strong></td>
+                        <td>@blend.Roaster</td>
+                        <td>@blend.RoastLevel.ToDisplayString()</td>
+                        <td>@blend.Supplier.Name</td>
+                        <td>@(blend.PricePerKg.HasValue ? $"{blend.PricePerKg.Value:F0} Kč" : "—")</td>
+                        <td>
+                            <div class="btn-group">
+                                <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
+                                        @onclick="() => StartBlendEdit(blend)">
+                                    Upravit
+                                </button>
+                                <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;"
+                                        @onclick="() => DeactivateBlend(blend)">
+                                    Odebrat
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
             }
         </tbody>
     </table>
@@ -233,6 +300,18 @@
     private string? newBlendOrigin;
     private RoastLevel newBlendRoastLevel = RoastLevel.Medium;
     private int newBlendSupplierId;
+    private int? newBlendWeightGrams;
+    private decimal? newBlendPriceCzk;
+
+    // Blend edit form
+    private int? editingBlendId;
+    private string editBlendName = "";
+    private string editBlendRoaster = "";
+    private string? editBlendOrigin;
+    private RoastLevel editBlendRoastLevel = RoastLevel.Medium;
+    private int editBlendSupplierId;
+    private int? editBlendWeightGrams;
+    private decimal? editBlendPriceCzk;
 
     // Blend of day form
     private int selectedBlendOfDayId;
@@ -326,14 +405,54 @@
             if (newBlendSupplierId == 0) { errorMessage = "Vyberte dodavatele."; return; }
 
             await BlendService.CreateBlendAsync(newBlendName.Trim(), newBlendRoaster.Trim(),
-                newBlendOrigin?.Trim(), newBlendRoastLevel, newBlendSupplierId);
+                newBlendOrigin?.Trim(), newBlendRoastLevel, newBlendSupplierId,
+                newBlendWeightGrams, newBlendPriceCzk);
 
             newBlendName = "";
             newBlendRoaster = "";
             newBlendOrigin = null;
             newBlendRoastLevel = RoastLevel.Medium;
             newBlendSupplierId = 0;
+            newBlendWeightGrams = null;
+            newBlendPriceCzk = null;
             statusMessage = "Směs byla přidána.";
+            await LoadBlends();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private void StartBlendEdit(CoffeeBlend blend)
+    {
+        editingBlendId = blend.Id;
+        editBlendName = blend.Name;
+        editBlendRoaster = blend.Roaster;
+        editBlendOrigin = blend.Origin;
+        editBlendRoastLevel = blend.RoastLevel;
+        editBlendSupplierId = blend.SupplierId;
+        editBlendWeightGrams = blend.WeightGrams;
+        editBlendPriceCzk = blend.PriceCzk;
+    }
+
+    private void CancelBlendEdit()
+    {
+        editingBlendId = null;
+    }
+
+    private async Task SaveBlendEdit()
+    {
+        try
+        {
+            errorMessage = null;
+            if (editingBlendId == null) return;
+            if (string.IsNullOrWhiteSpace(editBlendName)) { errorMessage = "Zadejte název směsi."; return; }
+            if (string.IsNullOrWhiteSpace(editBlendRoaster)) { errorMessage = "Zadejte název pražírny."; return; }
+
+            await BlendService.UpdateBlendAsync(editingBlendId.Value, editBlendName.Trim(), editBlendRoaster.Trim(),
+                editBlendOrigin?.Trim(), editBlendRoastLevel, editBlendSupplierId,
+                editBlendWeightGrams, editBlendPriceCzk);
+
+            editingBlendId = null;
+            statusMessage = "Směs byla aktualizována.";
             await LoadBlends();
         }
         catch (Exception ex) { errorMessage = ex.Message; }

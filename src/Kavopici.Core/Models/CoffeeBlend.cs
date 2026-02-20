@@ -10,6 +10,9 @@ public class CoffeeBlend
     public string? Origin { get; set; }
     public RoastLevel RoastLevel { get; set; }
     public int SupplierId { get; set; }
+    public int? WeightGrams { get; set; }
+    public decimal? PriceCzk { get; set; }
+    public decimal? PricePerKg { get; set; }
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

@@ -8,6 +8,10 @@
         }
         <div class="blend-detail"><span class="label">Pražení:</span> @Blend.RoastLevel.ToDisplayString()</div>
         <div class="blend-detail"><span class="label">Dodavatel:</span> @Blend.Supplier.Name</div>
+        @if (Blend.PricePerKg.HasValue)
+        {
+            <div class="blend-detail"><span class="label">Cena/kg:</span> @Blend.PricePerKg.Value.ToString("F0") Kč</div>
+        }
     </div>
     @if (!string.IsNullOrEmpty(SessionComment))
     {

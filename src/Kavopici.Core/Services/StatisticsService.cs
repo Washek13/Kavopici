@@ -42,7 +42,8 @@ public class StatisticsService : IStatisticsService
                 SupplierName: b.Supplier.Name,
                 AverageRating: ratings.Count > 0 ? ratings.Average(r => r.Stars) : 0,
                 RatingCount: ratings.Count,
-                Distribution: distribution
+                Distribution: distribution,
+                PricePerKg: b.PricePerKg
             );
         })
         .OrderByDescending(s => s.AverageRating)

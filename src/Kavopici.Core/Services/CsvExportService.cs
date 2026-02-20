@@ -24,7 +24,7 @@ public class CsvExportService : ICsvExportService
         var stats = await _statisticsService.GetBlendStatisticsAsync();
         var sb = new StringBuilder();
 
-        sb.AppendLine("Název směsi;Pražírna;Původ;Stupeň pražení;Dodavatel;Průměrné hodnocení;Počet hodnocení;1★;2★;3★;4★;5★");
+        sb.AppendLine("Název směsi;Pražírna;Původ;Stupeň pražení;Dodavatel;Cena/kg (Kč);Průměrné hodnocení;Počet hodnocení;1★;2★;3★;4★;5★");
 
         foreach (var s in stats)
         {
@@ -36,6 +36,7 @@ public class CsvExportService : ICsvExportService
                 Escape(s.Origin ?? ""),
                 Escape(roastLevel),
                 Escape(s.SupplierName),
+                s.PricePerKg?.ToString("F2") ?? "",
                 s.AverageRating.ToString("F2"),
                 s.RatingCount.ToString(),
                 s.Distribution[0].ToString(),

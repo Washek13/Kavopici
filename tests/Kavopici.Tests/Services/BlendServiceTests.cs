@@ -171,5 +171,108 @@ public class BlendServiceTests : IDisposable
         Assert.Null(result);
     }
 
+    [Fact]
+    public async Task CreateBlendAsync_WithPriceAndWeight_CalculatesPricePerKg()
+    {
+        var supplierId = await CreateSupplierAsync();
+
+        var blend = await _blendService.CreateBlendAsync(
+            "Test", "Roaster", null, RoastLevel.Medium, supplierId, weightGrams: 250, priceCzk: 350m);
+
+        Assert.Equal(250, blend.WeightGrams);
+        Assert.Equal(350m, blend.PriceCzk);
+        Assert.Equal(1400m, blend.PricePerKg);
+    }
+
+    [Fact]
+    public async Task CreateBlendAsync_WithoutPrice_PricePerKgIsNull()
+    {
+        var supplierId = await CreateSupplierAsync();
+
+        var blend = await _blendService.CreateBlendAsync(
+            "Test", "Roaster", null, RoastLevel.Medium, supplierId);
+
+        Assert.Null(blend.WeightGrams);
+        Assert.Null(blend.PriceCzk);
+        Assert.Null(blend.PricePerKg);
+    }
+
+    [Fact]
+    public async Task CreateBlendAsync_ZeroWeight_PricePerKgIsNull()
+    {
+        var supplierId = await CreateSupplierAsync();
+
+        var blend = await _blendService.CreateBlendAsync(
+            "Test", "Roaster", null, RoastLevel.Medium, supplierId, weightGrams: 0, priceCzk: 350m);
+
+        Assert.Null(blend.PricePerKg);
+    }
+
+    [Fact]
+    public async Task UpdateBlendAsync_UpdatesAllFields()
+    {
+        var supplier1Id = await CreateSupplierAsync("Supplier1");
+        var supplier2Id = await CreateSupplierAsync("Supplier2");
+        var blend = await _blendService.CreateBlendAsync(
+            "Original", "OldRoaster", "Brazil", RoastLevel.Light, supplier1Id);
+
+        var updated = await _blendService.UpdateBlendAsync(blend.Id,
+            "Updated", "NewRoaster", "Ethiopia", RoastLevel.Dark, supplier2Id, 500, 600m);
+
+        Assert.Equal("Updated", updated.Name);
+        Assert.Equal("NewRoaster", updated.Roaster);
+        Assert.Equal("Ethiopia", updated.Origin);
+        Assert.Equal(RoastLevel.Dark, updated.RoastLevel);
+        Assert.Equal(supplier2Id, updated.SupplierId);
+        Assert.Equal(500, updated.WeightGrams);
+        Assert.Equal(600m, updated.PriceCzk);
+        Assert.Equal(1200m, updated.PricePerKg);
+        Assert.NotNull(updated.Supplier);
+        Assert.Equal("Supplier2", updated.Supplier.Name);
+    }
+
+    [Fact]
+    public async Task UpdateBlendAsync_EmptyName_Throws()
+    {
+        var supplierId = await CreateSupplierAsync();
+        var blend = await _blendService.CreateBlendAsync(
+            "Test", "Roaster", null, RoastLevel.Medium, supplierId);
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _blendService.UpdateBlendAsync(blend.Id, "", "Roaster", null, RoastLevel.Medium, supplierId, null, null));
+    }
+
+    [Fact]
+    public async Task UpdateBlendAsync_EmptyRoaster_Throws()
+    {
+        var supplierId = await CreateSupplierAsync();
+        var blend = await _blendService.CreateBlendAsync(
+            "Test", "Roaster", null, RoastLevel.Medium, supplierId);
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => _blendService.UpdateBlendAsync(blend.Id, "Test", "", null, RoastLevel.Medium, supplierId, null, null));
+    }
+
+    [Fact]
+    public async Task UpdateBlendAsync_NonExistentBlend_Throws()
+    {
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _blendService.UpdateBlendAsync(9999, "Test", "Roaster", null, RoastLevel.Medium, 1, null, null));
+    }
+
+    [Fact]
+    public async Task UpdateBlendAsync_RecalculatesPricePerKg()
+    {
+        var supplierId = await CreateSupplierAsync();
+        var blend = await _blendService.CreateBlendAsync(
+            "Test", "Roaster", null, RoastLevel.Medium, supplierId, weightGrams: 250, priceCzk: 350m);
+        Assert.Equal(1400m, blend.PricePerKg);
+
+        var updated = await _blendService.UpdateBlendAsync(blend.Id,
+            "Test", "Roaster", null, RoastLevel.Medium, supplierId, 1000, 500m);
+
+        Assert.Equal(500m, updated.PricePerKg);
+    }
+
     public void Dispose() => _factory.Dispose();
 }
