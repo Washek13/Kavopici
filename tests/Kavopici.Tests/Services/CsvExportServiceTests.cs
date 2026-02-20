@@ -64,7 +64,7 @@ public class CsvExportServiceTests : IDisposable
         var user = await _userService.CreateUserAsync("Admin", isAdmin: true);
         var blend = await _blendService.CreateBlendAsync(
             "Test Blend", "Roaster", "Ethiopia", RoastLevel.Medium, user.Id);
-        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
         await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session.Id, 4, null);
 
         var bytes = await _csvExportService.GenerateCsvBytesAsync();
@@ -161,7 +161,7 @@ public class CsvExportServiceTests : IDisposable
         var user1 = await _userService.CreateUserAsync("User1", isAdmin: true);
         var user2 = await _userService.CreateUserAsync("User2");
         var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user1.Id);
-        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
 
         await _ratingService.SubmitRatingAsync(blend.Id, user1.Id, session.Id, 4, null);
         await _ratingService.SubmitRatingAsync(blend.Id, user2.Id, session.Id, 5, null);

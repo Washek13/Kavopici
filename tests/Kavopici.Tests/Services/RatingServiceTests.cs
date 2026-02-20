@@ -28,7 +28,7 @@ public class RatingServiceTests : IDisposable
         var user = await _userService.CreateUserAsync("Test User", isAdmin: true);
         var blend = await _blendService.CreateBlendAsync("Test Blend", "Test Roaster", "Origin",
             RoastLevel.Medium, user.Id);
-        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
         return (user, session);
     }
 
