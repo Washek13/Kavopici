@@ -43,6 +43,10 @@ else
                         {
                             <div class="blend-detail"><span class="label">Cena/kg:</span> @BlendA.PricePerKg.Value.ToString("F0") Kč</div>
                         }
+                        @if (BlendA.PricePerformance.HasValue)
+                        {
+                            <div class="blend-detail"><span class="label">Cena/★:</span> @BlendA.PricePerformance.Value.ToString("F0") Kč</div>
+                        }
                     </div>
                     <div class="flex items-center gap-8 mb-8">
                         <span style="font-size:28px;color:var(--amber-gold);font-family:Georgia,serif;">
@@ -50,6 +54,7 @@ else
                         </span>
                         @if (BlendA.RatingCount > 0) { <span style="color:var(--amber-gold);">&#9733;</span> }
                         <span class="text-muted">(@BlendA.RatingCount)</span>
+                        <ControversyBadge Level="BlendA.ControversyLevel" FontSize="13" />
                     </div>
                     @RenderDistribution(BlendA)
                 </div>
@@ -80,6 +85,10 @@ else
                         {
                             <div class="blend-detail"><span class="label">Cena/kg:</span> @BlendB.PricePerKg.Value.ToString("F0") Kč</div>
                         }
+                        @if (BlendB.PricePerformance.HasValue)
+                        {
+                            <div class="blend-detail"><span class="label">Cena/★:</span> @BlendB.PricePerformance.Value.ToString("F0") Kč</div>
+                        }
                     </div>
                     <div class="flex items-center gap-8 mb-8">
                         <span style="font-size:28px;color:var(--amber-gold);font-family:Georgia,serif;">
@@ -87,6 +96,7 @@ else
                         </span>
                         @if (BlendB.RatingCount > 0) { <span style="color:var(--amber-gold);">&#9733;</span> }
                         <span class="text-muted">(@BlendB.RatingCount)</span>
+                        <ControversyBadge Level="BlendB.ControversyLevel" FontSize="13" />
                     </div>
                     @RenderDistribution(BlendB)
                 </div>

@@ -33,6 +33,20 @@ public class StatisticsService : IStatisticsService
                     distribution[r.Stars - 1]++;
             }
 
+            var averageRating = ratings.Count > 0 ? ratings.Average(r => r.Stars) : 0.0;
+
+            double? controversyLevel = null;
+            if (ratings.Count >= 2)
+            {
+                controversyLevel = ratings.Average(r => (r.Stars - averageRating) * (r.Stars - averageRating));
+            }
+
+            decimal? pricePerformance = null;
+            if (b.PricePerKg.HasValue && averageRating > 0)
+            {
+                pricePerformance = Math.Round(b.PricePerKg.Value / (decimal)averageRating, 0);
+            }
+
             return new BlendStatistics(
                 BlendId: b.Id,
                 BlendName: b.Name,
@@ -40,10 +54,12 @@ public class StatisticsService : IStatisticsService
                 Origin: b.Origin,
                 RoastLevel: b.RoastLevel,
                 SupplierName: b.Supplier.Name,
-                AverageRating: ratings.Count > 0 ? ratings.Average(r => r.Stars) : 0,
+                AverageRating: averageRating,
                 RatingCount: ratings.Count,
                 Distribution: distribution,
-                PricePerKg: b.PricePerKg
+                PricePerKg: b.PricePerKg,
+                ControversyLevel: controversyLevel,
+                PricePerformance: pricePerformance
             );
         })
         .OrderByDescending(s => s.AverageRating)

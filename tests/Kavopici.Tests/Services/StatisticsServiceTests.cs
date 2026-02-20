@@ -145,6 +145,139 @@ public class StatisticsServiceTests : IDisposable
         Assert.Equal(new[] { 0, 0, 3, 0, 0 }, stats[0].Distribution);
     }
 
+    // --- ControversyLevel tests ---
+
+    [Fact]
+    public async Task GetBlendStatisticsAsync_NoRatings_ControversyLevelNull()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        Assert.Single(stats);
+        Assert.Null(stats[0].ControversyLevel);
+    }
+
+    [Fact]
+    public async Task GetBlendStatisticsAsync_SingleRating_ControversyLevelNull()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session.Id, 4, null);
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        Assert.Single(stats);
+        Assert.Null(stats[0].ControversyLevel);
+    }
+
+    [Fact]
+    public async Task GetBlendStatisticsAsync_AllSameRatings_ControversyLevelZero()
+    {
+        var user1 = await _userService.CreateUserAsync("User1", isAdmin: true);
+        var user2 = await _userService.CreateUserAsync("User2");
+        var user3 = await _userService.CreateUserAsync("User3");
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user1.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await _ratingService.SubmitRatingAsync(blend.Id, user1.Id, session.Id, 3, null);
+        await _ratingService.SubmitRatingAsync(blend.Id, user2.Id, session.Id, 3, null);
+        await _ratingService.SubmitRatingAsync(blend.Id, user3.Id, session.Id, 3, null);
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        Assert.Single(stats);
+        Assert.NotNull(stats[0].ControversyLevel);
+        Assert.Equal(0.0, stats[0].ControversyLevel!.Value, precision: 5);
+    }
+
+    [Fact]
+    public async Task GetBlendStatisticsAsync_MixedRatings_ControversyLevelCorrect()
+    {
+        var user1 = await _userService.CreateUserAsync("User1", isAdmin: true);
+        var user2 = await _userService.CreateUserAsync("User2");
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user1.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await _ratingService.SubmitRatingAsync(blend.Id, user1.Id, session.Id, 4, null);
+        await _ratingService.SubmitRatingAsync(blend.Id, user2.Id, session.Id, 2, null);
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        // Mean = 3.0, Variance = ((4-3)^2 + (2-3)^2) / 2 = 1.0
+        Assert.Single(stats);
+        Assert.NotNull(stats[0].ControversyLevel);
+        Assert.Equal(1.0, stats[0].ControversyLevel!.Value, precision: 5);
+    }
+
+    [Fact]
+    public async Task GetBlendStatisticsAsync_PolarizedRatings_HighControversyLevel()
+    {
+        var user1 = await _userService.CreateUserAsync("User1", isAdmin: true);
+        var user2 = await _userService.CreateUserAsync("User2");
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user1.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await _ratingService.SubmitRatingAsync(blend.Id, user1.Id, session.Id, 1, null);
+        await _ratingService.SubmitRatingAsync(blend.Id, user2.Id, session.Id, 5, null);
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        // Mean = 3.0, Variance = ((1-3)^2 + (5-3)^2) / 2 = 4.0
+        Assert.Single(stats);
+        Assert.NotNull(stats[0].ControversyLevel);
+        Assert.Equal(4.0, stats[0].ControversyLevel!.Value, precision: 5);
+    }
+
+    // --- PricePerformance tests ---
+
+    [Fact]
+    public async Task GetBlendStatisticsAsync_NoPricePerKg_PricePerformanceNull()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session.Id, 4, null);
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        Assert.Single(stats);
+        Assert.Null(stats[0].PricePerformance);
+    }
+
+    [Fact]
+    public async Task GetBlendStatisticsAsync_NoRatings_PricePerformanceNull()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id, 250, 200m);
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        Assert.Single(stats);
+        Assert.Null(stats[0].PricePerformance);
+    }
+
+    [Fact]
+    public async Task GetBlendStatisticsAsync_WithPriceAndRatings_PricePerformanceCorrect()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        // 250g at 200 CZK = 800 CZK/kg
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id, 250, 200m);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session.Id, 4, null);
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        // PricePerKg = 800, AverageRating = 4.0, PricePerformance = 800/4 = 200
+        Assert.Single(stats);
+        Assert.NotNull(stats[0].PricePerformance);
+        Assert.Equal(200m, stats[0].PricePerformance!.Value);
+    }
+
+    // --- GetUserRatingHistoryAsync tests ---
+
     [Fact]
     public async Task GetUserRatingHistoryAsync_ReturnsWithBlendAndSession()
     {

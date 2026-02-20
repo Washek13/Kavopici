@@ -24,7 +24,7 @@ public class CsvExportService : ICsvExportService
         var stats = await _statisticsService.GetBlendStatisticsAsync();
         var sb = new StringBuilder();
 
-        sb.AppendLine("Název směsi;Pražírna;Původ;Stupeň pražení;Dodavatel;Cena/kg (Kč);Průměrné hodnocení;Počet hodnocení;1★;2★;3★;4★;5★");
+        sb.AppendLine("Název směsi;Pražírna;Původ;Stupeň pražení;Dodavatel;Cena/kg (Kč);Průměrné hodnocení;Počet hodnocení;1★;2★;3★;4★;5★;Kontroverznost;Cena/★");
 
         foreach (var s in stats)
         {
@@ -43,7 +43,9 @@ public class CsvExportService : ICsvExportService
                 s.Distribution[1].ToString(),
                 s.Distribution[2].ToString(),
                 s.Distribution[3].ToString(),
-                s.Distribution[4].ToString()
+                s.Distribution[4].ToString(),
+                s.ControversyLevel?.ToString("F2") ?? "",
+                s.PricePerformance?.ToString("F0") ?? ""
             ));
         }
 
