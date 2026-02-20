@@ -4,8 +4,9 @@ namespace Kavopici.Services;
 
 public interface ISessionService
 {
-    Task<TastingSession?> GetTodaySessionAsync();
-    Task<TastingSession?> GetMostRecentUnratedSessionAsync(int userId);
-    Task<TastingSession> SetBlendOfTheDayAsync(int blendId, string? comment = null);
+    Task<List<TastingSession>> GetTodaySessionsAsync();
+    Task<List<TastingSession>> GetMostRecentUnratedSessionsAsync(int userId);
+    Task<TastingSession> AddBlendOfTheDayAsync(int blendId, string? comment = null);
+    Task RemoveBlendOfTheDayAsync(int sessionId);
     Task<List<TastingSession>> GetSessionHistoryAsync();
 }

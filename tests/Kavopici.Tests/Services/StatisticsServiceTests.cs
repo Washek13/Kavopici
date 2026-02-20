@@ -38,7 +38,7 @@ public class StatisticsServiceTests : IDisposable
         var user1 = await _userService.CreateUserAsync("User1", isAdmin: true);
         var user2 = await _userService.CreateUserAsync("User2");
         var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user1.Id);
-        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
 
         await _ratingService.SubmitRatingAsync(blend.Id, user1.Id, session.Id, 4, null);
         await _ratingService.SubmitRatingAsync(blend.Id, user2.Id, session.Id, 2, null);
@@ -87,10 +87,10 @@ public class StatisticsServiceTests : IDisposable
         var blendA = await _blendService.CreateBlendAsync("BlendA", "Roaster", null, RoastLevel.Medium, user.Id);
         var blendB = await _blendService.CreateBlendAsync("BlendB", "Roaster", null, RoastLevel.Dark, user.Id);
 
-        var session = await _sessionService.SetBlendOfTheDayAsync(blendA.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blendA.Id);
         await _ratingService.SubmitRatingAsync(blendA.Id, user.Id, session.Id, 2, null);
 
-        var session2 = await _sessionService.SetBlendOfTheDayAsync(blendB.Id);
+        var session2 = await _sessionService.AddBlendOfTheDayAsync(blendB.Id);
         await _ratingService.SubmitRatingAsync(blendB.Id, user.Id, session2.Id, 5, null);
 
         var stats = await _statisticsService.GetBlendStatisticsAsync();
@@ -106,7 +106,7 @@ public class StatisticsServiceTests : IDisposable
         var user = await _userService.CreateUserAsync("Jan", isAdmin: true);
         var blend = await _blendService.CreateBlendAsync(
             "Ethiopia Yirgacheffe", "Doubleshot", "Ethiopia", RoastLevel.Light, user.Id);
-        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
         await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session.Id, 4, null);
 
         var stats = await _statisticsService.GetBlendStatisticsAsync();
@@ -131,7 +131,7 @@ public class StatisticsServiceTests : IDisposable
         var user2 = await _userService.CreateUserAsync("User2");
         var user3 = await _userService.CreateUserAsync("User3");
         var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user1.Id);
-        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
 
         await _ratingService.SubmitRatingAsync(blend.Id, user1.Id, session.Id, 3, null);
         await _ratingService.SubmitRatingAsync(blend.Id, user2.Id, session.Id, 3, null);
@@ -150,7 +150,7 @@ public class StatisticsServiceTests : IDisposable
     {
         var user = await _userService.CreateUserAsync("User", isAdmin: true);
         var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
-        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
         await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session.Id, 4, null);
 
         var history = await _statisticsService.GetUserRatingHistoryAsync(user.Id);
@@ -176,7 +176,7 @@ public class StatisticsServiceTests : IDisposable
         var user1 = await _userService.CreateUserAsync("User1", isAdmin: true);
         var user2 = await _userService.CreateUserAsync("User2");
         var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user1.Id);
-        var session = await _sessionService.SetBlendOfTheDayAsync(blend.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
 
         await _ratingService.SubmitRatingAsync(blend.Id, user1.Id, session.Id, 4, null);
         await _ratingService.SubmitRatingAsync(blend.Id, user2.Id, session.Id, 3, null);
