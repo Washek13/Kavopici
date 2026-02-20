@@ -32,6 +32,8 @@ public class KavopiciDbContext : DbContext
             e.Property(b => b.Roaster).IsRequired().HasMaxLength(200);
             e.Property(b => b.Origin).HasMaxLength(200);
             e.Property(b => b.RoastLevel).HasConversion<int>();
+            e.Property(b => b.PriceCzk).HasColumnType("decimal(10,2)");
+            e.Property(b => b.PricePerKg).HasColumnType("decimal(10,2)");
             e.HasOne(b => b.Supplier)
                 .WithMany(u => u.SuppliedBlends)
                 .HasForeignKey(b => b.SupplierId)

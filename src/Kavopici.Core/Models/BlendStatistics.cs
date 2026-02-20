@@ -11,5 +11,6 @@ public record BlendStatistics(
     string SupplierName,
     double AverageRating,
     int RatingCount,
-    int[] Distribution // index 0-4 for stars 1-5
+    int[] Distribution, // index 0-4 for stars 1-5
+    decimal? PricePerKg
 );

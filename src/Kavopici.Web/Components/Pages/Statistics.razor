@@ -49,6 +49,7 @@ else if (tab == 0)
                     <th @onclick="@(() => SortBy("RatingCount"))">Počet</th>
                     <th @onclick="@(() => SortBy("Roaster"))">Pražírna</th>
                     <th @onclick="@(() => SortBy("SupplierName"))">Dodavatel</th>
+                    <th @onclick="@(() => SortBy("PricePerKg"))">Cena/kg</th>
                 </tr>
             </thead>
             <tbody>
@@ -68,6 +69,7 @@ else if (tab == 0)
                         <td>@stat.RatingCount</td>
                         <td>@stat.Roaster</td>
                         <td>@stat.SupplierName</td>
+                        <td>@(stat.PricePerKg.HasValue ? $"{stat.PricePerKg.Value:F0} Kč" : "—")</td>
                     </tr>
                 }
             </tbody>
@@ -247,6 +249,7 @@ else if (tab == 2)
             "RatingCount" => blendStats.OrderByDescending(s => s.RatingCount).ToList(),
             "Roaster" => blendStats.OrderBy(s => s.Roaster).ToList(),
             "SupplierName" => blendStats.OrderBy(s => s.SupplierName).ToList(),
+            "PricePerKg" => blendStats.OrderByDescending(s => s.PricePerKg ?? 0).ToList(),
             _ => blendStats
         };
     }

@@ -80,13 +80,14 @@ public class CsvExportServiceTests : IDisposable
         Assert.Equal("Ethiopia", columns[2]);
         Assert.Equal("Střední", columns[3]);
         Assert.Equal("Admin", columns[4]);
-        Assert.Equal("4.00", columns[5]);
-        Assert.Equal("1", columns[6]);
-        Assert.Equal("0", columns[7]);  // 1★
-        Assert.Equal("0", columns[8]);  // 2★
-        Assert.Equal("0", columns[9]);  // 3★
-        Assert.Equal("1", columns[10]); // 4★
-        Assert.Equal("0", columns[11]); // 5★
+        Assert.Equal("", columns[5]);   // Cena/kg — no price set
+        Assert.Equal("4.00", columns[6]);
+        Assert.Equal("1", columns[7]);
+        Assert.Equal("0", columns[8]);  // 1★
+        Assert.Equal("0", columns[9]);  // 2★
+        Assert.Equal("0", columns[10]); // 3★
+        Assert.Equal("1", columns[11]); // 4★
+        Assert.Equal("0", columns[12]); // 5★
     }
 
     [Fact]
@@ -172,7 +173,7 @@ public class CsvExportServiceTests : IDisposable
             .Select(l => l.TrimEnd('\r')).ToArray();
 
         var columns = lines[1].Split(';');
-        Assert.Equal("4.50", columns[5]);
+        Assert.Equal("4.50", columns[6]);
     }
 
     public void Dispose() => _factory.Dispose();
