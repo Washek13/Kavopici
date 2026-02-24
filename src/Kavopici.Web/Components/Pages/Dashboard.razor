@@ -74,42 +74,6 @@ else if (todaySessions.Count > 0)
         </div>
     }
 }
-else if (missedSessions.Count > 0)
-{
-    @foreach (var session in missedSessions)
-    {
-        var sessionId = session.Id;
-        var isRevealed = revealedMissedSessionIds.Contains(sessionId);
-
-        <div class="card">
-            <h2>Zmeškané hodnocení — @session.Date.ToString("d. M. yyyy")</h2>
-
-            @if (!isRevealed)
-            {
-                <div class="secret-overlay">
-                    <h3>Tajné hlasování</h3>
-                    @if (!string.IsNullOrEmpty(session.Comment))
-                    {
-                        <p style="font-size:1.1em;font-weight:600;margin:8px 0;">@session.Comment</p>
-                    }
-                    <p>Ohodnoťte kávu před odhalením detailů.</p>
-                </div>
-            }
-            else
-            {
-                <div class="blend-card-wrapper clickable" @onclick="() => GoToBlend(session.BlendId)">
-                    <BlendCard Blend="session.Blend" SessionComment="@session.Comment" />
-                </div>
-            }
-
-            <div class="mt-16">
-                <RatingForm SessionId="@sessionId"
-                            BlendId="@session.BlendId"
-                            OnRatingSubmitted="() => OnMissedRatingSubmitted(sessionId)" />
-            </div>
-        </div>
-    }
-}
 else
 {
     <div class="panel text-center">
@@ -131,10 +95,8 @@ else
 
 @code {
     private List<TastingSession> todaySessions = new();
-    private List<TastingSession> missedSessions = new();
     private Dictionary<int, Rating?> existingRatings = new();
     private HashSet<int> revealedSessionIds = new();
-    private HashSet<int> revealedMissedSessionIds = new();
     private bool isLoading = true;
 
     private string? topBlendName;
@@ -178,11 +140,6 @@ else
                     }
                 }
             }
-            else if (todaySessions.Count == 0 && AppState.CurrentUser != null)
-            {
-                missedSessions = await SessionService.GetMostRecentUnratedSessionsAsync(AppState.CurrentUser.Id);
-            }
-
             // Highlights
             var stats = await StatisticsService.GetBlendStatisticsAsync();
             if (stats.Count > 0)
@@ -213,11 +170,6 @@ else
     private void OnTodayRatingSubmitted(int sessionId)
     {
         revealedSessionIds.Add(sessionId);
-    }
-
-    private void OnMissedRatingSubmitted(int sessionId)
-    {
-        revealedMissedSessionIds.Add(sessionId);
     }
 
     private void GoToTopBlend() => Nav.NavigateTo($"/blend/{topBlendId}");

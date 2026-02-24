@@ -28,14 +28,14 @@ Kávopíči je webová aplikace pro kancelářské degustace kávy. Administrát
 - **Tajné hlasování** — detaily směsi se odhalí až po ohodnocení. Poznámka administrátora je viditelná i před hodnocením, aby uživatelé rozlišili jednotlivé vzorky.
 - Hodnocení 1–5 hvězdiček, volitelný komentář a výběr chuťových poznámek (Ovocná, Ořechová, Čokoládová, Karamelová, Květinová, Kořeněná, Citrusová, Medová).
 - Úprava vlastního hodnocení.
-- **Zpětné hlasování** — pokud nebyla nastavena káva dne a uživatel neohodnotil poslední směsi, na nástěnce se zobrazí karty pro zpětné hodnocení.
+- **Zpětné hlasování** — zmeškané směsi lze zpětně ohodnotit v záložce „Moje hodnocení" ve Statistikách.
 
 ### Statistiky
 - Souhrnná tabulka směsí (průměr, **kontroverznost**, počet, pražírna, dodavatel, cena/kg, **cena/★**) — sortovatelná podle sloupců.
 - **Kontroverznost** — úroveň shody mezi hodnotiteli vypočtená z rozptylu hodnocení (Shoda / Mírný rozpor / Rozpor).
 - **Cena za hvězdičku** — poměr ceny za kilogram a průměrného hodnocení; nižší hodnota = lepší hodnota za peníze.
 - **Detail směsi** — rozložení hvězdiček, jednotlivá hodnocení s komentáři a poznámkami.
-- **Moje hodnocení** — historie všech degustací s možností zpětného ohodnocení zmeškaných směsí a **úpravy existujících hodnocení** (tajné hlasování platí i zpětně).
+- **Moje hodnocení** — historie všech degustací s možností zpětného ohodnocení zmeškaných směsí a **úpravy existujících hodnocení**.
 - **Porovnání směsí** — dvě směsi vedle sebe s rozložením hodnocení.
 - **Export CSV** — stažení dat do souboru (včetně kontroverznosti a ceny/★).
 

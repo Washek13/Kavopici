@@ -103,7 +103,7 @@ else if (tab == 1)
                 @foreach (var item in userSessions)
                 {
                     var sessionId = item.Session.Id;
-                    var isRevealed = item.HasRated || revealedSessions.Contains(sessionId);
+                    var isRevealed = item.HasRated || revealedSessions.Contains(sessionId) || item.Session.Date != DateOnly.FromDateTime(DateTime.Today);
                     var isExpanded = expandedSessions.Contains(sessionId);
 
                     <tr>
