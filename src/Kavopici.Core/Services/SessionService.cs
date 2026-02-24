@@ -29,31 +29,6 @@ public class SessionService : ISessionService
             .ToListAsync();
     }
 
-    public async Task<List<TastingSession>> GetMostRecentUnratedSessionsAsync(int userId)
-    {
-        await using var context = await _contextFactory.CreateDbContextAsync();
-
-        // Find the most recent past date that has at least one unrated active session
-        var mostRecentDate = await context.TastingSessions
-            .Where(s => s.Date < Today && s.IsActive)
-            .Where(s => !context.Ratings.Any(r => r.SessionId == s.Id && r.UserId == userId))
-            .OrderByDescending(s => s.Date)
-            .Select(s => (DateOnly?)s.Date)
-            .FirstOrDefaultAsync();
-
-        if (mostRecentDate == null)
-            return new List<TastingSession>();
-
-        // Return all unrated sessions from that date
-        return await context.TastingSessions
-            .Where(s => s.Date == mostRecentDate && s.IsActive)
-            .Where(s => !context.Ratings.Any(r => r.SessionId == s.Id && r.UserId == userId))
-            .Include(s => s.Blend)
-                .ThenInclude(b => b.Supplier)
-            .OrderBy(s => s.CreatedAt)
-            .ToListAsync();
-    }
-
     public async Task<TastingSession> AddBlendOfTheDayAsync(int blendId, string? comment = null)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
