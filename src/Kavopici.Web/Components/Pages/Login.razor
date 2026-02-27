@@ -4,39 +4,52 @@
 @inject IDbContextFactory<KavopiciDbContext> DbContextFactory
 @inject AppState AppState
 @inject NavigationManager Nav
+@inject IJSRuntime JS
+@inject IStringLocalizer<SharedResources> L
 
 <div class="login-container">
     <img src="icon-80.png" alt="Kávopíči" class="login-icon" />
     <div class="login-title">KÁVOPÍČI</div>
-    <div class="login-subtitle">Kávový deník vaší kanceláře</div>
-
+    <div class="login-subtitle">@L["Login_Subtitle"]</div>
     @if (errorMessage != null)
     {
         <div class="msg-error" style="max-width:500px;width:100%;">@errorMessage</div>
     }
 
-    @if (isLoading)
+    @if (showLanguagePicker)
     {
-        <div class="loading">Načítání...</div>
+        <div class="card" style="max-width:400px;width:100%;">
+            <h2>@L["Lang_SelectLanguage"]</h2>
+            <div class="btn-group" style="flex-direction:column;">
+                <button class="btn btn-primary w-full" @onclick='() => SelectLanguage("cs")'>🇨🇿 @L["Lang_Czech"]</button>
+                <button class="btn btn-outline w-full" @onclick='() => SelectLanguage("sk")'>🇸🇰 @L["Lang_Slovak"]</button>
+                <button class="btn btn-outline w-full" @onclick='() => SelectLanguage("en")'>🇬🇧 @L["Lang_English"]</button>
+                <button class="btn btn-outline w-full" @onclick='() => SelectLanguage("de")'>🇩🇪 @L["Lang_German"]</button>
+            </div>
+        </div>
+    }
+    else if (isLoading)
+    {
+        <div class="loading">@L["Msg_Loading"]</div>
     }
     else if (isDatabaseNotSelected)
     {
         <div class="card" style="max-width:400px;width:100%;">
-            <h2>Vyberte databázi</h2>
-            <p class="mb-16">Vytvořte novou databázi nebo otevřete existující:</p>
+            <h2>@L["Heading_SelectDatabase"]</h2>
+            <p class="mb-16">@L["Login_DatabaseInstruction"]</p>
             <div class="form-group">
-                <label>Cesta k databázi</label>
+                <label>@L["Label_DatabasePath"]</label>
                 <input type="text" @bind="databasePathInput" @bind:event="oninput"
                        placeholder="@AppSettingsService.GetPlatformPlaceholderPath()" />
             </div>
             <div class="btn-group" style="flex-direction:column;">
                 <button class="btn btn-accent w-full" @onclick="CreateNewDatabase"
                         disabled="@string.IsNullOrWhiteSpace(databasePathInput)">
-                    Vytvořit novou databázi
+                    @L["Btn_CreateNewDatabase"]
                 </button>
                 <button class="btn btn-primary w-full" @onclick="OpenExistingDatabase"
                         disabled="@string.IsNullOrWhiteSpace(databasePathInput)">
-                    Otevřít existující databázi
+                    @L["Btn_OpenExistingDatabase"]
                 </button>
             </div>
         </div>
@@ -44,16 +57,16 @@
     else if (isFirstRun)
     {
         <div class="card" style="max-width:400px;width:100%;">
-            <h2>Vítejte!</h2>
-            <p class="mb-16">Vytvořte prvního administrátora pro zahájení.</p>
+            <h2>@L["Heading_Welcome"]</h2>
+            <p class="mb-16">@L["Login_FirstAdminInstruction"]</p>
             <div class="form-group">
-                <label>Jméno administrátora</label>
+                <label>@L["Label_AdminName"]</label>
                 <input type="text" @bind="newAdminName" @bind:event="oninput"
-                       @onkeydown="HandleAdminKeyDown" placeholder="Zadejte jméno..." />
+                       @onkeydown="HandleAdminKeyDown" placeholder="@L["Placeholder_EnterName"]" />
             </div>
             <button class="btn btn-primary w-full" @onclick="CreateFirstAdmin"
                     disabled="@string.IsNullOrWhiteSpace(newAdminName)">
-                Vytvořit a pokračovat
+                @L["Btn_CreateAndContinue"]
             </button>
         </div>
     }
@@ -78,12 +91,12 @@
         @if (selectedUser != null)
         {
             <button class="btn btn-primary mt-16" @onclick="LoginSelected">
-                Přihlásit jako @selectedUser.Name
+                @L["Btn_LoginAs"] @selectedUser.Name
             </button>
         }
     }
 
-    @if (!isDatabaseNotSelected && !isLoading && selectedDatabasePath != null)
+    @if (!showLanguagePicker && !isDatabaseNotSelected && !isLoading && selectedDatabasePath != null)
     {
         <div style="margin-top:16px;text-align:center;">
             <div class="text-muted" style="font-size:12px;max-width:350px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
@@ -92,7 +105,7 @@
             </div>
             <button class="btn" style="background:none;color:var(--coffee-brown);font-size:13px;text-decoration:underline;padding:4px;"
                     @onclick="CloseDatabase">
-                Zavřít databázi
+                @L["Btn_CloseDatabase"]
             </button>
         </div>
     }
@@ -104,6 +117,7 @@
     private bool isFirstRun;
     private bool isLoading = true;
     private bool isDatabaseNotSelected;
+    private bool showLanguagePicker;
     private string? selectedDatabasePath;
     private string databasePathInput = "";
     private string newAdminName = "";
@@ -118,6 +132,25 @@
         }
 
         await LoadUsers();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var cookie = await JS.InvokeAsync<string?>("getCultureCookie");
+            if (string.IsNullOrEmpty(cookie))
+            {
+                showLanguagePicker = true;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task SelectLanguage(string culture)
+    {
+        await JS.InvokeVoidAsync("setCultureCookie", culture);
+        Nav.NavigateTo("/", forceLoad: true);
     }
 
     private async Task LoadUsers()
@@ -158,7 +191,7 @@
         }
         catch (Exception ex)
         {
-            errorMessage = $"Chyba při otevírání databáze: {ex.Message}";
+            errorMessage = L["Err_OpenDatabaseFailed", ex.Message];
             isDatabaseNotSelected = true;
             isFirstRun = false;
             selectedDatabasePath = null;
@@ -178,7 +211,7 @@
             var path = databasePathInput.Trim();
             if (string.IsNullOrWhiteSpace(path))
             {
-                errorMessage = "Zadejte cestu k databázi.";
+                errorMessage = L["Err_EnterDatabasePath"];
                 return;
             }
 
@@ -201,15 +234,15 @@
         }
         catch (UnauthorizedAccessException)
         {
-            errorMessage = "Nelze vytvořit databázi. Zkontrolujte oprávnění.";
+            errorMessage = L["Err_CannotCreateDatabase"];
         }
         catch (PathTooLongException)
         {
-            errorMessage = "Cesta k databázi je příliš dlouhá.";
+            errorMessage = L["Err_DatabasePathTooLong"];
         }
         catch (Exception ex)
         {
-            errorMessage = $"Chyba při vytváření databáze: {ex.Message}";
+            errorMessage = L["Err_CreateDatabaseFailed", ex.Message];
         }
     }
 
@@ -221,7 +254,7 @@
             var path = databasePathInput.Trim();
             if (string.IsNullOrWhiteSpace(path))
             {
-                errorMessage = "Zadejte cestu k databázi.";
+                errorMessage = L["Err_EnterDatabasePath"];
                 return;
             }
 
@@ -230,7 +263,7 @@
 
             if (!File.Exists(expandedPath))
             {
-                errorMessage = "Soubor neexistuje. Zkontrolujte cestu.";
+                errorMessage = L["Err_FileNotFound"];
                 return;
             }
 
@@ -240,7 +273,7 @@
         }
         catch (Exception ex)
         {
-            errorMessage = $"Chyba při otevírání databáze: {ex.Message}";
+            errorMessage = L["Err_OpenDatabaseFailed", ex.Message];
         }
     }
 
@@ -276,7 +309,7 @@
             errorMessage = null;
             if (string.IsNullOrWhiteSpace(newAdminName))
             {
-                errorMessage = "Zadejte jméno administrátora.";
+                errorMessage = L["Err_EnterAdminName"];
                 return;
             }
             var admin = await UserService.CreateUserAsync(newAdminName.Trim(), isAdmin: true);

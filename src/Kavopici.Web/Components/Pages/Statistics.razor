@@ -4,10 +4,11 @@
 @inject AppState AppState
 @inject NavigationManager Nav
 @inject IJSRuntime JS
+@inject IStringLocalizer<SharedResources> L
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 
-<h1>Statistiky</h1>
+<h1>@L["Nav_Statistics"]</h1>
 
 @if (errorMessage != null)
 {
@@ -15,28 +16,28 @@
 }
 
 <div class="tab-bar">
-    <button class="tab-btn @(tab == 0 ? "active" : "")" @onclick="() => tab = 0">Přehled směsí</button>
-    <button class="tab-btn @(tab == 1 ? "active" : "")" @onclick="() => tab = 1">Moje hodnocení</button>
-    <button class="tab-btn @(tab == 2 ? "active" : "")" @onclick="() => tab = 2">Přehled dodavatelů</button>
+    <button class="tab-btn @(tab == 0 ? "active" : "")" @onclick="() => tab = 0">@L["Tab_BlendOverview"]</button>
+    <button class="tab-btn @(tab == 1 ? "active" : "")" @onclick="() => tab = 1">@L["Tab_MyRatings"]</button>
+    <button class="tab-btn @(tab == 2 ? "active" : "")" @onclick="() => tab = 2">@L["Tab_SupplierOverview"]</button>
 </div>
 
 @if (isLoading)
 {
-    <div class="loading">Načítání...</div>
+    <div class="loading">@L["Msg_Loading"]</div>
 }
 else if (tab == 0)
 {
     <div class="flex items-center justify-between mb-16">
         <div class="btn-group">
-            <button class="btn btn-outline" @onclick="GoToComparison">Porovnání směsí</button>
-            <button class="btn btn-outline" @onclick="ExportCsv">Export CSV</button>
+            <button class="btn btn-outline" @onclick="GoToComparison">@L["Btn_CompareBlends"]</button>
+            <button class="btn btn-outline" @onclick="ExportCsv">@L["Btn_ExportCsv"]</button>
         </div>
     </div>
 
     @if (blendStats.Count == 0)
     {
         <div class="panel text-center">
-            <p class="text-muted">Zatím žádné statistiky.</p>
+            <p class="text-muted">@L["Msg_NoStatistics"]</p>
         </div>
     }
     else
@@ -44,14 +45,14 @@ else if (tab == 0)
         <table class="data-table">
             <thead>
                 <tr>
-                    <th @onclick="@(() => SortBy("BlendName"))">Směs</th>
-                    <th @onclick="@(() => SortBy("AverageRating"))">Průměr</th>
-                    <th @onclick="@(() => SortBy("ControversyLevel"))">Kontroverznost</th>
-                    <th @onclick="@(() => SortBy("RatingCount"))">Počet</th>
-                    <th @onclick="@(() => SortBy("Roaster"))">Pražírna</th>
-                    <th @onclick="@(() => SortBy("SupplierName"))">Dodavatel</th>
-                    <th @onclick="@(() => SortBy("PricePerKg"))">Cena/kg</th>
-                    <th @onclick="@(() => SortBy("PricePerformance"))">Cena/★</th>
+                    <th @onclick="@(() => SortBy("BlendName"))">@L["Label_Blend"]</th>
+                    <th @onclick="@(() => SortBy("AverageRating"))">@L["Label_Average"]</th>
+                    <th @onclick="@(() => SortBy("ControversyLevel"))">@L["Label_Controversy"]</th>
+                    <th @onclick="@(() => SortBy("RatingCount"))">@L["Label_Count"]</th>
+                    <th @onclick="@(() => SortBy("Roaster"))">@L["Label_Roaster"]</th>
+                    <th @onclick="@(() => SortBy("SupplierName"))">@L["Label_Supplier"]</th>
+                    <th @onclick="@(() => SortBy("PricePerKg"))">@L["Label_PricePerKg"]</th>
+                    <th @onclick="@(() => SortBy("PricePerformance"))">@L["Label_PricePerStar"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -85,7 +86,7 @@ else if (tab == 1)
     @if (userSessions.Count == 0)
     {
         <div class="panel text-center">
-            <p class="text-muted">Zatím žádná degustace.</p>
+            <p class="text-muted">@L["Msg_NoTastings"]</p>
         </div>
     }
     else
@@ -93,10 +94,10 @@ else if (tab == 1)
         <table class="data-table">
             <thead>
                 <tr>
-                    <th>Datum</th>
-                    <th>Směs</th>
-                    <th>Poznámka</th>
-                    <th>Hodnocení</th>
+                    <th>@L["Label_Date"]</th>
+                    <th>@L["Label_Blend"]</th>
+                    <th>@L["Label_Note"]</th>
+                    <th>@L["Label_Rating"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -115,7 +116,7 @@ else if (tab == 1)
                             }
                             else
                             {
-                                <em class="text-muted">Tajné hlasování</em>
+                                <em class="text-muted">@L["Label_SecretVoting"]</em>
                             }
                         </td>
                         <td class="text-muted">@(item.Session.Comment ?? "—")</td>
@@ -123,7 +124,7 @@ else if (tab == 1)
                             @if (!item.HasRated && !isExpanded)
                             {
                                 <button class="btn btn-outline btn-sm" @onclick="() => ExpandRatingForm(sessionId)">
-                                    Ohodnotit
+                                    @L["Btn_Rate"]
                                 </button>
                             }
                         </td>
@@ -152,7 +153,7 @@ else if (tab == 2)
     @if (supplierStats.Count == 0)
     {
         <div class="panel text-center">
-            <p class="text-muted">Zatím žádní dodavatelé.</p>
+            <p class="text-muted">@L["Msg_NoSuppliers"]</p>
         </div>
     }
     else
@@ -160,9 +161,9 @@ else if (tab == 2)
         <table class="data-table">
             <thead>
                 <tr>
-                    <th @onclick="@(() => SortSupplierBy("SupplierName"))">Dodavatel</th>
-                    <th @onclick="@(() => SortSupplierBy("TotalSessionCount"))">Celkem</th>
-                    <th @onclick="@(() => SortSupplierBy("Last30DaysSessionCount"))">Posledních 30 dní</th>
+                    <th @onclick="@(() => SortSupplierBy("SupplierName"))">@L["Label_Supplier"]</th>
+                    <th @onclick="@(() => SortSupplierBy("TotalSessionCount"))">@L["Label_Total"]</th>
+                    <th @onclick="@(() => SortSupplierBy("Last30DaysSessionCount"))">@L["Label_Last30Days"]</th>
                 </tr>
             </thead>
             <tbody>

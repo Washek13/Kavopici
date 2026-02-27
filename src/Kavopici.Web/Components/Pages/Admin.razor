@@ -6,11 +6,12 @@
 @inject AppState AppState
 @inject NavigationManager Nav
 @inject IJSRuntime JS
+@inject IStringLocalizer<SharedResources> L
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 @if (!AppState.IsAdmin) { Nav.NavigateTo("/dashboard"); return; }
 
-<h1>Správa</h1>
+<h1>@L["Nav_Admin"]</h1>
 
 @if (errorMessage != null)
 {
@@ -22,30 +23,30 @@
 }
 
 <div class="tab-bar">
-    <button class="tab-btn @(tab == 0 ? "active" : "")" @onclick="() => tab = 0">Uživatelé</button>
-    <button class="tab-btn @(tab == 1 ? "active" : "")" @onclick="() => tab = 1">Směsi</button>
-    <button class="tab-btn @(tab == 2 ? "active" : "")" @onclick="() => tab = 2">Káva dne</button>
+    <button class="tab-btn @(tab == 0 ? "active" : "")" @onclick="() => tab = 0">@L["Tab_CoffeeOfDay"]</button>
+    <button class="tab-btn @(tab == 1 ? "active" : "")" @onclick="() => tab = 1">@L["Tab_Blends"]</button>
+    <button class="tab-btn @(tab == 2 ? "active" : "")" @onclick="() => tab = 2">@L["Tab_Users"]</button>
 </div>
 
 @* === Users Tab === *@
-@if (tab == 0)
+@if (tab == 2)
 {
     <div class="card">
-        <h2>Přidat uživatele</h2>
+        <h2>@L["Heading_AddUser"]</h2>
         <div class="flex gap-8 items-center">
-            <input type="text" @bind="newUserName" @bind:event="oninput" placeholder="Jméno..."
+            <input type="text" @bind="newUserName" @bind:event="oninput" placeholder="@L["Placeholder_Name"]"
                    style="flex:1;" @onkeydown="HandleUserKeyDown" />
             <button class="btn btn-primary" @onclick="AddUser"
-                    disabled="@string.IsNullOrWhiteSpace(newUserName)">Přidat</button>
+                    disabled="@string.IsNullOrWhiteSpace(newUserName)">@L["Btn_Add"]</button>
         </div>
     </div>
 
     <table class="data-table">
         <thead>
             <tr>
-                <th>Jméno</th>
-                <th>Role</th>
-                <th>Akce</th>
+                <th>@L["Label_Name"]</th>
+                <th>@L["Label_Role"]</th>
+                <th>@L["Label_Actions"]</th>
             </tr>
         </thead>
         <tbody>
@@ -58,16 +59,16 @@
                             @user.Name
                         </div>
                     </td>
-                    <td>@(user.IsAdmin ? "Admin" : "Uživatel")</td>
+                    <td>@(user.IsAdmin ? L["Role_Admin"] : L["Role_User"])</td>
                     <td>
                         <div class="btn-group">
                             <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
                                     @onclick="() => ToggleAdmin(user)">
-                                @(user.IsAdmin ? "Odebrat admin" : "Přidat admin")
+                                @(user.IsAdmin ? L["Btn_RemoveAdmin"] : L["Btn_AddAdmin"])
                             </button>
                             <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;"
                                     @onclick="() => DeactivateUser(user)">
-                                Deaktivovat
+                                @L["Btn_Deactivate"]
                             </button>
                         </div>
                     </td>
@@ -81,33 +82,33 @@
 @if (tab == 1)
 {
     <div class="card">
-        <h2>Přidat směs</h2>
+        <h2>@L["Heading_AddBlend"]</h2>
         <div class="form-group">
-            <label>Název</label>
-            <input type="text" @bind="newBlendName" placeholder="Název směsi..." />
+            <label>@L["Label_Name"]</label>
+            <input type="text" @bind="newBlendName" placeholder="@L["Label_Blend"]..." />
         </div>
         <div class="form-group">
-            <label>Pražírna</label>
-            <input type="text" @bind="newBlendRoaster" placeholder="Název pražírny..." />
+            <label>@L["Label_Roaster"]</label>
+            <input type="text" @bind="newBlendRoaster" placeholder="@L["Label_Roaster"]..." />
         </div>
         <div class="form-group">
-            <label>Původ (volitelný)</label>
-            <input type="text" @bind="newBlendOrigin" placeholder="Země původu..." />
+            <label>@L["Label_OriginOptional"]</label>
+            <input type="text" @bind="newBlendOrigin" placeholder="@L["Label_Origin"]..." />
         </div>
         <div class="form-group">
-            <label>Stupeň pražení</label>
+            <label>@L["Label_RoastLevel"]</label>
             <select @bind="newBlendRoastLevel">
-                <option value="@RoastLevel.Light">Lehké</option>
-                <option value="@RoastLevel.MediumLight">Středně lehké</option>
-                <option value="@RoastLevel.Medium">Střední</option>
-                <option value="@RoastLevel.MediumDark">Středně tmavé</option>
-                <option value="@RoastLevel.Dark">Tmavé</option>
+                <option value="@RoastLevel.Light">@L["RoastLevel_Light"]</option>
+                <option value="@RoastLevel.MediumLight">@L["RoastLevel_MediumLight"]</option>
+                <option value="@RoastLevel.Medium">@L["RoastLevel_Medium"]</option>
+                <option value="@RoastLevel.MediumDark">@L["RoastLevel_MediumDark"]</option>
+                <option value="@RoastLevel.Dark">@L["RoastLevel_Dark"]</option>
             </select>
         </div>
         <div class="form-group">
-            <label>Dodavatel</label>
+            <label>@L["Label_Supplier"]</label>
             <select @bind="newBlendSupplierId">
-                <option value="0">— vyberte —</option>
+                <option value="0">@L["Placeholder_Select"]</option>
                 @foreach (var u in allUsers)
                 {
                     <option value="@u.Id">@u.Name</option>
@@ -115,25 +116,25 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Hmotnost (g) — volitelné</label>
+            <label>@L["Label_WeightOptional"]</label>
             <input type="number" @bind="newBlendWeightGrams" placeholder="např. 250" min="1" />
         </div>
         <div class="form-group">
-            <label>Cena (Kč) — volitelné</label>
+            <label>@L["Label_PriceOptional"]</label>
             <input type="number" @bind="newBlendPriceCzk" placeholder="např. 350" min="0" step="0.01" />
         </div>
-        <button class="btn btn-primary" @onclick="AddBlend">Přidat směs</button>
+        <button class="btn btn-primary" @onclick="AddBlend">@L["Btn_AddBlend"]</button>
     </div>
 
     <table class="data-table">
         <thead>
             <tr>
-                <th>Název</th>
-                <th>Pražírna</th>
-                <th>Pražení</th>
-                <th>Dodavatel</th>
-                <th>Cena/kg</th>
-                <th>Akce</th>
+                <th>@L["Label_Name"]</th>
+                <th>@L["Label_Roaster"]</th>
+                <th>@L["Label_Roasting"]</th>
+                <th>@L["Label_Supplier"]</th>
+                <th>@L["Label_PricePerKg"]</th>
+                <th>@L["Label_Actions"]</th>
             </tr>
         </thead>
         <tbody>
@@ -146,11 +147,11 @@
                         <td><input type="text" @bind="editBlendRoaster" style="width:100%;" /></td>
                         <td>
                             <select @bind="editBlendRoastLevel">
-                                <option value="@RoastLevel.Light">Lehké</option>
-                                <option value="@RoastLevel.MediumLight">Středně lehké</option>
-                                <option value="@RoastLevel.Medium">Střední</option>
-                                <option value="@RoastLevel.MediumDark">Středně tmavé</option>
-                                <option value="@RoastLevel.Dark">Tmavé</option>
+                                <option value="@RoastLevel.Light">@L["RoastLevel_Light"]</option>
+                                <option value="@RoastLevel.MediumLight">@L["RoastLevel_MediumLight"]</option>
+                                <option value="@RoastLevel.Medium">@L["RoastLevel_Medium"]</option>
+                                <option value="@RoastLevel.MediumDark">@L["RoastLevel_MediumDark"]</option>
+                                <option value="@RoastLevel.Dark">@L["RoastLevel_Dark"]</option>
                             </select>
                         </td>
                         <td>
@@ -169,11 +170,11 @@
                             <div class="btn-group">
                                 <button class="btn btn-primary" style="padding:4px 10px;font-size:12px;"
                                         @onclick="SaveBlendEdit">
-                                    Uložit
+                                    @L["Btn_Save"]
                                 </button>
                                 <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
                                         @onclick="CancelBlendEdit">
-                                    Zrušit
+                                    @L["Btn_Cancel"]
                                 </button>
                             </div>
                         </td>
@@ -181,8 +182,8 @@
                     <tr>
                         <td colspan="6">
                             <div class="form-group" style="margin:0;">
-                                <label>Původ (volitelný)</label>
-                                <input type="text" @bind="editBlendOrigin" placeholder="Země původu..." />
+                                <label>@L["Label_OriginOptional"]</label>
+                                <input type="text" @bind="editBlendOrigin" placeholder="@L["Label_Origin"]..." />
                             </div>
                         </td>
                     </tr>
@@ -192,18 +193,18 @@
                     <tr>
                         <td><strong>@blend.Name</strong></td>
                         <td>@blend.Roaster</td>
-                        <td>@blend.RoastLevel.ToDisplayString()</td>
+                        <td>@L[$"RoastLevel_{blend.RoastLevel}"]</td>
                         <td>@blend.Supplier.Name</td>
                         <td>@(blend.PricePerKg.HasValue ? $"{blend.PricePerKg.Value:F0} Kč" : "—")</td>
                         <td>
                             <div class="btn-group">
                                 <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
                                         @onclick="() => StartBlendEdit(blend)">
-                                    Upravit
+                                    @L["Btn_Edit"]
                                 </button>
                                 <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;"
                                         @onclick="() => DeactivateBlend(blend)">
-                                    Odebrat
+                                    @L["Btn_Remove"]
                                 </button>
                             </div>
                         </td>
@@ -215,19 +216,19 @@
 }
 
 @* === Blend of Day Tab === *@
-@if (tab == 2)
+@if (tab == 0)
 {
     <div class="card">
-        <h2>Kávy dne</h2>
+        <h2>@L["Heading_CoffeesOfDay"]</h2>
 
         @if (currentSessions.Count > 0)
         {
             <table class="data-table mb-16">
                 <thead>
                     <tr>
-                        <th>Směs</th>
-                        <th>Poznámka</th>
-                        <th>Akce</th>
+                        <th>@L["Label_Blend"]</th>
+                        <th>@L["Label_Note"]</th>
+                        <th>@L["Label_Actions"]</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -239,7 +240,7 @@
                             <td>
                                 <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;"
                                         @onclick="() => RemoveBlendOfDay(session.Id)">
-                                    Odebrat
+                                    @L["Btn_Remove"]
                                 </button>
                             </td>
                         </tr>
@@ -250,15 +251,15 @@
         else
         {
             <div class="panel mb-16 text-center">
-                <p class="text-muted">Zatím nebyla nastavena žádná káva dne.</p>
+                <p class="text-muted">@L["Msg_NoCoffeeSet"]</p>
             </div>
         }
 
-        <h3>Přidat kávu dne</h3>
+        <h3>@L["Heading_AddCoffeeOfDay"]</h3>
         <div class="form-group">
-            <label>Směs</label>
+            <label>@L["Label_Blend"]</label>
             <select @bind="selectedBlendOfDayId">
-                <option value="0">— vyberte směs —</option>
+                <option value="0">@L["Placeholder_SelectBlend"]</option>
                 @foreach (var b in allBlends)
                 {
                     <option value="@b.Id">@b.Name (@b.Roaster)</option>
@@ -266,21 +267,21 @@
             </select>
         </div>
         <div class="form-group">
-            <label>Poznámka (volitelná)</label>
-            <textarea @bind="sessionComment" placeholder="Poznámka pro degustátory (např. Vzorek A)..."></textarea>
+            <label>@L["Label_NoteOptional"]</label>
+            <textarea @bind="sessionComment" placeholder="@L["Placeholder_NoteForTasters"]"></textarea>
         </div>
         <button class="btn btn-accent" @onclick="AddBlendOfDay"
                 disabled="@(selectedBlendOfDayId == 0)">
-            Přidat kávu dne
+            @L["Btn_AddCoffeeOfDay"]
         </button>
     </div>
 
     <div class="card">
         <div class="flex items-center justify-between mb-16">
-            <h2 style="margin-bottom:0;">Nástroje</h2>
+            <h2 style="margin-bottom:0;">@L["Heading_Tools"]</h2>
         </div>
         <div class="btn-group">
-            <button class="btn btn-outline" @onclick="ExportCsv">Export CSV</button>
+            <button class="btn btn-outline" @onclick="ExportCsv">@L["Btn_ExportCsv"]</button>
         </div>
     </div>
 }
@@ -358,10 +359,10 @@
         try
         {
             errorMessage = null;
-            if (string.IsNullOrWhiteSpace(newUserName)) { errorMessage = "Zadejte jméno uživatele."; return; }
+            if (string.IsNullOrWhiteSpace(newUserName)) { errorMessage = L["Err_EnterUserName"]; return; }
             await UserService.CreateUserAsync(newUserName.Trim());
             newUserName = "";
-            statusMessage = "Uživatel byl přidán.";
+            statusMessage = L["Msg_UserAdded"];
             await LoadUsers();
         }
         catch (Exception ex) { errorMessage = ex.Message; }
@@ -378,7 +379,7 @@
         {
             errorMessage = null;
             await UserService.DeactivateUserAsync(user.Id);
-            statusMessage = $"Uživatel {user.Name} byl deaktivován.";
+            statusMessage = L["Msg_UserDeactivated", user.Name];
             await LoadUsers();
         }
         catch (Exception ex) { errorMessage = ex.Message; }
@@ -400,9 +401,9 @@
         try
         {
             errorMessage = null;
-            if (string.IsNullOrWhiteSpace(newBlendName)) { errorMessage = "Zadejte název směsi."; return; }
-            if (string.IsNullOrWhiteSpace(newBlendRoaster)) { errorMessage = "Zadejte název pražírny."; return; }
-            if (newBlendSupplierId == 0) { errorMessage = "Vyberte dodavatele."; return; }
+            if (string.IsNullOrWhiteSpace(newBlendName)) { errorMessage = L["Err_EnterBlendName"]; return; }
+            if (string.IsNullOrWhiteSpace(newBlendRoaster)) { errorMessage = L["Err_EnterRoasterName"]; return; }
+            if (newBlendSupplierId == 0) { errorMessage = L["Err_SelectSupplier"]; return; }
 
             await BlendService.CreateBlendAsync(newBlendName.Trim(), newBlendRoaster.Trim(),
                 newBlendOrigin?.Trim(), newBlendRoastLevel, newBlendSupplierId,
@@ -415,7 +416,7 @@
             newBlendSupplierId = 0;
             newBlendWeightGrams = null;
             newBlendPriceCzk = null;
-            statusMessage = "Směs byla přidána.";
+            statusMessage = L["Msg_BlendAdded"];
             await LoadBlends();
         }
         catch (Exception ex) { errorMessage = ex.Message; }
@@ -444,15 +445,15 @@
         {
             errorMessage = null;
             if (editingBlendId == null) return;
-            if (string.IsNullOrWhiteSpace(editBlendName)) { errorMessage = "Zadejte název směsi."; return; }
-            if (string.IsNullOrWhiteSpace(editBlendRoaster)) { errorMessage = "Zadejte název pražírny."; return; }
+            if (string.IsNullOrWhiteSpace(editBlendName)) { errorMessage = L["Err_EnterBlendName"]; return; }
+            if (string.IsNullOrWhiteSpace(editBlendRoaster)) { errorMessage = L["Err_EnterRoasterName"]; return; }
 
             await BlendService.UpdateBlendAsync(editingBlendId.Value, editBlendName.Trim(), editBlendRoaster.Trim(),
                 editBlendOrigin?.Trim(), editBlendRoastLevel, editBlendSupplierId,
                 editBlendWeightGrams, editBlendPriceCzk);
 
             editingBlendId = null;
-            statusMessage = "Směs byla aktualizována.";
+            statusMessage = L["Msg_BlendUpdated"];
             await LoadBlends();
         }
         catch (Exception ex) { errorMessage = ex.Message; }
@@ -464,7 +465,7 @@
         {
             errorMessage = null;
             await BlendService.DeactivateBlendAsync(blend.Id);
-            statusMessage = $"Směs {blend.Name} byla odstraněna.";
+            statusMessage = L["Msg_BlendRemoved", blend.Name];
             await LoadBlends();
         }
         catch (Exception ex) { errorMessage = ex.Message; }
@@ -475,10 +476,10 @@
         try
         {
             errorMessage = null;
-            if (selectedBlendOfDayId == 0) { errorMessage = "Vyberte směs."; return; }
+            if (selectedBlendOfDayId == 0) { errorMessage = L["Err_SelectBlend"]; return; }
             await SessionService.AddBlendOfTheDayAsync(selectedBlendOfDayId, sessionComment);
             var blend = allBlends.FirstOrDefault(b => b.Id == selectedBlendOfDayId);
-            statusMessage = $"Káva dne přidána: {blend?.Name ?? ""}";
+            statusMessage = L["Msg_CoffeeOfDayAdded", blend?.Name ?? ""];
             sessionComment = null;
             selectedBlendOfDayId = 0;
             await LoadCurrentSessions();
@@ -492,7 +493,7 @@
         {
             errorMessage = null;
             await SessionService.RemoveBlendOfTheDayAsync(sessionId);
-            statusMessage = "Káva dne byla odebrána.";
+            statusMessage = L["Msg_CoffeeOfDayRemoved"];
             await LoadCurrentSessions();
         }
         catch (Exception ex) { errorMessage = ex.Message; }
@@ -506,9 +507,8 @@
             var bytes = await CsvExportService.GenerateCsvBytesAsync();
             var fileName = $"kavopici_export_{DateTime.Now:yyyy-MM-dd}.csv";
             await JS.InvokeVoidAsync("downloadFile", fileName, "text/csv", bytes);
-            statusMessage = "Data byla exportována.";
+            statusMessage = L["Msg_DataExported"];
         }
         catch (Exception ex) { errorMessage = ex.Message; }
     }
-
 }

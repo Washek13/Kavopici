@@ -2,10 +2,11 @@
 @inject IStatisticsService StatisticsService
 @inject AppState AppState
 @inject NavigationManager Nav
+@inject IStringLocalizer<SharedResources> L
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 
-<h1>Porovnání směsí</h1>
+<h1>@L["Heading_Comparison"]</h1>
 
 @if (errorMessage != null)
 {
@@ -14,7 +15,7 @@
 
 @if (isLoading)
 {
-    <div class="loading">Načítání...</div>
+    <div class="loading">@L["Msg_Loading"]</div>
 }
 else
 {
@@ -22,9 +23,9 @@ else
         @* Blend A *@
         <div>
             <div class="form-group">
-                <label>Směs A</label>
+                <label>@L["Label_BlendA"]</label>
                 <select @bind="blendAId">
-                    <option value="0">— vyberte —</option>
+                    <option value="0">@L["Placeholder_Select"]</option>
                     @foreach (var b in allBlends)
                     {
                         <option value="@b.BlendId">@b.BlendName (@b.Roaster)</option>
@@ -37,15 +38,15 @@ else
                 <div class="card">
                     <h3>@BlendA.BlendName</h3>
                     <div class="blend-details mb-8">
-                        <div class="blend-detail"><span class="label">Pražírna:</span> @BlendA.Roaster</div>
-                        <div class="blend-detail"><span class="label">Dodavatel:</span> @BlendA.SupplierName</div>
+                        <div class="blend-detail"><span class="label">@L["Label_Roaster"]:</span> @BlendA.Roaster</div>
+                        <div class="blend-detail"><span class="label">@L["Label_Supplier"]:</span> @BlendA.SupplierName</div>
                         @if (BlendA.PricePerKg.HasValue)
                         {
-                            <div class="blend-detail"><span class="label">Cena/kg:</span> @BlendA.PricePerKg.Value.ToString("F0") Kč</div>
+                            <div class="blend-detail"><span class="label">@L["Label_PricePerKg"]:</span> @BlendA.PricePerKg.Value.ToString("F0") Kč</div>
                         }
                         @if (BlendA.PricePerformance.HasValue)
                         {
-                            <div class="blend-detail"><span class="label">Cena/★:</span> @BlendA.PricePerformance.Value.ToString("F0") Kč</div>
+                            <div class="blend-detail"><span class="label">@L["Label_PricePerStar"]:</span> @BlendA.PricePerformance.Value.ToString("F0") Kč</div>
                         }
                     </div>
                     <div class="flex items-center gap-8 mb-8">
@@ -64,9 +65,9 @@ else
         @* Blend B *@
         <div>
             <div class="form-group">
-                <label>Směs B</label>
+                <label>@L["Label_BlendB"]</label>
                 <select @bind="blendBId">
-                    <option value="0">— vyberte —</option>
+                    <option value="0">@L["Placeholder_Select"]</option>
                     @foreach (var b in allBlends)
                     {
                         <option value="@b.BlendId">@b.BlendName (@b.Roaster)</option>
@@ -79,15 +80,15 @@ else
                 <div class="card">
                     <h3>@BlendB.BlendName</h3>
                     <div class="blend-details mb-8">
-                        <div class="blend-detail"><span class="label">Pražírna:</span> @BlendB.Roaster</div>
-                        <div class="blend-detail"><span class="label">Dodavatel:</span> @BlendB.SupplierName</div>
+                        <div class="blend-detail"><span class="label">@L["Label_Roaster"]:</span> @BlendB.Roaster</div>
+                        <div class="blend-detail"><span class="label">@L["Label_Supplier"]:</span> @BlendB.SupplierName</div>
                         @if (BlendB.PricePerKg.HasValue)
                         {
-                            <div class="blend-detail"><span class="label">Cena/kg:</span> @BlendB.PricePerKg.Value.ToString("F0") Kč</div>
+                            <div class="blend-detail"><span class="label">@L["Label_PricePerKg"]:</span> @BlendB.PricePerKg.Value.ToString("F0") Kč</div>
                         }
                         @if (BlendB.PricePerformance.HasValue)
                         {
-                            <div class="blend-detail"><span class="label">Cena/★:</span> @BlendB.PricePerformance.Value.ToString("F0") Kč</div>
+                            <div class="blend-detail"><span class="label">@L["Label_PricePerStar"]:</span> @BlendB.PricePerformance.Value.ToString("F0") Kč</div>
                         }
                     </div>
                     <div class="flex items-center gap-8 mb-8">

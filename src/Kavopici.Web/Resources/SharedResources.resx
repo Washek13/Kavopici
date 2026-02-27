@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- Update banner -->
+  <data name="Msg_UpdateAvailable" xml:space="preserve"><value>Je dostupná nová verze {0}.</value></data>
+  <data name="Msg_Downloading" xml:space="preserve"><value>Stahování...</value></data>
+  <data name="Btn_Update" xml:space="preserve"><value>Aktualizovat</value></data>
+
+  <!-- Navigation -->
+  <data name="Nav_Dashboard" xml:space="preserve"><value>Nástěnka</value></data>
+  <data name="Nav_Statistics" xml:space="preserve"><value>Statistiky</value></data>
+  <data name="Nav_Admin" xml:space="preserve"><value>Správa</value></data>
+  <data name="Nav_Logout" xml:space="preserve"><value>Odhlásit</value></data>
+  <data name="Tooltip_ReportBug" xml:space="preserve"><value>Nahlásit chybu</value></data>
+
+  <!-- Login -->
+  <data name="Login_Subtitle" xml:space="preserve"><value>Kávový deník vaší kanceláře</value></data>
+  <data name="Msg_Loading" xml:space="preserve"><value>Načítání...</value></data>
+  <data name="Heading_SelectDatabase" xml:space="preserve"><value>Vyberte databázi</value></data>
+  <data name="Login_DatabaseInstruction" xml:space="preserve"><value>Vytvořte novou databázi nebo otevřete existující:</value></data>
+  <data name="Label_DatabasePath" xml:space="preserve"><value>Cesta k databázi</value></data>
+  <data name="Btn_CreateNewDatabase" xml:space="preserve"><value>Vytvořit novou databázi</value></data>
+  <data name="Btn_OpenExistingDatabase" xml:space="preserve"><value>Otevřít existující databázi</value></data>
+  <data name="Heading_Welcome" xml:space="preserve"><value>Vítejte!</value></data>
+  <data name="Login_FirstAdminInstruction" xml:space="preserve"><value>Vytvořte prvního administrátora pro zahájení.</value></data>
+  <data name="Label_AdminName" xml:space="preserve"><value>Jméno administrátora</value></data>
+  <data name="Placeholder_EnterName" xml:space="preserve"><value>Zadejte jméno...</value></data>
+  <data name="Btn_CreateAndContinue" xml:space="preserve"><value>Vytvořit a pokračovat</value></data>
+  <data name="Btn_LoginAs" xml:space="preserve"><value>Přihlásit jako</value></data>
+  <data name="Btn_CloseDatabase" xml:space="preserve"><value>Zavřít databázi</value></data>
+
+  <!-- Language picker -->
+  <data name="Lang_SelectLanguage" xml:space="preserve"><value>Vyberte jazyk</value></data>
+  <data name="Lang_Czech" xml:space="preserve"><value>Čeština</value></data>
+  <data name="Lang_Slovak" xml:space="preserve"><value>Slovenčina</value></data>
+  <data name="Lang_English" xml:space="preserve"><value>English</value></data>
+  <data name="Lang_German" xml:space="preserve"><value>Deutsch</value></data>
+
+  <!-- Dashboard -->
+  <data name="Label_TopRated" xml:space="preserve"><value>Nejlépe hodnocená</value></data>
+  <data name="Label_YourRatings" xml:space="preserve"><value>Vaše hodnocení</value></data>
+  <data name="Label_TotalRatingsDesc" xml:space="preserve"><value>celkem hodnocení</value></data>
+  <data name="Label_CoffeeOfDay" xml:space="preserve"><value>Káva dne</value></data>
+  <data name="Label_SecretVoting" xml:space="preserve"><value>Tajné hlasování</value></data>
+  <data name="Msg_RateBeforeReveal" xml:space="preserve"><value>Ohodnoťte kávu před odhalením detailů.</value></data>
+  <data name="Heading_NoCoffeeToday" xml:space="preserve"><value>Dnes žádná káva</value></data>
+  <data name="Msg_NoCoffeeSetByAdmin" xml:space="preserve"><value>Administrátor dosud nenastavil dnešní směs.</value></data>
+  <data name="Msg_FlavorWheel" xml:space="preserve"><value>Nejste si jisti chutí? Podívejte se na kolečko chutí kávy</value></data>
+
+  <!-- Statistics tabs -->
+  <data name="Tab_BlendOverview" xml:space="preserve"><value>Přehled směsí</value></data>
+  <data name="Tab_MyRatings" xml:space="preserve"><value>Moje hodnocení</value></data>
+  <data name="Tab_SupplierOverview" xml:space="preserve"><value>Přehled dodavatelů</value></data>
+  <data name="Btn_CompareBlends" xml:space="preserve"><value>Porovnání směsí</value></data>
+  <data name="Btn_ExportCsv" xml:space="preserve"><value>Export CSV</value></data>
+  <data name="Msg_NoStatistics" xml:space="preserve"><value>Zatím žádné statistiky.</value></data>
+  <data name="Msg_NoTastings" xml:space="preserve"><value>Zatím žádná degustace.</value></data>
+  <data name="Msg_NoSuppliers" xml:space="preserve"><value>Zatím žádní dodavatelé.</value></data>
+  <data name="Label_Last30Days" xml:space="preserve"><value>Posledních 30 dní</value></data>
+  <data name="Btn_Rate" xml:space="preserve"><value>Ohodnotit</value></data>
+
+  <!-- Table headers / labels -->
+  <data name="Label_Blend" xml:space="preserve"><value>Směs</value></data>
+  <data name="Label_Average" xml:space="preserve"><value>Průměr</value></data>
+  <data name="Label_Controversy" xml:space="preserve"><value>Kontroverznost</value></data>
+  <data name="Label_Count" xml:space="preserve"><value>Počet</value></data>
+  <data name="Label_Roaster" xml:space="preserve"><value>Pražírna</value></data>
+  <data name="Label_Supplier" xml:space="preserve"><value>Dodavatel</value></data>
+  <data name="Label_PricePerKg" xml:space="preserve"><value>Cena/kg</value></data>
+  <data name="Label_PricePerStar" xml:space="preserve"><value>Cena/&#9733;</value></data>
+  <data name="Label_Date" xml:space="preserve"><value>Datum</value></data>
+  <data name="Label_Note" xml:space="preserve"><value>Poznámka</value></data>
+  <data name="Label_Rating" xml:space="preserve"><value>Hodnocení</value></data>
+  <data name="Label_Total" xml:space="preserve"><value>Celkem</value></data>
+  <data name="Label_Name" xml:space="preserve"><value>Jméno</value></data>
+  <data name="Label_Role" xml:space="preserve"><value>Role</value></data>
+  <data name="Label_Actions" xml:space="preserve"><value>Akce</value></data>
+  <data name="Label_Origin" xml:space="preserve"><value>Původ</value></data>
+  <data name="Label_Roasting" xml:space="preserve"><value>Pražení</value></data>
+  <data name="Label_Ratings" xml:space="preserve"><value>hodnocení</value></data>
+  <data name="Label_BlendA" xml:space="preserve"><value>Směs A</value></data>
+  <data name="Label_BlendB" xml:space="preserve"><value>Směs B</value></data>
+
+  <!-- Admin tabs -->
+  <data name="Tab_CoffeeOfDay" xml:space="preserve"><value>Káva dne</value></data>
+  <data name="Tab_Blends" xml:space="preserve"><value>Směsi</value></data>
+  <data name="Tab_Users" xml:space="preserve"><value>Uživatelé</value></data>
+
+  <!-- Admin forms -->
+  <data name="Heading_AddUser" xml:space="preserve"><value>Přidat uživatele</value></data>
+  <data name="Placeholder_Name" xml:space="preserve"><value>Jméno...</value></data>
+  <data name="Btn_Add" xml:space="preserve"><value>Přidat</value></data>
+  <data name="Role_Admin" xml:space="preserve"><value>Admin</value></data>
+  <data name="Role_User" xml:space="preserve"><value>Uživatel</value></data>
+  <data name="Btn_RemoveAdmin" xml:space="preserve"><value>Odebrat admin</value></data>
+  <data name="Btn_AddAdmin" xml:space="preserve"><value>Přidat admin</value></data>
+  <data name="Btn_Deactivate" xml:space="preserve"><value>Deaktivovat</value></data>
+  <data name="Heading_AddBlend" xml:space="preserve"><value>Přidat směs</value></data>
+  <data name="Label_OriginOptional" xml:space="preserve"><value>Původ (volitelný)</value></data>
+  <data name="Label_RoastLevel" xml:space="preserve"><value>Stupeň pražení</value></data>
+  <data name="Label_WeightOptional" xml:space="preserve"><value>Hmotnost (g) — volitelné</value></data>
+  <data name="Label_PriceOptional" xml:space="preserve"><value>Cena (Kč) — volitelné</value></data>
+  <data name="Btn_AddBlend" xml:space="preserve"><value>Přidat směs</value></data>
+  <data name="Placeholder_Select" xml:space="preserve"><value>— vyberte —</value></data>
+  <data name="Btn_Save" xml:space="preserve"><value>Uložit</value></data>
+  <data name="Btn_Cancel" xml:space="preserve"><value>Zrušit</value></data>
+  <data name="Btn_Edit" xml:space="preserve"><value>Upravit</value></data>
+  <data name="Btn_Remove" xml:space="preserve"><value>Odebrat</value></data>
+  <data name="Heading_CoffeesOfDay" xml:space="preserve"><value>Kávy dne</value></data>
+  <data name="Msg_NoCoffeeSet" xml:space="preserve"><value>Zatím nebyla nastavena žádná káva dne.</value></data>
+  <data name="Heading_AddCoffeeOfDay" xml:space="preserve"><value>Přidat kávu dne</value></data>
+  <data name="Placeholder_SelectBlend" xml:space="preserve"><value>— vyberte směs —</value></data>
+  <data name="Label_NoteOptional" xml:space="preserve"><value>Poznámka (volitelná)</value></data>
+  <data name="Placeholder_NoteForTasters" xml:space="preserve"><value>Poznámka pro degustátory (např. Vzorek A)...</value></data>
+  <data name="Btn_AddCoffeeOfDay" xml:space="preserve"><value>Přidat kávu dne</value></data>
+  <data name="Heading_Tools" xml:space="preserve"><value>Nástroje</value></data>
+
+  <!-- Error / status messages -->
+  <data name="Err_EnterDatabasePath" xml:space="preserve"><value>Zadejte cestu k databázi.</value></data>
+  <data name="Err_CannotCreateDatabase" xml:space="preserve"><value>Nelze vytvořit databázi. Zkontrolujte oprávnění.</value></data>
+  <data name="Err_DatabasePathTooLong" xml:space="preserve"><value>Cesta k databázi je příliš dlouhá.</value></data>
+  <data name="Err_CreateDatabaseFailed" xml:space="preserve"><value>Chyba při vytváření databáze: {0}</value></data>
+  <data name="Err_OpenDatabaseFailed" xml:space="preserve"><value>Chyba při otevírání databáze: {0}</value></data>
+  <data name="Err_FileNotFound" xml:space="preserve"><value>Soubor neexistuje. Zkontrolujte cestu.</value></data>
+  <data name="Err_EnterAdminName" xml:space="preserve"><value>Zadejte jméno administrátora.</value></data>
+  <data name="Err_EnterUserName" xml:space="preserve"><value>Zadejte jméno uživatele.</value></data>
+  <data name="Msg_UserAdded" xml:space="preserve"><value>Uživatel byl přidán.</value></data>
+  <data name="Msg_UserDeactivated" xml:space="preserve"><value>Uživatel {0} byl deaktivován.</value></data>
+  <data name="Err_EnterBlendName" xml:space="preserve"><value>Zadejte název směsi.</value></data>
+  <data name="Err_EnterRoasterName" xml:space="preserve"><value>Zadejte název pražírny.</value></data>
+  <data name="Err_SelectSupplier" xml:space="preserve"><value>Vyberte dodavatele.</value></data>
+  <data name="Msg_BlendAdded" xml:space="preserve"><value>Směs byla přidána.</value></data>
+  <data name="Msg_BlendUpdated" xml:space="preserve"><value>Směs byla aktualizována.</value></data>
+  <data name="Msg_BlendRemoved" xml:space="preserve"><value>Směs {0} byla odstraněna.</value></data>
+  <data name="Err_SelectBlend" xml:space="preserve"><value>Vyberte směs.</value></data>
+  <data name="Msg_CoffeeOfDayAdded" xml:space="preserve"><value>Káva dne přidána: {0}</value></data>
+  <data name="Msg_CoffeeOfDayRemoved" xml:space="preserve"><value>Káva dne byla odebrána.</value></data>
+  <data name="Msg_DataExported" xml:space="preserve"><value>Data byla exportována.</value></data>
+
+  <!-- BlendDetail -->
+  <data name="Msg_BlendNotFound" xml:space="preserve"><value>Směs nenalezena.</value></data>
+  <data name="Heading_RatingDistribution" xml:space="preserve"><value>Rozložení hodnocení</value></data>
+  <data name="Heading_IndividualRatings" xml:space="preserve"><value>Jednotlivá hodnocení</value></data>
+  <data name="Msg_NoRatings" xml:space="preserve"><value>Zatím žádná hodnocení.</value></data>
+
+  <!-- Comparison -->
+  <data name="Heading_Comparison" xml:space="preserve"><value>Porovnání směsí</value></data>
+
+  <!-- RatingForm -->
+  <data name="Label_YourRating" xml:space="preserve"><value>Vaše hodnocení</value></data>
+  <data name="Label_CommentOptional" xml:space="preserve"><value>Komentář (volitelný)</value></data>
+  <data name="Placeholder_HowDidItTaste" xml:space="preserve"><value>Jak vám káva chutnala?</value></data>
+  <data name="Label_TastingNotes" xml:space="preserve"><value>Chuťové poznámky</value></data>
+  <data name="Btn_SaveChanges" xml:space="preserve"><value>Uložit změny</value></data>
+  <data name="Btn_SubmitRating" xml:space="preserve"><value>Odeslat hodnocení</value></data>
+  <data name="Msg_RatingSaved" xml:space="preserve"><value>Vaše hodnocení bylo uloženo.</value></data>
+
+  <!-- ControversyBadge -->
+  <data name="Badge_Agreement" xml:space="preserve"><value>Shoda</value></data>
+  <data name="Badge_MildDisagreement" xml:space="preserve"><value>Mírný rozpor</value></data>
+  <data name="Badge_Disagreement" xml:space="preserve"><value>Rozpor</value></data>
+
+  <!-- RoastLevel enum -->
+  <data name="RoastLevel_Light" xml:space="preserve"><value>Lehké</value></data>
+  <data name="RoastLevel_MediumLight" xml:space="preserve"><value>Středně lehké</value></data>
+  <data name="RoastLevel_Medium" xml:space="preserve"><value>Střední</value></data>
+  <data name="RoastLevel_MediumDark" xml:space="preserve"><value>Středně tmavé</value></data>
+  <data name="RoastLevel_Dark" xml:space="preserve"><value>Tmavé</value></data>
+
+  <!-- Misc -->
+  <data name="Msg_PageNotFound" xml:space="preserve"><value>Stránka nenalezena.</value></data>
+  <data name="BugReport_Body" xml:space="preserve"><value>## Popis chyby&#xA;&lt;!-- Popište, co se stalo --&gt;&#xA;&#xA;## Kroky k reprodukci&#xA;1.&#xA;2.&#xA;3.&#xA;&#xA;## Očekávané chování&#xA;&lt;!-- Co jste očekávali? --&gt;&#xA;&#xA;## Skutečné chování&#xA;&lt;!-- Co se stalo místo toho? --&gt;&#xA;&#xA;---&#xA;**Verze aplikace:** {0}</value></data>
+
+  <!-- TastingNote names (IDs match DB seed) -->
+  <data name="TastingNote_1" xml:space="preserve"><value>Ovocná</value></data>
+  <data name="TastingNote_2" xml:space="preserve"><value>Ořechová</value></data>
+  <data name="TastingNote_3" xml:space="preserve"><value>Čokoládová</value></data>
+  <data name="TastingNote_4" xml:space="preserve"><value>Karamelová</value></data>
+  <data name="TastingNote_5" xml:space="preserve"><value>Květinová</value></data>
+  <data name="TastingNote_6" xml:space="preserve"><value>Kořeněná</value></data>
+  <data name="TastingNote_7" xml:space="preserve"><value>Citrusová</value></data>
+  <data name="TastingNote_8" xml:space="preserve"><value>Medová</value></data>
+</root>

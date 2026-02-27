@@ -3,13 +3,15 @@
 @inject UpdateState UpdateState
 @inject IUpdateService UpdateService
 @inject NavigationManager Nav
+@inject IJSRuntime JS
+@inject IStringLocalizer<SharedResources> L
 
 <div class="app-container">
     @if (UpdateState.IsUpdateAvailable)
     {
         <div class="update-banner">
             <div class="update-banner-content">
-                <span class="update-banner-version">Je dostupná nová verze @UpdateState.AvailableUpdate!.Version.</span>
+                <span class="update-banner-version">@string.Format(L["Msg_UpdateAvailable"], UpdateState.AvailableUpdate!.Version)</span>
                 @if (!string.IsNullOrWhiteSpace(UpdateState.AvailableUpdate!.ReleaseNotes))
                 {
                     <div class="update-banner-notes">
@@ -19,12 +21,12 @@
             </div>
             @if (isDownloading)
             {
-                <span>Stahování...</span>
+                <span>@L["Msg_Downloading"]</span>
             }
             else
             {
                 <button class="btn btn-sm" style="background:var(--amber-gold);color:var(--coffee-dark);margin-left:12px;" @onclick="InstallUpdate">
-                    Aktualizovat
+                    @L["Btn_Update"]
                 </button>
             }
         </div>
@@ -38,22 +40,30 @@
                 KÁVOPÍČI
             </div>
             <nav class="header-nav">
-                <button class="nav-btn" @onclick="GoToDashboard">Nástěnka</button>
-                <button class="nav-btn" @onclick="GoToStatistics">Statistiky</button>
+                <button class="nav-btn" @onclick="GoToDashboard">@L["Nav_Dashboard"]</button>
+                <button class="nav-btn" @onclick="GoToStatistics">@L["Nav_Statistics"]</button>
                 @if (AppState.IsAdmin)
                 {
-                    <button class="nav-btn" @onclick="GoToAdmin">Správa</button>
+                    <button class="nav-btn" @onclick="GoToAdmin">@L["Nav_Admin"]</button>
                 }
             </nav>
             <div class="header-user">
                 <UserInitials Name="@AppState.CurrentUser!.Name" />
                 <span class="user-name">@AppState.CurrentUser!.Name</span>
+                <select class="lang-select"
+                        value="@currentCulture"
+                        @onchange="OnLanguageChanged">
+                    <option value="cs">cs</option>
+                    <option value="sk">sk</option>
+                    <option value="en">en</option>
+                    <option value="de">de</option>
+                </select>
                 <a href="@BugReportUrl" target="_blank" rel="noopener noreferrer"
-                   class="btn btn-sm" title="Nahlásit chybu"
+                   class="btn btn-sm" title="@L["Tooltip_ReportBug"]"
                    style="text-decoration:none;font-size:16px;line-height:1;">
                     🪲
                 </a>
-                <button class="btn btn-sm" @onclick="Logout">Odhlásit</button>
+                <button class="btn btn-sm" @onclick="Logout">@L["Nav_Logout"]</button>
             </div>
         </header>
     }
@@ -65,6 +75,7 @@
 
 @code {
     private bool isDownloading;
+    private string currentCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
 
     protected override void OnInitialized()
     {
@@ -82,6 +93,16 @@
         if (UpdateState.AvailableUpdate is null) return;
         isDownloading = true;
         await UpdateService.DownloadAndInstallUpdateAsync(UpdateState.AvailableUpdate);
+    }
+
+    private async Task OnLanguageChanged(ChangeEventArgs e)
+    {
+        var culture = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(culture))
+        {
+            await JS.InvokeVoidAsync("setCultureCookie", culture);
+            Nav.NavigateTo(Nav.Uri, forceLoad: true);
+        }
     }
 
     private void GoToDashboard() => Nav.NavigateTo("/dashboard");
@@ -104,12 +125,7 @@
         var version = System.Reflection.Assembly.GetExecutingAssembly()
             .GetName().Version?.ToString() ?? "unknown";
 
-        var body = "## Popis chyby\n<!-- Popište, co se stalo -->\n\n"
-            + "## Kroky k reprodukci\n1.\n2.\n3.\n\n"
-            + "## Očekávané chování\n<!-- Co jste očekávali? -->\n\n"
-            + "## Skutečné chování\n<!-- Co se stalo místo toho? -->\n\n"
-            + "---\n"
-            + $"**Verze aplikace:** {version}";
+        var body = string.Format(L["BugReport_Body"], version);
 
         var encodedBody = Uri.EscapeDataString(body);
         return $"https://github.com/{GitHubOwner}/{GitHubRepo}/issues/new?labels=bug&body={encodedBody}";

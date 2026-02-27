@@ -15,6 +15,27 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Neutral (Czech) fallback — no culture, goes into main assembly -->
+    <EmbeddedResource Update="Resources\SharedResources.resx">
+      <LogicalName>Kavopici.Web.Resources.SharedResources.resources</LogicalName>
+    </EmbeddedResource>
+    <!-- Culture-specific satellites — LogicalName must include culture suffix so
+         ResourceManager.GetResourceFileName(culture) can find the stream -->
+    <EmbeddedResource Update="Resources\SharedResources.sk.resx">
+      <LogicalName>Kavopici.Web.Resources.SharedResources.sk.resources</LogicalName>
+      <Culture>sk</Culture>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\SharedResources.en.resx">
+      <LogicalName>Kavopici.Web.Resources.SharedResources.en.resources</LogicalName>
+      <Culture>en</Culture>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\SharedResources.de.resx">
+      <LogicalName>Kavopici.Web.Resources.SharedResources.de.resources</LogicalName>
+      <Culture>de</Culture>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Kavopici.Core\Kavopici.Core.csproj" />
   </ItemGroup>
 

@@ -1,5 +1,6 @@
 @inject IRatingService RatingService
 @inject AppState AppState
+@inject IStringLocalizer<SharedResources> L
 
 @if (errorMessage != null)
 {
@@ -13,23 +14,23 @@
 @if (!hasRated || isEditing)
 {
     <div class="form-group">
-        <label>Vaše hodnocení</label>
+        <label>@L["Label_YourRating"]</label>
         <StarRating Value="@selectedStars" ValueChanged="OnStarsChanged" />
     </div>
 
     <div class="form-group">
-        <label>Komentář (volitelný)</label>
-        <textarea @bind="comment" placeholder="Jak vám káva chutnala?"></textarea>
+        <label>@L["Label_CommentOptional"]</label>
+        <textarea @bind="comment" placeholder="@L["Placeholder_HowDidItTaste"]"></textarea>
     </div>
 
     <div class="form-group">
-        <label>Chuťové poznámky</label>
+        <label>@L["Label_TastingNotes"]</label>
         <div class="tasting-notes">
             @foreach (var note in availableNotes)
             {
                 <span class="note-tag @(selectedNoteIds.Contains(note.Id) ? "selected" : "")"
                       @onclick="() => ToggleNote(note.Id)">
-                    @note.Name
+                    @L[$"TastingNote_{note.Id}"]
                 </span>
             }
         </div>
@@ -38,11 +39,11 @@
     <div class="btn-group">
         <button class="btn btn-accent" @onclick="SubmitRating"
                 disabled="@(selectedStars < 1)">
-            @(isEditing ? "Uložit změny" : "Odeslat hodnocení")
+            @(isEditing ? L["Btn_SaveChanges"] : L["Btn_SubmitRating"])
         </button>
         @if (isEditing)
         {
-            <button class="btn btn-outline" @onclick="CancelEdit">Zrušit</button>
+            <button class="btn btn-outline" @onclick="CancelEdit">@L["Btn_Cancel"]</button>
         }
     </div>
 }
@@ -61,12 +62,12 @@ else
                     <div class="tasting-notes mt-8">
                         @foreach (var note in availableNotes.Where(n => selectedNoteIds.Contains(n.Id)))
                         {
-                            <span class="note-tag selected readonly">@note.Name</span>
+                            <span class="note-tag selected readonly">@L[$"TastingNote_{note.Id}"]</span>
                         }
                     </div>
                 }
             </div>
-            <button class="btn btn-outline" @onclick="StartEdit">Upravit</button>
+            <button class="btn btn-outline" @onclick="StartEdit">@L["Btn_Edit"]</button>
         </div>
     </div>
 }
@@ -147,7 +148,7 @@ else
                 await RatingService.SetRatingNotesAsync(currentRating.Id, selectedNoteIds.ToList());
 
             hasRated = true;
-            statusMessage = "Vaše hodnocení bylo uloženo.";
+            statusMessage = L["Msg_RatingSaved"];
 
             await OnRatingSubmitted.InvokeAsync();
         }
