@@ -19,7 +19,7 @@ Kávopíči je webová aplikace pro kancelářské degustace kávy. Administrát
 
 ### Přihlášení
 - Výběr profilu ze seznamu (bez hesel — důvěryhodné prostředí).
-- Na prvním spuštění volba databáze (vytvoření nové nebo otevření existující) a vytvoření prvního administrátora.
+- Na prvním spuštění výběr jazyka (🇨🇿 CS / 🇸🇰 SK / 🇬🇧 EN / 🇩🇪 DE) a volba databáze (vytvoření nové nebo otevření existující) a vytvoření prvního administrátora.
 
 ### Nástěnka (Dashboard)
 - **Přehled** — kliknutelné karty s nejlépe hodnocenou směsí (→ detail) a počtem vlastních hodnocení (→ statistiky).
@@ -45,6 +45,11 @@ Kávopíči je webová aplikace pro kancelářské degustace kávy. Administrát
 - **Káva dne** — přidání a odebrání směsí pro denní degustaci (lze vybrat více směsí), volitelná poznámka ke každé.
 - **Export CSV** — export statistik.
 
+### Lokalizace
+- Podpora čtyř jazyků: **česky, slovensky, English, Deutsch**.
+- Jazyk se vybírá při prvním spuštění a je uložen v cookie. Lze kdykoli změnit přepínačem v záhlaví.
+- Přeloženo vše včetně chuťových poznámek, stupňů pražení a šablony hlášení chyb.
+
 ### Automatické aktualizace
 - Kontrola nových verzí přes GitHub Releases na pozadí při startu.
 - Stažení a instalace MSIX balíčku přímo z aplikace.
@@ -59,6 +64,7 @@ Kávopíči je webová aplikace pro kancelářské degustace kávy. Administrát
 | UI | Blazor Server (Interactive SSR), vlastní CSS |
 | Databáze | SQLite (DELETE journal, busy timeout 30 s, Pooling=False) |
 | ORM | Entity Framework Core 8.0 |
+| Lokalizace | .NET `IStringLocalizer`, `.resx` resource files (cs, sk, en, de) |
 | Balení | MSIX (Windows), self-contained (multi-platform: win-x64, osx-x64, osx-arm64) |
 | Testování | xUnit, Coverlet |
 | CI/CD | GitHub Actions |
@@ -80,6 +86,7 @@ Kavopici.sln
 │       │   ├── Pages/          # Login, Dashboard, Statistics, BlendDetail, Comparison, Admin
 │       │   ├── Shared/         # StarRating, BlendCard, UserInitials, ControversyBadge
 │       │   └── Layout/         # MainLayout (navigace, update banner)
+│       ├── Resources/          # SharedResources.resx + satelity (.cs/.sk/.en/.de)
 │       ├── Services/           # AppState, UpdateService, UpdateState
 │       └── wwwroot/            # CSS, ikony, favicon
 └── tests/

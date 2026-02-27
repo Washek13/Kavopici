@@ -4,10 +4,11 @@
 @inject IStatisticsService StatisticsService
 @inject AppState AppState
 @inject NavigationManager Nav
+@inject IStringLocalizer<SharedResources> L
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 
-<h1>Nástěnka</h1>
+<h1>@L["Nav_Dashboard"]</h1>
 
 @if (errorMessage != null)
 {
@@ -19,14 +20,14 @@
 {
     <div class="highlights">
         <div class="highlight-card clickable" @onclick="GoToTopBlend">
-            <div class="highlight-label">Nejlépe hodnocená</div>
+            <div class="highlight-label">@L["Label_TopRated"]</div>
             <div class="highlight-value">@topBlendName</div>
             <div class="highlight-sub">@topBlendRating.ToString("F1") &#9733;</div>
         </div>
         <div class="highlight-card clickable" @onclick="GoToStatistics">
-            <div class="highlight-label">Vaše hodnocení</div>
+            <div class="highlight-label">@L["Label_YourRatings"]</div>
             <div class="highlight-value">@userRatingCount</div>
-            <div class="highlight-sub">celkem hodnocení</div>
+            <div class="highlight-sub">@L["Label_TotalRatingsDesc"]</div>
         </div>
     </div>
 }
@@ -34,7 +35,7 @@
 @* Blends of the Day *@
 @if (isLoading)
 {
-    <div class="loading">Načítání...</div>
+    <div class="loading">@L["Msg_Loading"]</div>
 }
 else if (todaySessions.Count > 0)
 {
@@ -45,17 +46,17 @@ else if (todaySessions.Count > 0)
         var existing = existingRatings.GetValueOrDefault(sessionId);
 
         <div class="card">
-            <h2>Káva dne — @session.Date.ToString("d. M. yyyy")</h2>
+            <h2>@L["Label_CoffeeOfDay"] — @session.Date.ToString("d. M. yyyy")</h2>
 
             @if (!isRevealed)
             {
                 <div class="secret-overlay">
-                    <h3>Tajné hlasování</h3>
+                    <h3>@L["Label_SecretVoting"]</h3>
                     @if (!string.IsNullOrEmpty(session.Comment))
                     {
                         <p style="font-size:1.1em;font-weight:600;margin:8px 0;">@session.Comment</p>
                     }
-                    <p>Ohodnoťte kávu před odhalením detailů.</p>
+                    <p>@L["Msg_RateBeforeReveal"]</p>
                 </div>
             }
             else
@@ -77,8 +78,8 @@ else if (todaySessions.Count > 0)
 else
 {
     <div class="panel text-center">
-        <h2>Dnes žádná káva</h2>
-        <p class="text-muted">Administrátor dosud nenastavil dnešní směs.</p>
+        <h2>@L["Heading_NoCoffeeToday"]</h2>
+        <p class="text-muted">@L["Msg_NoCoffeeSetByAdmin"]</p>
     </div>
 }
 
@@ -89,7 +90,7 @@ else
    class="flavor-wheel-banner">
     <div class="banner-content">
         <span class="banner-icon">☕</span>
-        <span class="banner-text">Nejste si jisti chutí? Podívejte se na kolečko chutí kávy</span>
+        <span class="banner-text">@L["Msg_FlavorWheel"]</span>
     </div>
 </a>
 

@@ -1,3 +1,5 @@
+@inject IStringLocalizer<SharedResources> L
+
 <Router AppAssembly="typeof(Program).Assembly">
     <Found Context="routeData">
         <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
@@ -5,7 +7,27 @@
     </Found>
     <NotFound>
         <LayoutView Layout="typeof(Layout.MainLayout)">
-            <p>Stránka nenalezena.</p>
+            <p>@L["Msg_PageNotFound"]</p>
         </LayoutView>
     </NotFound>
 </Router>
+
+@code {
+    /// <summary>
+    /// Culture name serialized by Blazor from the SSR parent (App.razor) into the
+    /// component marker HTML. When the interactive circuit starts it restores this
+    /// value, letting us apply the correct CultureInfo before the first render.
+    /// </summary>
+    [Parameter]
+    public string? CultureName { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrEmpty(CultureName))
+        {
+            var cultureInfo = new System.Globalization.CultureInfo(CultureName);
+            System.Globalization.CultureInfo.CurrentCulture = cultureInfo;
+            System.Globalization.CultureInfo.CurrentUICulture = cultureInfo;
+        }
+    }
+}

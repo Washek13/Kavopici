@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- Update banner -->
+  <data name="Msg_UpdateAvailable" xml:space="preserve"><value>Eine neue Version {0} ist verfügbar.</value></data>
+  <data name="Msg_Downloading" xml:space="preserve"><value>Herunterladen...</value></data>
+  <data name="Btn_Update" xml:space="preserve"><value>Aktualisieren</value></data>
+
+  <!-- Navigation -->
+  <data name="Nav_Dashboard" xml:space="preserve"><value>Dashboard</value></data>
+  <data name="Nav_Statistics" xml:space="preserve"><value>Statistiken</value></data>
+  <data name="Nav_Admin" xml:space="preserve"><value>Verwaltung</value></data>
+  <data name="Nav_Logout" xml:space="preserve"><value>Abmelden</value></data>
+  <data name="Tooltip_ReportBug" xml:space="preserve"><value>Fehler melden</value></data>
+
+  <!-- Login -->
+  <data name="Login_Subtitle" xml:space="preserve"><value>Das Kaffee-Tagebuch Ihres Büros</value></data>
+  <data name="Msg_Loading" xml:space="preserve"><value>Laden...</value></data>
+  <data name="Heading_SelectDatabase" xml:space="preserve"><value>Datenbank auswählen</value></data>
+  <data name="Login_DatabaseInstruction" xml:space="preserve"><value>Erstellen Sie eine neue Datenbank oder öffnen Sie eine vorhandene:</value></data>
+  <data name="Label_DatabasePath" xml:space="preserve"><value>Datenbankpfad</value></data>
+  <data name="Btn_CreateNewDatabase" xml:space="preserve"><value>Neue Datenbank erstellen</value></data>
+  <data name="Btn_OpenExistingDatabase" xml:space="preserve"><value>Vorhandene Datenbank öffnen</value></data>
+  <data name="Heading_Welcome" xml:space="preserve"><value>Willkommen!</value></data>
+  <data name="Login_FirstAdminInstruction" xml:space="preserve"><value>Erstellen Sie den ersten Administrator, um zu beginnen.</value></data>
+  <data name="Label_AdminName" xml:space="preserve"><value>Administratorname</value></data>
+  <data name="Placeholder_EnterName" xml:space="preserve"><value>Name eingeben...</value></data>
+  <data name="Btn_CreateAndContinue" xml:space="preserve"><value>Erstellen und fortfahren</value></data>
+  <data name="Btn_LoginAs" xml:space="preserve"><value>Anmelden als</value></data>
+  <data name="Btn_CloseDatabase" xml:space="preserve"><value>Datenbank schließen</value></data>
+
+  <!-- Language picker -->
+  <data name="Lang_SelectLanguage" xml:space="preserve"><value>Sprache auswählen</value></data>
+  <data name="Lang_Czech" xml:space="preserve"><value>Čeština</value></data>
+  <data name="Lang_Slovak" xml:space="preserve"><value>Slovenčina</value></data>
+  <data name="Lang_English" xml:space="preserve"><value>English</value></data>
+  <data name="Lang_German" xml:space="preserve"><value>Deutsch</value></data>
+
+  <!-- Dashboard -->
+  <data name="Label_TopRated" xml:space="preserve"><value>Bestbewertet</value></data>
+  <data name="Label_YourRatings" xml:space="preserve"><value>Ihre Bewertungen</value></data>
+  <data name="Label_TotalRatingsDesc" xml:space="preserve"><value>Bewertungen insgesamt</value></data>
+  <data name="Label_CoffeeOfDay" xml:space="preserve"><value>Kaffee des Tages</value></data>
+  <data name="Label_SecretVoting" xml:space="preserve"><value>Geheime Abstimmung</value></data>
+  <data name="Msg_RateBeforeReveal" xml:space="preserve"><value>Bewerten Sie den Kaffee, bevor die Details enthüllt werden.</value></data>
+  <data name="Heading_NoCoffeeToday" xml:space="preserve"><value>Heute kein Kaffee</value></data>
+  <data name="Msg_NoCoffeeSetByAdmin" xml:space="preserve"><value>Der Administrator hat die heutige Mischung noch nicht festgelegt.</value></data>
+  <data name="Msg_FlavorWheel" xml:space="preserve"><value>Nicht sicher beim Geschmack? Schauen Sie sich das Geschmacksrad an</value></data>
+
+  <!-- Statistics tabs -->
+  <data name="Tab_BlendOverview" xml:space="preserve"><value>Mischungsübersicht</value></data>
+  <data name="Tab_MyRatings" xml:space="preserve"><value>Meine Bewertungen</value></data>
+  <data name="Tab_SupplierOverview" xml:space="preserve"><value>Lieferantenübersicht</value></data>
+  <data name="Btn_CompareBlends" xml:space="preserve"><value>Mischungen vergleichen</value></data>
+  <data name="Btn_ExportCsv" xml:space="preserve"><value>CSV exportieren</value></data>
+  <data name="Msg_NoStatistics" xml:space="preserve"><value>Noch keine Statistiken.</value></data>
+  <data name="Msg_NoTastings" xml:space="preserve"><value>Noch keine Verkostungen.</value></data>
+  <data name="Msg_NoSuppliers" xml:space="preserve"><value>Noch keine Lieferanten.</value></data>
+  <data name="Label_Last30Days" xml:space="preserve"><value>Letzte 30 Tage</value></data>
+  <data name="Btn_Rate" xml:space="preserve"><value>Bewerten</value></data>
+
+  <!-- Table headers / labels -->
+  <data name="Label_Blend" xml:space="preserve"><value>Mischung</value></data>
+  <data name="Label_Average" xml:space="preserve"><value>Durchschnitt</value></data>
+  <data name="Label_Controversy" xml:space="preserve"><value>Kontroversität</value></data>
+  <data name="Label_Count" xml:space="preserve"><value>Anzahl</value></data>
+  <data name="Label_Roaster" xml:space="preserve"><value>Rösterei</value></data>
+  <data name="Label_Supplier" xml:space="preserve"><value>Lieferant</value></data>
+  <data name="Label_PricePerKg" xml:space="preserve"><value>Preis/kg</value></data>
+  <data name="Label_PricePerStar" xml:space="preserve"><value>Preis/&#9733;</value></data>
+  <data name="Label_Date" xml:space="preserve"><value>Datum</value></data>
+  <data name="Label_Note" xml:space="preserve"><value>Anmerkung</value></data>
+  <data name="Label_Rating" xml:space="preserve"><value>Bewertung</value></data>
+  <data name="Label_Total" xml:space="preserve"><value>Gesamt</value></data>
+  <data name="Label_Name" xml:space="preserve"><value>Name</value></data>
+  <data name="Label_Role" xml:space="preserve"><value>Rolle</value></data>
+  <data name="Label_Actions" xml:space="preserve"><value>Aktionen</value></data>
+  <data name="Label_Origin" xml:space="preserve"><value>Herkunft</value></data>
+  <data name="Label_Roasting" xml:space="preserve"><value>Röstung</value></data>
+  <data name="Label_Ratings" xml:space="preserve"><value>Bewertungen</value></data>
+  <data name="Label_BlendA" xml:space="preserve"><value>Mischung A</value></data>
+  <data name="Label_BlendB" xml:space="preserve"><value>Mischung B</value></data>
+
+  <!-- Admin tabs -->
+  <data name="Tab_CoffeeOfDay" xml:space="preserve"><value>Kaffee des Tages</value></data>
+  <data name="Tab_Blends" xml:space="preserve"><value>Mischungen</value></data>
+  <data name="Tab_Users" xml:space="preserve"><value>Benutzer</value></data>
+
+  <!-- Admin forms -->
+  <data name="Heading_AddUser" xml:space="preserve"><value>Benutzer hinzufügen</value></data>
+  <data name="Placeholder_Name" xml:space="preserve"><value>Name...</value></data>
+  <data name="Btn_Add" xml:space="preserve"><value>Hinzufügen</value></data>
+  <data name="Role_Admin" xml:space="preserve"><value>Admin</value></data>
+  <data name="Role_User" xml:space="preserve"><value>Benutzer</value></data>
+  <data name="Btn_RemoveAdmin" xml:space="preserve"><value>Admin entfernen</value></data>
+  <data name="Btn_AddAdmin" xml:space="preserve"><value>Admin hinzufügen</value></data>
+  <data name="Btn_Deactivate" xml:space="preserve"><value>Deaktivieren</value></data>
+  <data name="Heading_AddBlend" xml:space="preserve"><value>Mischung hinzufügen</value></data>
+  <data name="Label_OriginOptional" xml:space="preserve"><value>Herkunft (optional)</value></data>
+  <data name="Label_RoastLevel" xml:space="preserve"><value>Röstgrad</value></data>
+  <data name="Label_WeightOptional" xml:space="preserve"><value>Gewicht (g) — optional</value></data>
+  <data name="Label_PriceOptional" xml:space="preserve"><value>Preis (CZK) — optional</value></data>
+  <data name="Btn_AddBlend" xml:space="preserve"><value>Mischung hinzufügen</value></data>
+  <data name="Placeholder_Select" xml:space="preserve"><value>— auswählen —</value></data>
+  <data name="Btn_Save" xml:space="preserve"><value>Speichern</value></data>
+  <data name="Btn_Cancel" xml:space="preserve"><value>Abbrechen</value></data>
+  <data name="Btn_Edit" xml:space="preserve"><value>Bearbeiten</value></data>
+  <data name="Btn_Remove" xml:space="preserve"><value>Entfernen</value></data>
+  <data name="Heading_CoffeesOfDay" xml:space="preserve"><value>Kaffees des Tages</value></data>
+  <data name="Msg_NoCoffeeSet" xml:space="preserve"><value>Es wurde noch kein Kaffee des Tages festgelegt.</value></data>
+  <data name="Heading_AddCoffeeOfDay" xml:space="preserve"><value>Kaffee des Tages hinzufügen</value></data>
+  <data name="Placeholder_SelectBlend" xml:space="preserve"><value>— Mischung auswählen —</value></data>
+  <data name="Label_NoteOptional" xml:space="preserve"><value>Anmerkung (optional)</value></data>
+  <data name="Placeholder_NoteForTasters" xml:space="preserve"><value>Anmerkung für Verkoster (z.B. Probe A)...</value></data>
+  <data name="Btn_AddCoffeeOfDay" xml:space="preserve"><value>Kaffee des Tages hinzufügen</value></data>
+  <data name="Heading_Tools" xml:space="preserve"><value>Werkzeuge</value></data>
+
+  <!-- Error / status messages -->
+  <data name="Err_EnterDatabasePath" xml:space="preserve"><value>Geben Sie den Datenbankpfad ein.</value></data>
+  <data name="Err_CannotCreateDatabase" xml:space="preserve"><value>Datenbank kann nicht erstellt werden. Überprüfen Sie die Berechtigungen.</value></data>
+  <data name="Err_DatabasePathTooLong" xml:space="preserve"><value>Der Datenbankpfad ist zu lang.</value></data>
+  <data name="Err_CreateDatabaseFailed" xml:space="preserve"><value>Fehler beim Erstellen der Datenbank: {0}</value></data>
+  <data name="Err_OpenDatabaseFailed" xml:space="preserve"><value>Fehler beim Öffnen der Datenbank: {0}</value></data>
+  <data name="Err_FileNotFound" xml:space="preserve"><value>Datei nicht gefunden. Überprüfen Sie den Pfad.</value></data>
+  <data name="Err_EnterAdminName" xml:space="preserve"><value>Geben Sie den Administratornamen ein.</value></data>
+  <data name="Err_EnterUserName" xml:space="preserve"><value>Geben Sie den Benutzernamen ein.</value></data>
+  <data name="Msg_UserAdded" xml:space="preserve"><value>Benutzer wurde hinzugefügt.</value></data>
+  <data name="Msg_UserDeactivated" xml:space="preserve"><value>Benutzer {0} wurde deaktiviert.</value></data>
+  <data name="Err_EnterBlendName" xml:space="preserve"><value>Geben Sie den Mischungsnamen ein.</value></data>
+  <data name="Err_EnterRoasterName" xml:space="preserve"><value>Geben Sie den Namen der Rösterei ein.</value></data>
+  <data name="Err_SelectSupplier" xml:space="preserve"><value>Wählen Sie einen Lieferanten aus.</value></data>
+  <data name="Msg_BlendAdded" xml:space="preserve"><value>Mischung wurde hinzugefügt.</value></data>
+  <data name="Msg_BlendUpdated" xml:space="preserve"><value>Mischung wurde aktualisiert.</value></data>
+  <data name="Msg_BlendRemoved" xml:space="preserve"><value>Mischung {0} wurde entfernt.</value></data>
+  <data name="Err_SelectBlend" xml:space="preserve"><value>Wählen Sie eine Mischung aus.</value></data>
+  <data name="Msg_CoffeeOfDayAdded" xml:space="preserve"><value>Kaffee des Tages hinzugefügt: {0}</value></data>
+  <data name="Msg_CoffeeOfDayRemoved" xml:space="preserve"><value>Kaffee des Tages wurde entfernt.</value></data>
+  <data name="Msg_DataExported" xml:space="preserve"><value>Daten wurden exportiert.</value></data>
+
+  <!-- BlendDetail -->
+  <data name="Msg_BlendNotFound" xml:space="preserve"><value>Mischung nicht gefunden.</value></data>
+  <data name="Heading_RatingDistribution" xml:space="preserve"><value>Bewertungsverteilung</value></data>
+  <data name="Heading_IndividualRatings" xml:space="preserve"><value>Einzelne Bewertungen</value></data>
+  <data name="Msg_NoRatings" xml:space="preserve"><value>Noch keine Bewertungen.</value></data>
+
+  <!-- Comparison -->
+  <data name="Heading_Comparison" xml:space="preserve"><value>Mischungsvergleich</value></data>
+
+  <!-- RatingForm -->
+  <data name="Label_YourRating" xml:space="preserve"><value>Ihre Bewertung</value></data>
+  <data name="Label_CommentOptional" xml:space="preserve"><value>Kommentar (optional)</value></data>
+  <data name="Placeholder_HowDidItTaste" xml:space="preserve"><value>Wie hat der Kaffee geschmeckt?</value></data>
+  <data name="Label_TastingNotes" xml:space="preserve"><value>Geschmacksnotizen</value></data>
+  <data name="Btn_SaveChanges" xml:space="preserve"><value>Änderungen speichern</value></data>
+  <data name="Btn_SubmitRating" xml:space="preserve"><value>Bewertung abschicken</value></data>
+  <data name="Msg_RatingSaved" xml:space="preserve"><value>Ihre Bewertung wurde gespeichert.</value></data>
+
+  <!-- ControversyBadge -->
+  <data name="Badge_Agreement" xml:space="preserve"><value>Einigkeit</value></data>
+  <data name="Badge_MildDisagreement" xml:space="preserve"><value>Leichter Dissens</value></data>
+  <data name="Badge_Disagreement" xml:space="preserve"><value>Dissens</value></data>
+
+  <!-- RoastLevel enum -->
+  <data name="RoastLevel_Light" xml:space="preserve"><value>Hell</value></data>
+  <data name="RoastLevel_MediumLight" xml:space="preserve"><value>Mittelhell</value></data>
+  <data name="RoastLevel_Medium" xml:space="preserve"><value>Mittel</value></data>
+  <data name="RoastLevel_MediumDark" xml:space="preserve"><value>Mitteldunkel</value></data>
+  <data name="RoastLevel_Dark" xml:space="preserve"><value>Dunkel</value></data>
+
+  <!-- Misc -->
+  <data name="Msg_PageNotFound" xml:space="preserve"><value>Seite nicht gefunden.</value></data>
+  <data name="BugReport_Body" xml:space="preserve"><value>## Fehlerbeschreibung&#xA;&lt;!-- Beschreiben Sie, was passiert ist --&gt;&#xA;&#xA;## Schritte zur Reproduktion&#xA;1.&#xA;2.&#xA;3.&#xA;&#xA;## Erwartetes Verhalten&#xA;&lt;!-- Was haben Sie erwartet? --&gt;&#xA;&#xA;## Tatsächliches Verhalten&#xA;&lt;!-- Was ist stattdessen passiert? --&gt;&#xA;&#xA;---&#xA;**App-Version:** {0}</value></data>
+
+  <!-- TastingNote names (IDs match DB seed) -->
+  <data name="TastingNote_1" xml:space="preserve"><value>Fruchtig</value></data>
+  <data name="TastingNote_2" xml:space="preserve"><value>Nussig</value></data>
+  <data name="TastingNote_3" xml:space="preserve"><value>Schokoladig</value></data>
+  <data name="TastingNote_4" xml:space="preserve"><value>Karamell</value></data>
+  <data name="TastingNote_5" xml:space="preserve"><value>Blumig</value></data>
+  <data name="TastingNote_6" xml:space="preserve"><value>Würzig</value></data>
+  <data name="TastingNote_7" xml:space="preserve"><value>Zitrusig</value></data>
+  <data name="TastingNote_8" xml:space="preserve"><value>Honigartig</value></data>
+</root>

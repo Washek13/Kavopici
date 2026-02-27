@@ -3,6 +3,7 @@
 @inject IRatingService RatingService
 @inject AppState AppState
 @inject NavigationManager Nav
+@inject IStringLocalizer<SharedResources> L
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 
@@ -13,12 +14,12 @@
 
 @if (isLoading)
 {
-    <div class="loading">Načítání...</div>
+    <div class="loading">@L["Msg_Loading"]</div>
 }
 else if (blendStats == null)
 {
     <div class="panel text-center">
-        <p class="text-muted">Směs nenalezena.</p>
+        <p class="text-muted">@L["Msg_BlendNotFound"]</p>
     </div>
 }
 else
@@ -26,20 +27,20 @@ else
     <div class="card">
         <h1>@blendStats.BlendName</h1>
         <div class="blend-details mb-16">
-            <div class="blend-detail"><span class="label">Pražírna:</span> @blendStats.Roaster</div>
+            <div class="blend-detail"><span class="label">@L["Label_Roaster"]:</span> @blendStats.Roaster</div>
             @if (!string.IsNullOrEmpty(blendStats.Origin))
             {
-                <div class="blend-detail"><span class="label">Původ:</span> @blendStats.Origin</div>
+                <div class="blend-detail"><span class="label">@L["Label_Origin"]:</span> @blendStats.Origin</div>
             }
-            <div class="blend-detail"><span class="label">Pražení:</span> @blendStats.RoastLevel.ToDisplayString()</div>
-            <div class="blend-detail"><span class="label">Dodavatel:</span> @blendStats.SupplierName</div>
+            <div class="blend-detail"><span class="label">@L["Label_Roasting"]:</span> @L[$"RoastLevel_{blendStats.RoastLevel}"]</div>
+            <div class="blend-detail"><span class="label">@L["Label_Supplier"]:</span> @blendStats.SupplierName</div>
             @if (blendStats.PricePerKg.HasValue)
             {
-                <div class="blend-detail"><span class="label">Cena/kg:</span> @blendStats.PricePerKg.Value.ToString("F0") Kč</div>
+                <div class="blend-detail"><span class="label">@L["Label_PricePerKg"]:</span> @blendStats.PricePerKg.Value.ToString("F0") Kč</div>
             }
             @if (blendStats.PricePerformance.HasValue)
             {
-                <div class="blend-detail"><span class="label">Cena/★:</span> @blendStats.PricePerformance.Value.ToString("F0") Kč</div>
+                <div class="blend-detail"><span class="label">@L["Label_PricePerStar"]:</span> @blendStats.PricePerformance.Value.ToString("F0") Kč</div>
             }
         </div>
 
@@ -51,14 +52,14 @@ else
             {
                 <span style="font-size:24px;color:var(--amber-gold);">&#9733;</span>
             }
-            <span class="text-muted">(@blendStats.RatingCount hodnocení)</span>
+            <span class="text-muted">(@blendStats.RatingCount @L["Label_Ratings"])</span>
             <ControversyBadge Level="blendStats.ControversyLevel" />
         </div>
 
         @* Distribution *@
         @if (blendStats.RatingCount > 0)
         {
-            <h3>Rozložení hodnocení</h3>
+            <h3>@L["Heading_RatingDistribution"]</h3>
             var maxCount = blendStats.Distribution.Max();
             @for (int i = 4; i >= 0; i--)
             {
@@ -76,11 +77,11 @@ else
     </div>
 
     @* Individual ratings *@
-    <h2 class="mt-16">Jednotlivá hodnocení</h2>
+    <h2 class="mt-16">@L["Heading_IndividualRatings"]</h2>
     @if (ratings.Count == 0)
     {
         <div class="panel text-center">
-            <p class="text-muted">Zatím žádná hodnocení.</p>
+            <p class="text-muted">@L["Msg_NoRatings"]</p>
         </div>
     }
     else
@@ -105,7 +106,7 @@ else
                     <div class="tasting-notes mt-8">
                         @foreach (var rtn in r.RatingTastingNotes)
                         {
-                            <span class="note-tag selected readonly">@rtn.TastingNote.Name</span>
+                            <span class="note-tag selected readonly">@L[$"TastingNote_{rtn.TastingNote.Id}"]</span>
                         }
                     </div>
                 }
@@ -142,5 +143,4 @@ else
         catch (Exception ex) { errorMessage = ex.Message; }
         finally { isLoading = false; }
     }
-
 }

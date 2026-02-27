@@ -12,6 +12,8 @@ settingsService.Load();
 builder.Services.AddSingleton<IAppSettingsService>(settingsService);
 builder.Services.AddSingleton<IDbContextFactory<KavopiciDbContext>, KavopiciDbContextFactory>();
 
+builder.Services.AddLocalization(opts => opts.ResourcesPath = "Resources");
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
@@ -62,6 +64,13 @@ if (!string.IsNullOrEmpty(settingsService.DatabasePath) && File.Exists(settingsS
 }
 
 app.UseStaticFiles();
+
+var supportedCultures = new[] { "cs", "sk", "en", "de" };
+app.UseRequestLocalization(new RequestLocalizationOptions()
+    .SetDefaultCulture("cs")
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures));
+
 app.UseAntiforgery();
 
 app.MapRazorComponents<Kavopici.Web.Components.App>()

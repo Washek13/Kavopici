@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="@System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,9 +10,17 @@
     <HeadOutlet @rendermode="RenderMode.InteractiveServer" />
 </head>
 <body>
-    <Routes @rendermode="RenderMode.InteractiveServer" />
+    <Routes CultureName="@System.Globalization.CultureInfo.CurrentUICulture.Name"
+            @rendermode="RenderMode.InteractiveServer" />
     <script src="_framework/blazor.web.js"></script>
     <script>
+        window.setCultureCookie = function (culture) {
+            document.cookie = '.AspNetCore.Culture=c=' + culture + '|uic=' + culture + '; path=/; max-age=' + (365 * 24 * 60 * 60);
+        };
+        window.getCultureCookie = function () {
+            var m = document.cookie.match(/\.AspNetCore\.Culture=([^;]+)/);
+            return m ? decodeURIComponent(m[1]) : null;
+        };
         window.downloadFile = function (fileName, contentType, byteArray) {
             var blob = new Blob([byteArray], { type: contentType });
             var url = URL.createObjectURL(blob);
@@ -27,3 +35,4 @@
     </script>
 </body>
 </html>
+
