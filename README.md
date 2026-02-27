@@ -57,7 +57,7 @@ Kávopíči je webová aplikace pro kancelářské degustace kávy. Administrát
 |---|---|
 | Framework | .NET 8, ASP.NET Core |
 | UI | Blazor Server (Interactive SSR), vlastní CSS |
-| Databáze | SQLite (WAL mód, busy timeout 5 s) |
+| Databáze | SQLite (DELETE journal, busy timeout 30 s, Pooling=False) |
 | ORM | Entity Framework Core 8.0 |
 | Balení | MSIX (Windows), self-contained (multi-platform: win-x64, osx-x64, osx-arm64) |
 | Testování | xUnit, Coverlet |
@@ -72,7 +72,7 @@ Kavopici.sln
 ├── src/
 │   ├── Kavopici.Core/          # Doménová logika, modely, služby, databáze
 │   │   ├── Models/             # User, CoffeeBlend, TastingSession, Rating, TastingNote, BlendStatistics
-│   │   ├── Data/               # KavopiciDbContext, DbContextFactory, SQLite WAL interceptor
+│   │   ├── Data/               # KavopiciDbContext, DbContextFactory, SQLite pragma interceptor
 │   │   └── Services/           # UserService, BlendService, SessionService, RatingService,
 │   │                           # StatisticsService, CsvExportService, AppSettingsService, IUpdateService
 │   └── Kavopici.Web/           # ASP.NET Core aplikace (vstupní bod)
@@ -176,7 +176,7 @@ Aplikace kontroluje nové verze automaticky. Pokud je dostupná aktualizace, v z
 ## Konfigurace
 
 - **Cesta k databázi** — ukládá se do `%APPDATA%/Kavopici/settings.json`. Uživatel ji vybírá při prvním spuštění.
-- **SQLite pragmy** — WAL mód, busy timeout 5 s, synchronous NORMAL (nastaveno automaticky přes interceptor).
+- **SQLite pragmy** — DELETE journal, busy timeout 30 s, synchronous NORMAL, Pooling=False (nastaveno automaticky přes interceptor).
 - **Port** — `http://localhost:5201` (konfigurovatelný v `appsettings.json`).
 
 ---

@@ -41,7 +41,11 @@ if (!string.IsNullOrEmpty(settingsService.DatabasePath) && File.Exists(settingsS
             using var scope = app.Services.CreateScope();
             var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<KavopiciDbContext>>();
             await using var db = await factory.CreateDbContextAsync();
-            await db.Database.MigrateAsync();
+            var pending = (await db.Database.GetPendingMigrationsAsync()).ToList();
+            if (pending.Count > 0)
+            {
+                await db.Database.MigrateAsync();
+            }
             migrated = true;
         }
         catch (Exception ex) when (attempt < 6)
