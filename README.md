@@ -1,99 +1,97 @@
 # Kávopíči
 
-**Sdílená aplikace pro hodnocení a porovnávání kávových směsí při firemních degustacích.**
+**A shared app for coworkers to rate and compare coffee blends during office tastings.**
 
-> English: A shared app for coworkers to rate and compare coffee blends during office tastings.
+## About
 
-## O projektu
+Kávopíči is a web application for office coffee tastings. An admin sets the "coffee of the day", coworkers rate it (1–5 stars), add a comment and tasting notes, and the app displays summary statistics, leaderboards, and blend comparisons.
 
-Kávopíči je webová aplikace pro kancelářské degustace kávy. Administrátor nastaví "kávu dne", kolegové ji ohodnotí (1–5 hvězdiček), přidají komentář a chuťové poznámky, a aplikace zobrazí souhrnné statistiky, žebříčky a porovnání směsí.
+### Target users
 
-### Cílové skupiny
-
-- **Admin** — spravuje uživatele, přidává směsi, nastavuje denní kávu, exportuje data.
-- **Degustátoři** (5–20 kolegů) — hodnotí kávu dne, prohlížejí statistiky a historii.
+- **Admin** — manages users, adds blends, sets the daily coffee, exports data.
+- **Tasters** (5–20 coworkers) — rate the coffee of the day, browse statistics and history.
 
 ---
 
-## Funkce
+## Features
 
-### Přihlášení
-- Výběr profilu ze seznamu (bez hesel — důvěryhodné prostředí).
-- Na prvním spuštění výběr jazyka (🇨🇿 CS / 🇸🇰 SK / 🇬🇧 EN / 🇩🇪 DE) a volba databáze (vytvoření nové nebo otevření existující) a vytvoření prvního administrátora.
+### Login
+- Profile selection from a list (no passwords — trusted environment).
+- On first launch: language selection (🇨🇿 CS / 🇸🇰 SK / 🇬🇧 EN / 🇩🇪 DE), database setup (create new or open existing), and first admin creation.
 
-### Nástěnka (Dashboard)
-- **Přehled** — kliknutelné karty s nejlépe hodnocenou směsí (→ detail) a počtem vlastních hodnocení (→ statistiky).
-- **Kolečko chutí kávy** — odkaz na interaktivní kolečko chutí pro lepší orientaci v chuťových profilech.
-- Zobrazení "Káv dne" — administrátor může nastavit více směsí k degustaci, každá se zobrazí jako samostatná karta.
-- **Tajné hlasování** — detaily směsi se odhalí až po ohodnocení. Poznámka administrátora je viditelná i před hodnocením, aby uživatelé rozlišili jednotlivé vzorky.
-- Hodnocení 1–5 hvězdiček, volitelný komentář a výběr chuťových poznámek (Ovocná, Ořechová, Čokoládová, Karamelová, Květinová, Kořeněná, Citrusová, Medová).
-- Úprava vlastního hodnocení.
-- **Zpětné hlasování** — zmeškané směsi lze zpětně ohodnotit v záložce „Moje hodnocení" ve Statistikách.
+### Dashboard
+- **Overview** — clickable cards for the top-rated blend (→ detail) and your total rating count (→ statistics).
+- **Coffee flavor wheel** — link to an interactive flavor wheel for better orientation in taste profiles.
+- Multiple "coffees of the day" — admin can set multiple blends for a session, each shown as a separate card.
+- **Secret voting** — blend details are revealed only after rating. Admin notes are visible before voting so users can tell samples apart.
+- Rating 1–5 stars, optional comment, and tasting note selection (Fruity, Nutty, Chocolatey, Caramel, Floral, Spiced, Citrusy, Honey).
+- Edit your own rating.
+- **Retroactive voting** — missed blends can be rated later from the "My Ratings" tab in Statistics.
 
-### Statistiky
-- Souhrnná tabulka směsí (průměr, **kontroverznost**, počet, pražírna, dodavatel, cena/kg, **cena/★**) — sortovatelná podle sloupců.
-- **Kontroverznost** — úroveň shody mezi hodnotiteli vypočtená z rozptylu hodnocení (Shoda / Mírný rozpor / Rozpor).
-- **Cena za hvězdičku** — poměr ceny za kilogram a průměrného hodnocení; nižší hodnota = lepší hodnota za peníze.
-- **Detail směsi** — rozložení hvězdiček, jednotlivá hodnocení s komentáři a poznámkami.
-- **Moje hodnocení** — historie všech degustací s možností zpětného ohodnocení zmeškaných směsí a **úpravy existujících hodnocení**.
-- **Porovnání směsí** — dvě směsi vedle sebe s rozložením hodnocení.
-- **Export CSV** — stažení dat do souboru (včetně kontroverznosti a ceny/★).
+### Statistics
+- Summary table of blends (average, **controversy**, count, roaster, supplier, price/kg, **price/★**) — sortable by column.
+- **Controversy** — agreement level between raters calculated from score variance (Agreement / Mild disagreement / Disagreement).
+- **Price per star** — ratio of price per kilogram to average rating; lower = better value for money.
+- **Blend detail** — star distribution, individual ratings with comments and tasting notes.
+- **My ratings** — full tasting history with retroactive rating of missed blends and **editing of existing ratings**.
+- **Blend comparison** — two blends side by side with rating distribution.
+- **CSV export** — download data to a file (including controversy and price/★).
 
-### Správa (admin)
-- **Uživatelé** — přidání, deaktivace, přidělení/odebrání admin práv (poslední admin nelze odebrat).
-- **Směsi** — přidání (název, pražírna, původ, stupeň pražení, dodavatel, hmotnost, cena), úprava existujících směsí a odebrání (soft delete). Cena za 1 kg se automaticky vypočítá z hmotnosti a ceny.
-- **Káva dne** — přidání a odebrání směsí pro denní degustaci (lze vybrat více směsí), volitelná poznámka ke každé.
-- **Export CSV** — export statistik.
+### Admin
+- **Users** — add, deactivate, grant/revoke admin rights (last admin cannot be removed).
+- **Blends** — add (name, roaster, origin, roast level, supplier, weight, price), edit existing blends and remove (soft delete). Price per kg is calculated automatically from weight and price.
+- **Coffee of the day** — add and remove blends for the daily tasting session (multiple blends supported), optional note per blend.
+- **CSV export** — export statistics.
 
-### Lokalizace
-- Podpora čtyř jazyků: **česky, slovensky, English, Deutsch**.
-- Jazyk se vybírá při prvním spuštění a je uložen v cookie. Lze kdykoli změnit přepínačem v záhlaví.
-- Přeloženo vše včetně chuťových poznámek, stupňů pražení a šablony hlášení chyb.
+### Localization
+- Four supported languages: **Czech, Slovak, English, German**.
+- Language is selected on first launch and stored in a cookie. Can be changed at any time via the header switcher.
+- Everything is translated, including tasting notes, roast levels, and the bug report template.
 
-### Automatické aktualizace
-- Kontrola nových verzí přes GitHub Releases na pozadí při startu.
-- Stažení a instalace MSIX balíčku přímo z aplikace.
+### Auto-update
+- Checks for new versions via GitHub Releases in the background on startup.
+- Downloads and installs the MSIX package directly from within the app.
 
 ---
 
-## Technologie
+## Technology
 
-| Vrstva | Technologie |
+| Layer | Technology |
 |---|---|
 | Framework | .NET 8, ASP.NET Core |
-| UI | Blazor Server (Interactive SSR), vlastní CSS |
-| Databáze | SQLite (DELETE journal, busy timeout 30 s, Pooling=False) |
+| UI | Blazor Server (Interactive SSR), custom CSS |
+| Database | SQLite (DELETE journal, busy timeout 30 s, Pooling=False) |
 | ORM | Entity Framework Core 8.0 |
-| Lokalizace | .NET `IStringLocalizer`, `.resx` resource files (cs, sk, en, de) |
-| Balení | MSIX (Windows), self-contained (multi-platform: win-x64, osx-x64, osx-arm64) |
-| Testování | xUnit, Coverlet |
+| Localization | .NET `IStringLocalizer`, `.resx` resource files (cs, sk, en, de) |
+| Packaging | MSIX (Windows), self-contained (multi-platform: win-x64, osx-x64, osx-arm64) |
+| Testing | xUnit, Coverlet |
 | CI/CD | GitHub Actions |
 
 ---
 
-## Architektura
+## Architecture
 
 ```
 Kavopici.sln
 ├── src/
-│   ├── Kavopici.Core/          # Doménová logika, modely, služby, databáze
+│   ├── Kavopici.Core/          # Domain logic, models, services, database
 │   │   ├── Models/             # User, CoffeeBlend, TastingSession, Rating, TastingNote, BlendStatistics
 │   │   ├── Data/               # KavopiciDbContext, DbContextFactory, SQLite pragma interceptor
 │   │   └── Services/           # UserService, BlendService, SessionService, RatingService,
 │   │                           # StatisticsService, CsvExportService, AppSettingsService, IUpdateService
-│   └── Kavopici.Web/           # ASP.NET Core aplikace (vstupní bod)
+│   └── Kavopici.Web/           # ASP.NET Core app (entry point)
 │       ├── Components/
 │       │   ├── Pages/          # Login, Dashboard, Statistics, BlendDetail, Comparison, Admin
 │       │   ├── Shared/         # StarRating, BlendCard, UserInitials, ControversyBadge
-│       │   └── Layout/         # MainLayout (navigace, update banner)
-│       ├── Resources/          # SharedResources.resx + satelity (.cs/.sk/.en/.de)
+│       │   └── Layout/         # MainLayout (navigation, update banner)
+│       ├── Resources/          # SharedResources.resx + satellites (.cs/.sk/.en/.de)
 │       ├── Services/           # AppState, UpdateService, UpdateState
-│       └── wwwroot/            # CSS, ikony, favicon
+│       └── wwwroot/            # CSS, icons, favicon
 └── tests/
-    └── Kavopici.Tests/         # Unit testy (UserService, RatingService, SessionService, StatisticsService)
+    └── Kavopici.Tests/         # Unit tests (UserService, RatingService, SessionService, StatisticsService)
 ```
 
-### Datový model
+### Data model
 
 ```
 User                    CoffeeBlend              TastingSession
@@ -118,38 +116,38 @@ Rating                  TastingNote              RatingTastingNote
 ├── Comment?
 └── CreatedAt
 
-Unique: (UserId, SessionId) — jedno hodnocení na uživatele za sezení.
+Unique: (UserId, SessionId) — one rating per user per session.
 ```
 
 **RoastLevel**: `Light`, `MediumLight`, `Medium`, `MediumDark`, `Dark`
 
 ---
 
-## Spuštění pro vývoj
+## Development
 
-### Požadavky
+### Prerequisites
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-### Build a spuštění
+### Build and run
 
 ```bash
-# Build celého řešení
+# Build the full solution
 dotnet build Kavopici.sln
 
-# Spuštění aplikace
+# Run the app
 dotnet run --project src/Kavopici.Web/Kavopici.Web.csproj
 ```
 
-Aplikace se spustí na `http://localhost:5201` a automaticky otevře prohlížeč.
+The app starts at `http://localhost:5201` and opens the browser automatically.
 
-### Testy
+### Tests
 
 ```bash
 dotnet test tests/Kavopici.Tests/Kavopici.Tests.csproj
 ```
 
-### Publikace
+### Publish
 
 ```bash
 # Windows (win-x64)
@@ -164,37 +162,37 @@ dotnet publish src/Kavopici.Web/Kavopici.Web.csproj -c Release -r osx-arm64 --se
 
 ---
 
-## Instalace (pro uživatele)
+## Installation (end users)
 
-Aplikace se distribuuje jako MSIX balíček přes [GitHub Releases](https://github.com/Washek13/Kavopici/releases).
+The app is distributed as an MSIX package via [GitHub Releases](https://github.com/Washek13/Kavopici/releases).
 
-### Prvotní instalace
+### First-time installation
 
-1. Ze stránky Releases stáhněte soubory `Kavopici.cer` a `Install-Certificate.ps1`.
-2. Spusťte `Install-Certificate.ps1` jako Administrátor — nainstaluje podpisový certifikát (stačí jednou).
-3. Stáhněte a otevřete `Kavopici-X.Y.Z.msix` — nainstaluje aplikaci.
+1. From the Releases page, download `Kavopici.cer` and `Install-Certificate.ps1`.
+2. Run `Install-Certificate.ps1` as Administrator — installs the signing certificate (one-time only).
+3. Download and open `Kavopici-X.Y.Z.msix` — installs the app.
 
-### Aktualizace
+### Updates
 
-Aplikace kontroluje nové verze automaticky. Pokud je dostupná aktualizace, v záhlaví se zobrazí banner s tlačítkem "Aktualizovat".
+The app checks for new versions automatically. When an update is available, a banner with an "Update" button appears in the header.
 
 ---
 
-## Konfigurace
+## Configuration
 
-- **Cesta k databázi** — ukládá se do `%APPDATA%/Kavopici/settings.json`. Uživatel ji vybírá při prvním spuštění.
-- **SQLite pragmy** — DELETE journal, busy timeout 30 s, synchronous NORMAL, Pooling=False (nastaveno automaticky přes interceptor).
-- **Port** — `http://localhost:5201` (konfigurovatelný v `appsettings.json`).
+- **Database path** — stored in `%APPDATA%/Kavopici/settings.json`. Selected by the user on first launch.
+- **SQLite pragmas** — DELETE journal, busy timeout 30 s, synchronous NORMAL, Pooling=False (set automatically via interceptor).
+- **Port** — `http://localhost:5201` (configurable in `appsettings.json`).
 
 ---
 
 ## CI/CD
 
-GitHub Actions workflow (`.github/workflows/build-msix.yml`) se spouští při push tagu `v*`:
+GitHub Actions workflow (`.github/workflows/build-msix.yml`) triggers on push of a `v*` tag:
 
-1. Build a publish .NET aplikace.
-2. Generování tile obrázků z ikony.
-3. Vytvoření a podepsání MSIX balíčku.
-4. Publikace GitHub Release s balíčkem, certifikátem a instalačním skriptem.
+1. Build and publish the .NET app.
+2. Generate tile images from the icon.
+3. Create and sign the MSIX package.
+4. Publish a GitHub Release with the package, certificate, and install script.
 
 Secrets: `CERT_PFX_BASE64`, `CERT_PASSWORD`.
