@@ -22,13 +22,13 @@
 }
 
 <div class="tab-bar">
-    <button class="tab-btn @(tab == 0 ? "active" : "")" @onclick="() => tab = 0">Uživatelé</button>
+    <button class="tab-btn @(tab == 0 ? "active" : "")" @onclick="() => tab = 0">Káva dne</button>
     <button class="tab-btn @(tab == 1 ? "active" : "")" @onclick="() => tab = 1">Směsi</button>
-    <button class="tab-btn @(tab == 2 ? "active" : "")" @onclick="() => tab = 2">Káva dne</button>
+    <button class="tab-btn @(tab == 2 ? "active" : "")" @onclick="() => tab = 2">Uživatelé</button>
 </div>
 
 @* === Users Tab === *@
-@if (tab == 0)
+@if (tab == 2)
 {
     <div class="card">
         <h2>Přidat uživatele</h2>
@@ -215,7 +215,7 @@
 }
 
 @* === Blend of Day Tab === *@
-@if (tab == 2)
+@if (tab == 0)
 {
     <div class="card">
         <h2>Kávy dne</h2>
