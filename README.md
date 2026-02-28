@@ -17,6 +17,7 @@ Kávopíči is a web application for office coffee tastings. An admin sets the "
 
 ### Login
 - Profile selection from a list (no passwords — trusted environment).
+- **Auto-login** — the selected user is remembered via a browser cookie. On page refresh or app restart, the user is logged in automatically. Logging out clears the cookie.
 - On first launch: language selection (🇨🇿 CS / 🇸🇰 SK / 🇬🇧 EN / 🇩🇪 DE), database setup (create new or open existing), and first admin creation.
 
 ### Dashboard

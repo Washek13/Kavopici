@@ -216,5 +216,37 @@ public class UserServiceTests : IDisposable
             () => _service.ToggleAdminAsync(9999));
     }
 
+    [Fact]
+    public async Task GetByIdAsync_ExistingUser_ReturnsUser()
+    {
+        var created = await _service.CreateUserAsync("Test User");
+
+        var result = await _service.GetByIdAsync(created.Id);
+
+        Assert.NotNull(result);
+        Assert.Equal("Test User", result!.Name);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_NonExistentUser_ReturnsNull()
+    {
+        var result = await _service.GetByIdAsync(9999);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_InactiveUser_StillReturnsUser()
+    {
+        var admin = await _service.CreateUserAsync("Admin", isAdmin: true);
+        var user = await _service.CreateUserAsync("Inactive");
+        await _service.DeactivateUserAsync(user.Id);
+
+        var result = await _service.GetByIdAsync(user.Id);
+
+        Assert.NotNull(result);
+        Assert.False(result!.IsActive);
+    }
+
     public void Dispose() => _factory.Dispose();
 }

@@ -21,6 +21,16 @@
             var m = document.cookie.match(/\.AspNetCore\.Culture=([^;]+)/);
             return m ? decodeURIComponent(m[1]) : null;
         };
+        window.setUserCookie = function (userId) {
+            document.cookie = 'Kavopici.User=' + userId + '; path=/; max-age=' + (365 * 24 * 60 * 60);
+        };
+        window.clearUserCookie = function () {
+            document.cookie = 'Kavopici.User=; path=/; max-age=0';
+        };
+        window.getUserCookie = function () {
+            var m = document.cookie.match(/Kavopici\.User=(\d+)/);
+            return m ? m[1] : null;
+        };
         window.downloadFile = function (fileName, contentType, byteArray) {
             var blob = new Blob([byteArray], { type: contentType });
             var url = URL.createObjectURL(blob);

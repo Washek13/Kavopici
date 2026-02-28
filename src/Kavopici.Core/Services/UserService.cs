@@ -13,6 +13,12 @@ public class UserService : IUserService
         _contextFactory = contextFactory;
     }
 
+    public async Task<User?> GetByIdAsync(int userId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        return await context.Users.FindAsync(userId);
+    }
+
     public async Task<List<User>> GetActiveUsersAsync()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();

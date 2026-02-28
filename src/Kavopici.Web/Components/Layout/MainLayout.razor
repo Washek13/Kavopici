@@ -109,8 +109,9 @@
     private void GoToStatistics() => Nav.NavigateTo("/statistics");
     private void GoToAdmin() => Nav.NavigateTo("/admin");
 
-    private void Logout()
+    private async Task Logout()
     {
+        await JS.InvokeVoidAsync("clearUserCookie");
         AppState.Logout();
         Nav.NavigateTo("/");
     }
