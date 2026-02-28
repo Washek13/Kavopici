@@ -4,6 +4,26 @@ using Kavopici.Services;
 using Kavopici.Web.Services;
 using Microsoft.EntityFrameworkCore;
 
+// Single-instance detection: if an instance is already running, open browser and exit
+var config = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: true)
+    .Build();
+var serverUrl = config["Urls"] ?? "http://localhost:5201";
+
+using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+try
+{
+    await httpClient.GetAsync(serverUrl);
+    // Server responded — another instance is already running
+    Process.Start(new ProcessStartInfo { FileName = serverUrl, UseShellExecute = true });
+    return;
+}
+catch
+{
+    // No response — no instance running, continue with normal startup
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Settings (DB path stored in %APPDATA%/Kavopici/settings.json)
@@ -88,19 +108,87 @@ _ = Task.Run(async () =>
     }
 });
 
-// Auto-open browser
+// Auto-open browser with splash screen
 var url = app.Urls.FirstOrDefault() ?? "http://localhost:5201";
-Task.Run(async () =>
+var splashPath = Path.Combine(Path.GetTempPath(), "kavopici-splash.html");
+try
 {
-    await Task.Delay(500);
-    try
-    {
-        Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
-    }
-    catch
-    {
-        // Ignore if browser can't be opened (e.g. headless environment)
-    }
+    var iconPath = Path.Combine(app.Environment.WebRootPath, "icon-80.png");
+    var iconBase64 = Convert.ToBase64String(File.ReadAllBytes(iconPath));
+    var splashHtml = $@"<!DOCTYPE html>
+<html>
+<head>
+<meta charset=""utf-8"">
+<title>Kávopíči</title>
+<style>
+  * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+  body {{
+    background: #FFF8F0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+  }}
+  .splash {{
+    text-align: center;
+  }}
+  .splash img {{
+    width: 80px;
+    height: 80px;
+    margin-bottom: 16px;
+  }}
+  .splash h1 {{
+    font-family: 'Georgia', serif;
+    font-size: 42px;
+    color: #2C1810;
+    letter-spacing: 3px;
+    margin-bottom: 24px;
+  }}
+  .loading {{
+    color: #4A2C2A;
+    font-size: 16px;
+  }}
+  .loading::after {{
+    content: '';
+    animation: dots 1.5s steps(4, end) infinite;
+  }}
+  @keyframes dots {{
+    0% {{ content: ''; }}
+    25% {{ content: '.'; }}
+    50% {{ content: '..'; }}
+    75% {{ content: '...'; }}
+  }}
+</style>
+</head>
+<body>
+<div class=""splash"">
+  <img src=""data:image/png;base64,{iconBase64}"" alt=""Kávopíči"">
+  <h1>KÁVOPÍČI</h1>
+  <div class=""loading"">Načítání</div>
+</div>
+<script>
+  var target = '{url}';
+  var timer = setInterval(function() {{
+    fetch(target, {{ mode: 'no-cors' }}).then(function() {{
+      clearInterval(timer);
+      window.location.href = target;
+    }}).catch(function() {{}});
+  }}, 500);
+</script>
+</body>
+</html>";
+    File.WriteAllText(splashPath, splashHtml);
+    Process.Start(new ProcessStartInfo { FileName = splashPath, UseShellExecute = true });
+}
+catch
+{
+    // Ignore if browser can't be opened (e.g. headless environment)
+}
+
+app.Lifetime.ApplicationStopping.Register(() =>
+{
+    try { File.Delete(splashPath); } catch { }
 });
 
 app.Run();
