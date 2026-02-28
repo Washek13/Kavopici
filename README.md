@@ -140,7 +140,7 @@ dotnet build Kavopici.sln
 dotnet run --project src/Kavopici.Web/Kavopici.Web.csproj
 ```
 
-The app starts at `http://localhost:5201` and opens the browser automatically.
+The app starts at `http://localhost:5201` and opens the browser automatically. A splash screen with the app logo is shown immediately while the server finishes starting, then the browser redirects to the app once it's ready.
 
 **Single-instance:** If an instance is already running, launching the app again opens the browser to the existing instance and exits — no port conflict crash.
 
