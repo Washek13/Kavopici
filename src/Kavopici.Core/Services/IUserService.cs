@@ -4,6 +4,7 @@ namespace Kavopici.Services;
 
 public interface IUserService
 {
+    Task<User?> GetByIdAsync(int userId);
     Task<List<User>> GetActiveUsersAsync();
     Task<List<User>> GetAllUsersAsync();
     Task<User> CreateUserAsync(string name, bool isAdmin = false);

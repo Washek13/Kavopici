@@ -138,11 +138,28 @@
     {
         if (firstRender)
         {
-            var cookie = await JS.InvokeAsync<string?>("getCultureCookie");
-            if (string.IsNullOrEmpty(cookie))
+            var cultureCookie = await JS.InvokeAsync<string?>("getCultureCookie");
+            if (string.IsNullOrEmpty(cultureCookie))
             {
                 showLanguagePicker = true;
                 StateHasChanged();
+                return;
+            }
+
+            // Auto-login from cookie
+            var userCookie = await JS.InvokeAsync<string?>("getUserCookie");
+            if (!string.IsNullOrEmpty(userCookie) && int.TryParse(userCookie, out var userId))
+            {
+                var user = await UserService.GetByIdAsync(userId);
+                if (user is { IsActive: true })
+                {
+                    AppState.SetUser(user);
+                    Nav.NavigateTo("/dashboard");
+                    return;
+                }
+
+                // Stale cookie — user deleted or deactivated
+                await JS.InvokeVoidAsync("clearUserCookie");
             }
         }
     }
@@ -290,16 +307,17 @@
 
     private void SelectUser(User user) => selectedUser = user;
 
-    private void LoginUser(User user)
+    private async Task LoginUser(User user)
     {
         AppState.SetUser(user);
+        await JS.InvokeVoidAsync("setUserCookie", user.Id);
         Nav.NavigateTo("/dashboard");
     }
 
-    private void LoginSelected()
+    private async Task LoginSelected()
     {
         if (selectedUser != null)
-            LoginUser(selectedUser);
+            await LoginUser(selectedUser);
     }
 
     private async Task CreateFirstAdmin()
