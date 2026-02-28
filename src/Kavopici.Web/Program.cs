@@ -4,6 +4,26 @@ using Kavopici.Services;
 using Kavopici.Web.Services;
 using Microsoft.EntityFrameworkCore;
 
+// Single-instance detection: if an instance is already running, open browser and exit
+var config = new ConfigurationBuilder()
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: true)
+    .Build();
+var serverUrl = config["Urls"] ?? "http://localhost:5201";
+
+using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(2) };
+try
+{
+    await httpClient.GetAsync(serverUrl);
+    // Server responded — another instance is already running
+    Process.Start(new ProcessStartInfo { FileName = serverUrl, UseShellExecute = true });
+    return;
+}
+catch
+{
+    // No response — no instance running, continue with normal startup
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Settings (DB path stored in %APPDATA%/Kavopici/settings.json)

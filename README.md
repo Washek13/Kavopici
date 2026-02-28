@@ -142,6 +142,10 @@ dotnet run --project src/Kavopici.Web/Kavopici.Web.csproj
 
 The app starts at `http://localhost:5201` and opens the browser automatically.
 
+**Single-instance:** If an instance is already running, launching the app again opens the browser to the existing instance and exits — no port conflict crash.
+
+**Hidden console:** The published app uses `WinExe` output type, so no console window is shown on Windows.
+
 ### Tests
 
 ```bash
