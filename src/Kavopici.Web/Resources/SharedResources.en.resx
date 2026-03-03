@@ -21,10 +21,9 @@
   <data name="Login_Subtitle" xml:space="preserve"><value>Your office coffee diary</value></data>
   <data name="Msg_Loading" xml:space="preserve"><value>Loading...</value></data>
   <data name="Heading_SelectDatabase" xml:space="preserve"><value>Select Database</value></data>
-  <data name="Login_DatabaseInstruction" xml:space="preserve"><value>Create a new database or open an existing one:</value></data>
+  <data name="Login_DatabaseInstruction" xml:space="preserve"><value>Enter the database path. If the file does not exist, a new one will be created.</value></data>
   <data name="Label_DatabasePath" xml:space="preserve"><value>Database path</value></data>
-  <data name="Btn_CreateNewDatabase" xml:space="preserve"><value>Create new database</value></data>
-  <data name="Btn_OpenExistingDatabase" xml:space="preserve"><value>Open existing database</value></data>
+  <data name="Btn_OpenOrCreateDatabase" xml:space="preserve"><value>Open / create database</value></data>
   <data name="Heading_Welcome" xml:space="preserve"><value>Welcome!</value></data>
   <data name="Login_FirstAdminInstruction" xml:space="preserve"><value>Create the first administrator to get started.</value></data>
   <data name="Label_AdminName" xml:space="preserve"><value>Administrator name</value></data>
