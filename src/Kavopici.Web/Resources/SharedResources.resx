@@ -21,10 +21,9 @@
   <data name="Login_Subtitle" xml:space="preserve"><value>Kávový deník vaší kanceláře</value></data>
   <data name="Msg_Loading" xml:space="preserve"><value>Načítání...</value></data>
   <data name="Heading_SelectDatabase" xml:space="preserve"><value>Vyberte databázi</value></data>
-  <data name="Login_DatabaseInstruction" xml:space="preserve"><value>Vytvořte novou databázi nebo otevřete existující:</value></data>
+  <data name="Login_DatabaseInstruction" xml:space="preserve"><value>Zadejte cestu k databázi. Pokud soubor neexistuje, vytvoří se nový.</value></data>
   <data name="Label_DatabasePath" xml:space="preserve"><value>Cesta k databázi</value></data>
-  <data name="Btn_CreateNewDatabase" xml:space="preserve"><value>Vytvořit novou databázi</value></data>
-  <data name="Btn_OpenExistingDatabase" xml:space="preserve"><value>Otevřít existující databázi</value></data>
+  <data name="Btn_OpenOrCreateDatabase" xml:space="preserve"><value>Otevřít / vytvořit databázi</value></data>
   <data name="Heading_Welcome" xml:space="preserve"><value>Vítejte!</value></data>
   <data name="Login_FirstAdminInstruction" xml:space="preserve"><value>Vytvořte prvního administrátora pro zahájení.</value></data>
   <data name="Label_AdminName" xml:space="preserve"><value>Jméno administrátora</value></data>

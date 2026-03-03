@@ -21,10 +21,9 @@
   <data name="Login_Subtitle" xml:space="preserve"><value>Das Kaffee-Tagebuch Ihres Büros</value></data>
   <data name="Msg_Loading" xml:space="preserve"><value>Laden...</value></data>
   <data name="Heading_SelectDatabase" xml:space="preserve"><value>Datenbank auswählen</value></data>
-  <data name="Login_DatabaseInstruction" xml:space="preserve"><value>Erstellen Sie eine neue Datenbank oder öffnen Sie eine vorhandene:</value></data>
+  <data name="Login_DatabaseInstruction" xml:space="preserve"><value>Geben Sie den Datenbankpfad ein. Wenn die Datei nicht existiert, wird eine neue erstellt.</value></data>
   <data name="Label_DatabasePath" xml:space="preserve"><value>Datenbankpfad</value></data>
-  <data name="Btn_CreateNewDatabase" xml:space="preserve"><value>Neue Datenbank erstellen</value></data>
-  <data name="Btn_OpenExistingDatabase" xml:space="preserve"><value>Vorhandene Datenbank öffnen</value></data>
+  <data name="Btn_OpenOrCreateDatabase" xml:space="preserve"><value>Datenbank öffnen / erstellen</value></data>
   <data name="Heading_Welcome" xml:space="preserve"><value>Willkommen!</value></data>
   <data name="Login_FirstAdminInstruction" xml:space="preserve"><value>Erstellen Sie den ersten Administrator, um zu beginnen.</value></data>
   <data name="Label_AdminName" xml:space="preserve"><value>Administratorname</value></data>

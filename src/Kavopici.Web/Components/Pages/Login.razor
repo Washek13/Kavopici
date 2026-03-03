@@ -42,16 +42,10 @@
                 <input type="text" @bind="databasePathInput" @bind:event="oninput"
                        placeholder="@AppSettingsService.GetPlatformPlaceholderPath()" />
             </div>
-            <div class="btn-group" style="flex-direction:column;">
-                <button class="btn btn-accent w-full" @onclick="CreateNewDatabase"
-                        disabled="@string.IsNullOrWhiteSpace(databasePathInput)">
-                    @L["Btn_CreateNewDatabase"]
-                </button>
-                <button class="btn btn-primary w-full" @onclick="OpenExistingDatabase"
-                        disabled="@string.IsNullOrWhiteSpace(databasePathInput)">
-                    @L["Btn_OpenExistingDatabase"]
-                </button>
-            </div>
+            <button class="btn btn-primary w-full" @onclick="OpenOrCreateDatabase"
+                    disabled="@string.IsNullOrWhiteSpace(databasePathInput)">
+                @L["Btn_OpenOrCreateDatabase"]
+            </button>
         </div>
     }
     else if (isFirstRun)
@@ -220,7 +214,7 @@
         }
     }
 
-    private async Task CreateNewDatabase()
+    private async Task OpenOrCreateDatabase()
     {
         try
         {
@@ -238,12 +232,13 @@
             // Expand path before using it for file operations
             var expandedPath = AppSettingsService.ExpandPath(path);
 
-            var dir = Path.GetDirectoryName(expandedPath);
-            if (!string.IsNullOrEmpty(dir))
-                Directory.CreateDirectory(dir);
-
-            if (File.Exists(expandedPath))
-                File.Delete(expandedPath);
+            if (!File.Exists(expandedPath))
+            {
+                // Create parent directory if needed
+                var dir = Path.GetDirectoryName(expandedPath);
+                if (!string.IsNullOrEmpty(dir))
+                    Directory.CreateDirectory(dir);
+            }
 
             AppSettings.SetDatabasePath(path);
             databasePathInput = "";
@@ -256,37 +251,6 @@
         catch (PathTooLongException)
         {
             errorMessage = L["Err_DatabasePathTooLong"];
-        }
-        catch (Exception ex)
-        {
-            errorMessage = L["Err_CreateDatabaseFailed", ex.Message];
-        }
-    }
-
-    private async Task OpenExistingDatabase()
-    {
-        try
-        {
-            errorMessage = null;
-            var path = databasePathInput.Trim();
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                errorMessage = L["Err_EnterDatabasePath"];
-                return;
-            }
-
-            // Expand path before checking if file exists
-            var expandedPath = AppSettingsService.ExpandPath(path);
-
-            if (!File.Exists(expandedPath))
-            {
-                errorMessage = L["Err_FileNotFound"];
-                return;
-            }
-
-            AppSettings.SetDatabasePath(path);
-            databasePathInput = "";
-            await LoadUsers();
         }
         catch (Exception ex)
         {
