@@ -183,4 +183,7 @@
   <data name="TastingNote_6" xml:space="preserve"><value>Spiced</value></data>
   <data name="TastingNote_7" xml:space="preserve"><value>Citrusy</value></data>
   <data name="TastingNote_8" xml:space="preserve"><value>Honey</value></data>
+  <data name="Label_LinkedBlend" xml:space="preserve"><value>Link to blend</value></data>
+  <data name="Heading_LinkedSources" xml:space="preserve"><value>Linked sources</value></data>
+  <data name="Placeholder_NoLink" xml:space="preserve"><value>No link</value></data>
 </root>

@@ -221,7 +221,8 @@ textarea { resize: vertical; min-height: 60px; }
     box-shadow: 0 2px 8px rgba(111, 78, 55, 0.15);
 }
 .blend-name { font-family: 'Georgia', serif; color: var(--coffee-dark); margin-bottom: 10px; }
-.blend-details { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; }
+.blend-details { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; align-items: baseline; }
+.blend-detail { line-height: 1.4; }
 .blend-detail .label { font-weight: 600; color: var(--coffee-medium); }
 .blend-comment {
     margin-top: 10px;

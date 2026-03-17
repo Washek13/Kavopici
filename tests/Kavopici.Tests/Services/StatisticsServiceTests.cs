@@ -497,5 +497,61 @@ public class StatisticsServiceTests : IDisposable
         Assert.Equal("SupplierA", result[1].SupplierName);
     }
 
+    // --- LinkedBlend statistics tests ---
+
+    [Fact]
+    public async Task GetBlendStatisticsAsync_LinkedBlends_AggregatesRatings()
+    {
+        var user1 = await _userService.CreateUserAsync("User1", isAdmin: true);
+        var user2 = await _userService.CreateUserAsync("User2");
+        var root = await _blendService.CreateBlendAsync("Root", "Roaster", null, RoastLevel.Medium, user1.Id);
+        var child = await _blendService.CreateBlendAsync("Child", "Roaster", null, RoastLevel.Medium, user1.Id,
+            linkedBlendId: root.Id);
+
+        var session1 = await _sessionService.AddBlendOfTheDayAsync(root.Id);
+        await _ratingService.SubmitRatingAsync(root.Id, user1.Id, session1.Id, 4, null);
+
+        var session2 = await _sessionService.AddBlendOfTheDayAsync(child.Id);
+        await _ratingService.SubmitRatingAsync(child.Id, user2.Id, session2.Id, 2, null);
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        // Should produce one row with aggregated ratings
+        Assert.Single(stats);
+        Assert.Equal(3.0, stats[0].AverageRating);
+        Assert.Equal(2, stats[0].RatingCount);
+    }
+
+    [Fact]
+    public async Task GetBlendStatisticsAsync_LinkedBlends_SingleRowPerGroup()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var root = await _blendService.CreateBlendAsync("Root", "Roaster", null, RoastLevel.Medium, user.Id);
+        var child = await _blendService.CreateBlendAsync("Child", "Roaster", null, RoastLevel.Medium, user.Id,
+            linkedBlendId: root.Id);
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        Assert.Single(stats);
+        Assert.Equal(root.Id, stats[0].BlendId);
+        Assert.Equal("Root", stats[0].BlendName);
+        Assert.Equal(2, stats[0].LinkedBlendCount);
+    }
+
+    [Fact]
+    public async Task GetBlendStatisticsAsync_LinkedBlends_UsesLatestPrice()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var root = await _blendService.CreateBlendAsync("Root", "Roaster", null, RoastLevel.Medium, user.Id,
+            weightGrams: 250, priceCzk: 200m); // 800 CZK/kg
+        var child = await _blendService.CreateBlendAsync("Child", "Roaster", null, RoastLevel.Medium, user.Id,
+            weightGrams: 250, priceCzk: 300m, linkedBlendId: root.Id); // 1200 CZK/kg (latest)
+
+        var stats = await _statisticsService.GetBlendStatisticsAsync();
+
+        Assert.Single(stats);
+        Assert.Equal(1200m, stats[0].PricePerKg);
+    }
+
     public void Dispose() => _factory.Dispose();
 }

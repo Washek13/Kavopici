@@ -38,6 +38,10 @@ public class KavopiciDbContext : DbContext
                 .WithMany(u => u.SuppliedBlends)
                 .HasForeignKey(b => b.SupplierId)
                 .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(b => b.LinkedBlend)
+                .WithMany(b => b.LinkedBlends)
+                .HasForeignKey(b => b.LinkedBlendId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<TastingSession>(e =>

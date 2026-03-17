@@ -183,4 +183,7 @@
   <data name="TastingNote_6" xml:space="preserve"><value>Kořeněná</value></data>
   <data name="TastingNote_7" xml:space="preserve"><value>Citrusová</value></data>
   <data name="TastingNote_8" xml:space="preserve"><value>Medová</value></data>
+  <data name="Label_LinkedBlend" xml:space="preserve"><value>Propojit se směsí</value></data>
+  <data name="Heading_LinkedSources" xml:space="preserve"><value>Propojené zdroje</value></data>
+  <data name="Placeholder_NoLink" xml:space="preserve"><value>Žádné propojení</value></data>
 </root>

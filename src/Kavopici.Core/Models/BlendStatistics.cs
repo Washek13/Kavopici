@@ -14,5 +14,6 @@ public record BlendStatistics(
     int[] Distribution, // index 0-4 for stars 1-5
     decimal? PricePerKg,
     double? ControversyLevel, // population variance of stars, null when RatingCount < 2
-    decimal? PricePerformance // PricePerKg / AverageRating, null when either is missing/zero
+    decimal? PricePerformance, // PricePerKg / AverageRating, null when either is missing/zero
+    int LinkedBlendCount = 0 // number of blends in the linked group (0 = standalone)
 );

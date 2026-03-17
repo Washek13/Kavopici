@@ -25,7 +25,8 @@ public class BlendService : IBlendService
     }
 
     public async Task<CoffeeBlend> CreateBlendAsync(string name, string roaster, string? origin,
-        RoastLevel roastLevel, int supplierId, int? weightGrams = null, decimal? priceCzk = null)
+        RoastLevel roastLevel, int supplierId, int? weightGrams = null, decimal? priceCzk = null,
+        int? linkedBlendId = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Název směsi nemůže být prázdný.");
@@ -33,6 +34,14 @@ public class BlendService : IBlendService
             throw new ArgumentException("Název pražírny nemůže být prázdný.");
 
         await using var context = await _contextFactory.CreateDbContextAsync();
+
+        // Resolve linkedBlendId to actual root
+        if (linkedBlendId.HasValue)
+        {
+            var target = await context.CoffeeBlends.FindAsync(linkedBlendId.Value)
+                ?? throw new InvalidOperationException("Propojená směs nebyla nalezena.");
+            linkedBlendId = target.LinkedBlendId ?? target.Id;
+        }
 
         var blend = new CoffeeBlend
         {
@@ -44,6 +53,7 @@ public class BlendService : IBlendService
             WeightGrams = weightGrams,
             PriceCzk = priceCzk,
             PricePerKg = CalculatePricePerKg(weightGrams, priceCzk),
+            LinkedBlendId = linkedBlendId,
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
@@ -90,6 +100,28 @@ public class BlendService : IBlendService
             ?? throw new InvalidOperationException("Směs nebyla nalezena.");
 
         blend.IsActive = false;
+
+        // If this is a root blend with children, promote the oldest child to root
+        if (blend.LinkedBlendId == null)
+        {
+            var children = await context.CoffeeBlends
+                .Where(b => b.LinkedBlendId == blendId)
+                .OrderBy(b => b.CreatedAt)
+                .ToListAsync();
+
+            if (children.Count > 0)
+            {
+                var newRoot = children[0];
+                newRoot.LinkedBlendId = null;
+
+                // Re-point remaining children to new root
+                foreach (var child in children.Skip(1))
+                {
+                    child.LinkedBlendId = newRoot.Id;
+                }
+            }
+        }
+
         await context.SaveChangesAsync();
     }
 
@@ -99,6 +131,62 @@ public class BlendService : IBlendService
         return await context.CoffeeBlends
             .Include(b => b.Supplier)
             .FirstOrDefaultAsync(b => b.Id == blendId);
+    }
+
+    public async Task LinkBlendAsync(int blendId, int rootBlendId)
+    {
+        if (blendId == rootBlendId)
+            throw new InvalidOperationException("Směs nemůže být propojena sama se sebou.");
+
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var blend = await context.CoffeeBlends.FindAsync(blendId)
+            ?? throw new InvalidOperationException("Směs nebyla nalezena.");
+        var target = await context.CoffeeBlends.FindAsync(rootBlendId)
+            ?? throw new InvalidOperationException("Cílová směs nebyla nalezena.");
+
+        // Resolve to actual root
+        var actualRootId = target.LinkedBlendId ?? target.Id;
+
+        if (blendId == actualRootId)
+            throw new InvalidOperationException("Směs nemůže být propojena sama se sebou.");
+
+        // If blendId is currently a root with children, re-point them to the new root
+        var children = await context.CoffeeBlends
+            .Where(b => b.LinkedBlendId == blendId)
+            .ToListAsync();
+        foreach (var child in children)
+        {
+            child.LinkedBlendId = actualRootId;
+        }
+
+        blend.LinkedBlendId = actualRootId;
+        await context.SaveChangesAsync();
+    }
+
+    public async Task UnlinkBlendAsync(int blendId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        var blend = await context.CoffeeBlends.FindAsync(blendId)
+            ?? throw new InvalidOperationException("Směs nebyla nalezena.");
+
+        blend.LinkedBlendId = null;
+        await context.SaveChangesAsync();
+    }
+
+    public async Task<List<CoffeeBlend>> GetLinkGroupAsync(int blendId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        var blend = await context.CoffeeBlends.FindAsync(blendId)
+            ?? throw new InvalidOperationException("Směs nebyla nalezena.");
+
+        var rootId = blend.LinkedBlendId ?? blend.Id;
+
+        return await context.CoffeeBlends
+            .Where(b => b.Id == rootId || b.LinkedBlendId == rootId)
+            .Include(b => b.Supplier)
+            .OrderBy(b => b.CreatedAt)
+            .ToListAsync();
     }
 
     private static decimal? CalculatePricePerKg(int? weightGrams, decimal? priceCzk)
