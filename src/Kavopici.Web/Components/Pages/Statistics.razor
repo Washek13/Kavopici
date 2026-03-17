@@ -19,6 +19,7 @@
     <button class="tab-btn @(tab == 0 ? "active" : "")" @onclick="() => tab = 0">@L["Tab_BlendOverview"]</button>
     <button class="tab-btn @(tab == 1 ? "active" : "")" @onclick="() => tab = 1">@L["Tab_MyRatings"]</button>
     <button class="tab-btn @(tab == 2 ? "active" : "")" @onclick="() => tab = 2">@L["Tab_SupplierOverview"]</button>
+    <button class="tab-btn @(tab == 3 ? "active" : "")" @onclick="() => tab = 3">@L["Tab_UserOverview"]</button>
 </div>
 
 @if (isLoading)
@@ -180,6 +181,57 @@ else if (tab == 2)
     }
 }
 
+else if (tab == 3)
+{
+    @if (userStats.Count == 0)
+    {
+        <div class="panel text-center">
+            <p class="text-muted">@L["Msg_NoUsers"]</p>
+        </div>
+    }
+    else
+    {
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th @onclick="@(() => SortUserBy("UserName"))">@L["Label_User"]</th>
+                    <th @onclick="@(() => SortUserBy("VoteCount"))">@L["Label_VoteCount"]</th>
+                    <th @onclick="@(() => SortUserBy("AverageGiven"))">@L["Label_AverageGiven"]</th>
+                    <th @onclick="@(() => SortUserBy("ParticipationRate"))">@L["Label_Participation"]</th>
+                    <th @onclick="@(() => SortUserBy("FavoriteTastingNote"))">@L["Label_FavoriteTaste"]</th>
+                    <th @onclick="@(() => SortUserBy("SuppliedBlendsCount"))">@L["Label_SuppliedBlends"]</th>
+                    <th @onclick="@(() => SortUserBy("SuppliedAvgPricePerStar"))">@L["Label_SuppliedPricePerStar"]</th>
+                    <th @onclick="@(() => SortUserBy("VotingConsistency"))">@L["Label_Consistency"]</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var stat in userStats)
+                {
+                    <tr>
+                        <td><strong>@stat.UserName</strong></td>
+                        <td>@stat.VoteCount</td>
+                        <td>
+                            @if (stat.VoteCount > 0)
+                            {
+                                <span style="color:var(--amber-gold);font-weight:600;">@stat.AverageGiven.ToString("F1") &#9733;</span>
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
+                        <td>@stat.ParticipationRate.ToString("F0") %</td>
+                        <td>@(stat.FavoriteTastingNote ?? "—")</td>
+                        <td>@stat.SuppliedBlendsCount</td>
+                        <td>@(stat.SuppliedAvgPricePerStar.HasValue ? $"{stat.SuppliedAvgPricePerStar.Value:F0} Kč/★" : "—")</td>
+                        <td>@(stat.VotingConsistency.HasValue ? stat.VotingConsistency.Value.ToString("F2") : "—")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
 @code {
     private const int MaxStars = 5;
 
@@ -187,6 +239,7 @@ else if (tab == 2)
     private List<BlendStatistics> blendStats = new();
     private List<SessionWithRating> userSessions = new();
     private List<SupplierStatistics> supplierStats = new();
+    private List<UserStatistics> userStats = new();
     private HashSet<int> expandedSessions = new();
     private HashSet<int> revealedSessions = new();
     private bool isLoading = true;
@@ -203,6 +256,8 @@ else if (tab == 2)
             tab = 1;
         else if (query["tab"] == "suppliers")
             tab = 2;
+        else if (query["tab"] == "users")
+            tab = 3;
 
         await LoadAsync();
     }
@@ -215,6 +270,7 @@ else if (tab == 2)
             errorMessage = null;
             blendStats = await StatisticsService.GetBlendStatisticsAsync();
             supplierStats = await StatisticsService.GetSupplierStatisticsAsync();
+            userStats = await StatisticsService.GetUserStatisticsAsync();
 
             if (AppState.CurrentUser != null)
                 userSessions = await StatisticsService.GetUserSessionHistoryAsync(AppState.CurrentUser.Id);
@@ -262,6 +318,22 @@ else if (tab == 2)
             "TotalSessionCount" => supplierStats.OrderByDescending(s => s.TotalSessionCount).ToList(),
             "Last30DaysSessionCount" => supplierStats.OrderByDescending(s => s.Last30DaysSessionCount).ToList(),
             _ => supplierStats
+        };
+    }
+
+    private void SortUserBy(string column)
+    {
+        userStats = column switch
+        {
+            "UserName" => userStats.OrderBy(s => s.UserName).ToList(),
+            "VoteCount" => userStats.OrderByDescending(s => s.VoteCount).ToList(),
+            "AverageGiven" => userStats.OrderByDescending(s => s.AverageGiven).ToList(),
+            "ParticipationRate" => userStats.OrderByDescending(s => s.ParticipationRate).ToList(),
+            "FavoriteTastingNote" => userStats.OrderBy(s => s.FavoriteTastingNote ?? "").ToList(),
+            "SuppliedBlendsCount" => userStats.OrderByDescending(s => s.SuppliedBlendsCount).ToList(),
+            "SuppliedAvgPricePerStar" => userStats.OrderBy(s => s.SuppliedAvgPricePerStar ?? decimal.MaxValue).ToList(),
+            "VotingConsistency" => userStats.OrderBy(s => s.VotingConsistency ?? double.MaxValue).ToList(),
+            _ => userStats
         };
     }
 

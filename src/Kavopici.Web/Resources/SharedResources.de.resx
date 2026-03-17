@@ -54,11 +54,13 @@
   <data name="Tab_BlendOverview" xml:space="preserve"><value>Mischungsübersicht</value></data>
   <data name="Tab_MyRatings" xml:space="preserve"><value>Meine Bewertungen</value></data>
   <data name="Tab_SupplierOverview" xml:space="preserve"><value>Lieferantenübersicht</value></data>
+  <data name="Tab_UserOverview" xml:space="preserve"><value>Benutzerübersicht</value></data>
   <data name="Btn_CompareBlends" xml:space="preserve"><value>Mischungen vergleichen</value></data>
   <data name="Btn_ExportCsv" xml:space="preserve"><value>CSV exportieren</value></data>
   <data name="Msg_NoStatistics" xml:space="preserve"><value>Noch keine Statistiken.</value></data>
   <data name="Msg_NoTastings" xml:space="preserve"><value>Noch keine Verkostungen.</value></data>
   <data name="Msg_NoSuppliers" xml:space="preserve"><value>Noch keine Lieferanten.</value></data>
+  <data name="Msg_NoUsers" xml:space="preserve"><value>Noch keine Benutzer.</value></data>
   <data name="Label_Last30Days" xml:space="preserve"><value>Letzte 30 Tage</value></data>
   <data name="Btn_Rate" xml:space="preserve"><value>Bewerten</value></data>
 
@@ -83,6 +85,14 @@
   <data name="Label_Ratings" xml:space="preserve"><value>Bewertungen</value></data>
   <data name="Label_BlendA" xml:space="preserve"><value>Mischung A</value></data>
   <data name="Label_BlendB" xml:space="preserve"><value>Mischung B</value></data>
+  <data name="Label_User" xml:space="preserve"><value>Benutzer</value></data>
+  <data name="Label_VoteCount" xml:space="preserve"><value>Abstimmungen</value></data>
+  <data name="Label_AverageGiven" xml:space="preserve"><value>Ø Vergeben</value></data>
+  <data name="Label_Participation" xml:space="preserve"><value>Beteiligung</value></data>
+  <data name="Label_FavoriteTaste" xml:space="preserve"><value>Lieblingsgeschmack</value></data>
+  <data name="Label_SuppliedBlends" xml:space="preserve"><value>Gelieferte Sorten</value></data>
+  <data name="Label_SuppliedPricePerStar" xml:space="preserve"><value>Preis/&#9733; gel.</value></data>
+  <data name="Label_Consistency" xml:space="preserve"><value>Konsistenz</value></data>
 
   <!-- Admin tabs -->
   <data name="Tab_CoffeeOfDay" xml:space="preserve"><value>Kaffee des Tages</value></data>

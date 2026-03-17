@@ -54,11 +54,13 @@
   <data name="Tab_BlendOverview" xml:space="preserve"><value>Přehled směsí</value></data>
   <data name="Tab_MyRatings" xml:space="preserve"><value>Moje hodnocení</value></data>
   <data name="Tab_SupplierOverview" xml:space="preserve"><value>Přehled dodavatelů</value></data>
+  <data name="Tab_UserOverview" xml:space="preserve"><value>Přehled uživatelů</value></data>
   <data name="Btn_CompareBlends" xml:space="preserve"><value>Porovnání směsí</value></data>
   <data name="Btn_ExportCsv" xml:space="preserve"><value>Export CSV</value></data>
   <data name="Msg_NoStatistics" xml:space="preserve"><value>Zatím žádné statistiky.</value></data>
   <data name="Msg_NoTastings" xml:space="preserve"><value>Zatím žádná degustace.</value></data>
   <data name="Msg_NoSuppliers" xml:space="preserve"><value>Zatím žádní dodavatelé.</value></data>
+  <data name="Msg_NoUsers" xml:space="preserve"><value>Zatím žádní uživatelé.</value></data>
   <data name="Label_Last30Days" xml:space="preserve"><value>Posledních 30 dní</value></data>
   <data name="Btn_Rate" xml:space="preserve"><value>Ohodnotit</value></data>
 
@@ -83,6 +85,14 @@
   <data name="Label_Ratings" xml:space="preserve"><value>hodnocení</value></data>
   <data name="Label_BlendA" xml:space="preserve"><value>Směs A</value></data>
   <data name="Label_BlendB" xml:space="preserve"><value>Směs B</value></data>
+  <data name="Label_User" xml:space="preserve"><value>Uživatel</value></data>
+  <data name="Label_VoteCount" xml:space="preserve"><value>Hlasování</value></data>
+  <data name="Label_AverageGiven" xml:space="preserve"><value>Průměr udělený</value></data>
+  <data name="Label_Participation" xml:space="preserve"><value>Účast</value></data>
+  <data name="Label_FavoriteTaste" xml:space="preserve"><value>Oblíbená chuť</value></data>
+  <data name="Label_SuppliedBlends" xml:space="preserve"><value>Dodané směsi</value></data>
+  <data name="Label_SuppliedPricePerStar" xml:space="preserve"><value>Cena/&#9733; dod.</value></data>
+  <data name="Label_Consistency" xml:space="preserve"><value>Konzistence</value></data>
 
   <!-- Admin tabs -->
   <data name="Tab_CoffeeOfDay" xml:space="preserve"><value>Káva dne</value></data>

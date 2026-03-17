@@ -116,6 +116,85 @@ public class StatisticsService : IStatisticsService
             .ToListAsync();
     }
 
+    public async Task<List<UserStatistics>> GetUserStatisticsAsync()
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var users = await context.Users
+            .Where(u => u.IsActive)
+            .ToListAsync();
+
+        var ratings = await context.Ratings
+            .Include(r => r.RatingTastingNotes)
+                .ThenInclude(rtn => rtn.TastingNote)
+            .ToListAsync();
+
+        var totalSessions = await context.TastingSessions
+            .Where(s => s.IsActive)
+            .CountAsync();
+
+        var blends = await context.CoffeeBlends
+            .Where(b => b.IsActive)
+            .Include(b => b.Ratings)
+            .ToListAsync();
+
+        return users.Select(user =>
+        {
+            var userRatings = ratings.Where(r => r.UserId == user.Id).ToList();
+            var voteCount = userRatings.Count;
+            var averageGiven = voteCount > 0 ? userRatings.Average(r => r.Stars) : 0.0;
+            var participationRate = totalSessions > 0 ? (double)voteCount / totalSessions * 100.0 : 0.0;
+
+            // Most-used tasting note
+            string? favoriteTastingNote = userRatings
+                .SelectMany(r => r.RatingTastingNotes)
+                .GroupBy(rtn => rtn.TastingNote.Name)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefault();
+
+            // Supplied blends
+            var suppliedBlends = blends.Where(b => b.SupplierId == user.Id).ToList();
+            var suppliedBlendsCount = suppliedBlends.Count;
+
+            // Price per star for supplied blends (only blends with price and at least one rating)
+            var blendsWithPriceAndRatings = suppliedBlends
+                .Where(b => b.PricePerKg.HasValue && b.Ratings.Count > 0)
+                .ToList();
+
+            decimal? suppliedAvgPricePerStar = null;
+            if (blendsWithPriceAndRatings.Count > 0)
+            {
+                var pricePerStarValues = blendsWithPriceAndRatings
+                    .Select(b => b.PricePerKg!.Value / (decimal)b.Ratings.Average(r => r.Stars))
+                    .ToList();
+                suppliedAvgPricePerStar = Math.Round(pricePerStarValues.Average(), 0);
+            }
+
+            // Voting consistency: population std dev (null if < 2 votes)
+            double? votingConsistency = null;
+            if (voteCount >= 2)
+            {
+                var variance = userRatings.Average(r => (r.Stars - averageGiven) * (r.Stars - averageGiven));
+                votingConsistency = Math.Sqrt(variance);
+            }
+
+            return new UserStatistics(
+                UserId: user.Id,
+                UserName: user.Name,
+                VoteCount: voteCount,
+                AverageGiven: averageGiven,
+                ParticipationRate: participationRate,
+                FavoriteTastingNote: favoriteTastingNote,
+                SuppliedBlendsCount: suppliedBlendsCount,
+                SuppliedAvgPricePerStar: suppliedAvgPricePerStar,
+                VotingConsistency: votingConsistency
+            );
+        })
+        .OrderByDescending(u => u.VoteCount)
+        .ToList();
+    }
+
     public async Task<List<SessionWithRating>> GetUserSessionHistoryAsync(int userId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
