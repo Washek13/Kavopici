@@ -1,6 +1,7 @@
 @page "/blend/{BlendId:int}"
 @inject IStatisticsService StatisticsService
 @inject IRatingService RatingService
+@inject IBlendService BlendService
 @inject AppState AppState
 @inject NavigationManager Nav
 @inject IStringLocalizer<SharedResources> L
@@ -74,6 +75,30 @@ else
                 </div>
             }
         }
+
+        @if (linkedBlends.Count > 1)
+        {
+            <h3 class="mt-16">@L["Heading_LinkedSources"]</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>@L["Label_Name"]</th>
+                        <th>@L["Label_Supplier"]</th>
+                        <th>@L["Label_PricePerKg"]</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var lb in linkedBlends)
+                    {
+                        <tr style="@(lb.Id == BlendId ? "font-weight:bold;" : "")">
+                            <td>@lb.Name (@lb.Roaster)</td>
+                            <td>@lb.Supplier.Name</td>
+                            <td>@(lb.PricePerKg.HasValue ? $"{lb.PricePerKg.Value:F0} Kč" : "—")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     </div>
 
     @* Individual ratings *@
@@ -120,6 +145,7 @@ else
 
     private BlendStatistics? blendStats;
     private List<Rating> ratings = new();
+    private List<CoffeeBlend> linkedBlends = new();
     private bool isLoading = true;
     private string? errorMessage;
 
@@ -136,9 +162,18 @@ else
             isLoading = true;
             errorMessage = null;
 
+            // Load linked group and resolve root ID for stats lookup
+            linkedBlends = await BlendService.GetLinkGroupAsync(BlendId);
+            var blendIds = linkedBlends.Select(b => b.Id).ToList();
+            var rootId = linkedBlends.FirstOrDefault(b => b.LinkedBlendId == null)?.Id ?? BlendId;
+
             var allStats = await StatisticsService.GetBlendStatisticsAsync();
-            blendStats = allStats.FirstOrDefault(s => s.BlendId == BlendId);
-            ratings = await RatingService.GetRatingsForBlendAsync(BlendId);
+            blendStats = allStats.FirstOrDefault(s => s.BlendId == rootId);
+
+            // Fetch ratings for all blends in the group
+            ratings = blendIds.Count > 1
+                ? await RatingService.GetRatingsForBlendsAsync(blendIds)
+                : await RatingService.GetRatingsForBlendAsync(BlendId);
         }
         catch (Exception ex) { errorMessage = ex.Message; }
         finally { isLoading = false; }

@@ -274,5 +274,111 @@ public class BlendServiceTests : IDisposable
         Assert.Equal(500m, updated.PricePerKg);
     }
 
+    // --- LinkedBlend tests ---
+
+    [Fact]
+    public async Task LinkBlendAsync_SetsLinkedBlendId()
+    {
+        var supplierId = await CreateSupplierAsync();
+        var root = await _blendService.CreateBlendAsync("Root", "Roaster", null, RoastLevel.Medium, supplierId);
+        var child = await _blendService.CreateBlendAsync("Child", "Roaster", null, RoastLevel.Medium, supplierId);
+
+        await _blendService.LinkBlendAsync(child.Id, root.Id);
+
+        var updated = await _blendService.GetBlendByIdAsync(child.Id);
+        Assert.Equal(root.Id, updated!.LinkedBlendId);
+    }
+
+    [Fact]
+    public async Task LinkBlendAsync_SelfLink_Throws()
+    {
+        var supplierId = await CreateSupplierAsync();
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, supplierId);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _blendService.LinkBlendAsync(blend.Id, blend.Id));
+    }
+
+    [Fact]
+    public async Task LinkBlendAsync_ChainResolvesToRoot()
+    {
+        var supplierId = await CreateSupplierAsync();
+        var root = await _blendService.CreateBlendAsync("Root", "Roaster", null, RoastLevel.Medium, supplierId);
+        var child = await _blendService.CreateBlendAsync("Child", "Roaster", null, RoastLevel.Medium, supplierId);
+        var grandchild = await _blendService.CreateBlendAsync("Grandchild", "Roaster", null, RoastLevel.Medium, supplierId);
+
+        await _blendService.LinkBlendAsync(child.Id, root.Id);
+        // Link grandchild to child — should resolve to root
+        await _blendService.LinkBlendAsync(grandchild.Id, child.Id);
+
+        var updated = await _blendService.GetBlendByIdAsync(grandchild.Id);
+        Assert.Equal(root.Id, updated!.LinkedBlendId);
+    }
+
+    [Fact]
+    public async Task UnlinkBlendAsync_ClearsLinkedBlendId()
+    {
+        var supplierId = await CreateSupplierAsync();
+        var root = await _blendService.CreateBlendAsync("Root", "Roaster", null, RoastLevel.Medium, supplierId);
+        var child = await _blendService.CreateBlendAsync("Child", "Roaster", null, RoastLevel.Medium, supplierId);
+        await _blendService.LinkBlendAsync(child.Id, root.Id);
+
+        await _blendService.UnlinkBlendAsync(child.Id);
+
+        var updated = await _blendService.GetBlendByIdAsync(child.Id);
+        Assert.Null(updated!.LinkedBlendId);
+    }
+
+    [Fact]
+    public async Task GetLinkGroupAsync_ReturnsAllInGroup()
+    {
+        var supplierId = await CreateSupplierAsync();
+        var root = await _blendService.CreateBlendAsync("Root", "Roaster", null, RoastLevel.Medium, supplierId);
+        var child1 = await _blendService.CreateBlendAsync("Child1", "Roaster", null, RoastLevel.Medium, supplierId);
+        var child2 = await _blendService.CreateBlendAsync("Child2", "Roaster", null, RoastLevel.Medium, supplierId);
+        await _blendService.LinkBlendAsync(child1.Id, root.Id);
+        await _blendService.LinkBlendAsync(child2.Id, root.Id);
+
+        var group = await _blendService.GetLinkGroupAsync(child1.Id);
+
+        Assert.Equal(3, group.Count);
+        Assert.Contains(group, b => b.Id == root.Id);
+        Assert.Contains(group, b => b.Id == child1.Id);
+        Assert.Contains(group, b => b.Id == child2.Id);
+    }
+
+    [Fact]
+    public async Task DeactivateBlendAsync_RootWithChildren_PromotesChild()
+    {
+        var supplierId = await CreateSupplierAsync();
+        var root = await _blendService.CreateBlendAsync("Root", "Roaster", null, RoastLevel.Medium, supplierId);
+        var child1 = await _blendService.CreateBlendAsync("Child1", "Roaster", null, RoastLevel.Medium, supplierId);
+        var child2 = await _blendService.CreateBlendAsync("Child2", "Roaster", null, RoastLevel.Medium, supplierId);
+        await _blendService.LinkBlendAsync(child1.Id, root.Id);
+        await _blendService.LinkBlendAsync(child2.Id, root.Id);
+
+        await _blendService.DeactivateBlendAsync(root.Id);
+
+        // child1 should become new root (oldest child)
+        var updatedChild1 = await _blendService.GetBlendByIdAsync(child1.Id);
+        Assert.Null(updatedChild1!.LinkedBlendId);
+
+        // child2 should now point to child1
+        var updatedChild2 = await _blendService.GetBlendByIdAsync(child2.Id);
+        Assert.Equal(child1.Id, updatedChild2!.LinkedBlendId);
+    }
+
+    [Fact]
+    public async Task CreateBlendAsync_WithLinkedBlendId_SetsLink()
+    {
+        var supplierId = await CreateSupplierAsync();
+        var root = await _blendService.CreateBlendAsync("Root", "Roaster", null, RoastLevel.Medium, supplierId);
+
+        var child = await _blendService.CreateBlendAsync("Child", "Roaster", null, RoastLevel.Medium, supplierId,
+            linkedBlendId: root.Id);
+
+        Assert.Equal(root.Id, child.LinkedBlendId);
+    }
+
     public void Dispose() => _factory.Dispose();
 }

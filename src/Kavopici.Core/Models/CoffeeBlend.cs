@@ -16,7 +16,11 @@ public class CoffeeBlend
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+    public int? LinkedBlendId { get; set; }
+
     public User Supplier { get; set; } = null!;
+    public CoffeeBlend? LinkedBlend { get; set; }
+    public ICollection<CoffeeBlend> LinkedBlends { get; set; } = new List<CoffeeBlend>();
     public ICollection<TastingSession> Sessions { get; set; } = new List<TastingSession>();
     public ICollection<Rating> Ratings { get; set; } = new List<Rating>();
 }

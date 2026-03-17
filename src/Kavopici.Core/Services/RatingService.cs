@@ -96,6 +96,20 @@ public class RatingService : IRatingService
             .ToListAsync();
     }
 
+    public async Task<List<Rating>> GetRatingsForBlendsAsync(IEnumerable<int> blendIds)
+    {
+        var ids = blendIds.ToList();
+        await using var context = await _contextFactory.CreateDbContextAsync();
+        return await context.Ratings
+            .Where(r => ids.Contains(r.BlendId))
+            .Include(r => r.User)
+            .Include(r => r.Session)
+            .Include(r => r.RatingTastingNotes)
+                .ThenInclude(rtn => rtn.TastingNote)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync();
+    }
+
     public async Task<List<TastingNote>> GetAllTastingNotesAsync()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();

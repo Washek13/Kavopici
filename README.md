@@ -40,7 +40,7 @@ Kávopíči is a web application for office coffee tastings. An admin sets the "
 
 ### Admin
 - **Users** — add, deactivate, grant/revoke admin rights (last admin cannot be removed).
-- **Blends** — add (name, roaster, origin, roast level, supplier, weight, price), edit existing blends and remove (soft delete). Price per kg is calculated automatically from weight and price.
+- **Blends** — add (name, roaster, origin, roast level, supplier, weight, price), edit existing blends and remove (soft delete). Price per kg is calculated automatically from weight and price. **Linked blends** — link the same coffee blend across different suppliers so their ratings aggregate into a single row in statistics.
 - **Coffee of the day** — add and remove blends for the daily tasting session (multiple blends supported), optional note per blend.
 - **CSV export** — export statistics.
 
@@ -105,6 +105,7 @@ User                    CoffeeBlend              TastingSession
                         ├── WeightGrams?
                         ├── PriceCzk?
                         ├── PricePerKg? (calc.)
+                        ├── LinkedBlendId? (FK→self)
                         ├── IsActive
                         └── CreatedAt
 

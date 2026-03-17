@@ -23,9 +23,21 @@ public class StatisticsService : IStatisticsService
             .Include(b => b.Ratings)
             .ToListAsync();
 
-        return blends.Select(b =>
+        // Group by root ID: linked blends share one root, standalone blends are their own root
+        var groups = blends.GroupBy(b => b.LinkedBlendId ?? b.Id);
+
+        return groups.Select(g =>
         {
-            var ratings = b.Ratings.ToList();
+            var groupBlends = g.ToList();
+
+            // Root blend is the one with LinkedBlendId == null, or the first in the group
+            var rootBlend = groupBlends.FirstOrDefault(b => b.LinkedBlendId == null) ?? groupBlends[0];
+
+            // Latest blend (most recently created) for price display
+            var latestBlend = groupBlends.OrderByDescending(b => b.CreatedAt).First();
+
+            // Aggregate all ratings across the group
+            var ratings = groupBlends.SelectMany(b => b.Ratings).ToList();
             var distribution = new int[5];
             foreach (var r in ratings)
             {
@@ -41,25 +53,28 @@ public class StatisticsService : IStatisticsService
                 controversyLevel = ratings.Average(r => (r.Stars - averageRating) * (r.Stars - averageRating));
             }
 
+            var pricePerKg = latestBlend.PricePerKg;
+
             decimal? pricePerformance = null;
-            if (b.PricePerKg.HasValue && averageRating > 0)
+            if (pricePerKg.HasValue && averageRating > 0)
             {
-                pricePerformance = Math.Round(b.PricePerKg.Value / (decimal)averageRating, 0);
+                pricePerformance = Math.Round(pricePerKg.Value / (decimal)averageRating, 0);
             }
 
             return new BlendStatistics(
-                BlendId: b.Id,
-                BlendName: b.Name,
-                Roaster: b.Roaster,
-                Origin: b.Origin,
-                RoastLevel: b.RoastLevel,
-                SupplierName: b.Supplier.Name,
+                BlendId: rootBlend.Id,
+                BlendName: rootBlend.Name,
+                Roaster: rootBlend.Roaster,
+                Origin: rootBlend.Origin,
+                RoastLevel: rootBlend.RoastLevel,
+                SupplierName: rootBlend.Supplier.Name,
                 AverageRating: averageRating,
                 RatingCount: ratings.Count,
                 Distribution: distribution,
-                PricePerKg: b.PricePerKg,
+                PricePerKg: pricePerKg,
                 ControversyLevel: controversyLevel,
-                PricePerformance: pricePerformance
+                PricePerformance: pricePerformance,
+                LinkedBlendCount: groupBlends.Count
             );
         })
         .OrderByDescending(s => s.AverageRating)
