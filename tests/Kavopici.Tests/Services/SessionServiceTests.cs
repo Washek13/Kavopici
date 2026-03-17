@@ -112,15 +112,21 @@ public class SessionServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task AddBlendOfTheDayAsync_DuplicateBlend_Throws()
+    public async Task AddBlendOfTheDayAsync_SameBlendMultipleTimes_Coexist()
     {
         var user = await _userService.CreateUserAsync("User", isAdmin: true);
         var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
 
-        await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        var session1 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        var session2 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _sessionService.AddBlendOfTheDayAsync(blend.Id));
+        Assert.NotEqual(session1.Id, session2.Id);
+        Assert.Equal(blend.Id, session1.BlendId);
+        Assert.Equal(blend.Id, session2.BlendId);
+
+        var todaySessions = await _sessionService.GetTodaySessionsAsync();
+        Assert.Contains(todaySessions, s => s.Id == session1.Id);
+        Assert.Contains(todaySessions, s => s.Id == session2.Id);
     }
 
     [Fact]

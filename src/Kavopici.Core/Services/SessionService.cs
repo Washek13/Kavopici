@@ -33,13 +33,6 @@ public class SessionService : ISessionService
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
 
-        // Prevent adding the same blend twice for the same day
-        var duplicate = await context.TastingSessions
-            .AnyAsync(s => s.BlendId == blendId && s.Date == Today && s.IsActive);
-
-        if (duplicate)
-            throw new InvalidOperationException("Tato směs je již nastavena jako káva dne.");
-
         var session = new TastingSession
         {
             BlendId = blendId,
