@@ -553,5 +553,152 @@ public class StatisticsServiceTests : IDisposable
         Assert.Equal(1200m, stats[0].PricePerKg);
     }
 
+    // --- GetUserStatisticsAsync tests ---
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_NoUsers_ReturnsEmpty()
+    {
+        var result = await _statisticsService.GetUserStatisticsAsync();
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_WithRatings_CalculatesVoteCountAndAverage()
+    {
+        var user = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Blend", "Roaster", null, RoastLevel.Medium, user.Id);
+        var session1 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        var session2 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session1.Id, 4, null);
+        await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session2.Id, 2, null);
+
+        var result = await _statisticsService.GetUserStatisticsAsync();
+
+        Assert.Single(result);
+        Assert.Equal(2, result[0].VoteCount);
+        Assert.Equal(3.0, result[0].AverageGiven, precision: 5);
+    }
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_ParticipationRate_FractionOfTotalSessions()
+    {
+        var user = await _userService.CreateUserAsync("Bob", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Blend", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        // 3 total sessions, user participates in 2
+        var session1 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        var session2 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session1.Id, 4, null);
+        await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session2.Id, 3, null);
+
+        var result = await _statisticsService.GetUserStatisticsAsync();
+
+        Assert.Single(result);
+        // 2/3 * 100 ≈ 66.67%
+        Assert.Equal(2.0 / 3.0 * 100.0, result[0].ParticipationRate, precision: 5);
+    }
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_FavoriteTastingNote_ReturnsMostUsed()
+    {
+        var user = await _userService.CreateUserAsync("Carol", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Blend", "Roaster", null, RoastLevel.Medium, user.Id);
+        var session1 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        var session2 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        var session3 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        var r1 = await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session1.Id, 4, null);
+        var r2 = await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session2.Id, 3, null);
+        var r3 = await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session3.Id, 5, null);
+
+        // TastingNote Id=1 "Ovocná" used twice, Id=2 "Ořechová" used once
+        await _ratingService.SetRatingNotesAsync(r1.Id, new List<int> { 1 });
+        await _ratingService.SetRatingNotesAsync(r2.Id, new List<int> { 1 });
+        await _ratingService.SetRatingNotesAsync(r3.Id, new List<int> { 2 });
+
+        var result = await _statisticsService.GetUserStatisticsAsync();
+
+        Assert.Single(result);
+        Assert.Equal("Ovocná", result[0].FavoriteTastingNote);
+    }
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_Consistency_IsPopulationStdDev()
+    {
+        var user = await _userService.CreateUserAsync("Dave", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Blend", "Roaster", null, RoastLevel.Medium, user.Id);
+        var session1 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        var session2 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session1.Id, 2, null);
+        await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session2.Id, 4, null);
+
+        var result = await _statisticsService.GetUserStatisticsAsync();
+
+        // Mean = 3.0, variance = ((2-3)^2 + (4-3)^2) / 2 = 1.0, stddev = 1.0
+        Assert.Single(result);
+        Assert.NotNull(result[0].VotingConsistency);
+        Assert.Equal(1.0, result[0].VotingConsistency!.Value, precision: 5);
+    }
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_SingleVote_ConsistencyNull()
+    {
+        var user = await _userService.CreateUserAsync("Eve", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Blend", "Roaster", null, RoastLevel.Medium, user.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        await _ratingService.SubmitRatingAsync(blend.Id, user.Id, session.Id, 3, null);
+
+        var result = await _statisticsService.GetUserStatisticsAsync();
+
+        Assert.Single(result);
+        Assert.Null(result[0].VotingConsistency);
+    }
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_SuppliedBlends_CountsActiveOnly()
+    {
+        var supplier = await _userService.CreateUserAsync("Frank", isAdmin: true);
+        var activeBlend = await _blendService.CreateBlendAsync("Active", "Roaster", null, RoastLevel.Medium, supplier.Id);
+        var inactiveBlend = await _blendService.CreateBlendAsync("Inactive", "Roaster", null, RoastLevel.Dark, supplier.Id);
+        await _blendService.DeactivateBlendAsync(inactiveBlend.Id);
+
+        var result = await _statisticsService.GetUserStatisticsAsync();
+
+        Assert.Single(result);
+        Assert.Equal(1, result[0].SuppliedBlendsCount);
+    }
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_SuppliedPricePerStar_ExcludesBlendsWithoutPriceOrRatings()
+    {
+        var supplier = await _userService.CreateUserAsync("Grace", isAdmin: true);
+
+        // Blend with price and ratings — should be included
+        // 250g at 200 CZK = 800 CZK/kg, avg rating 4 → price/star = 200
+        var blendA = await _blendService.CreateBlendAsync("BlendA", "Roaster", null, RoastLevel.Medium,
+            supplier.Id, weightGrams: 250, priceCzk: 200m);
+        var sessionA = await _sessionService.AddBlendOfTheDayAsync(blendA.Id);
+        await _ratingService.SubmitRatingAsync(blendA.Id, supplier.Id, sessionA.Id, 4, null);
+
+        // Blend with price but no ratings — excluded
+        await _blendService.CreateBlendAsync("BlendB", "Roaster", null, RoastLevel.Medium,
+            supplier.Id, weightGrams: 250, priceCzk: 300m);
+
+        // Blend with ratings but no price — excluded
+        var blendC = await _blendService.CreateBlendAsync("BlendC", "Roaster", null, RoastLevel.Medium, supplier.Id);
+        var sessionC = await _sessionService.AddBlendOfTheDayAsync(blendC.Id);
+        await _ratingService.SubmitRatingAsync(blendC.Id, supplier.Id, sessionC.Id, 5, null);
+
+        var result = await _statisticsService.GetUserStatisticsAsync();
+
+        Assert.Single(result);
+        Assert.NotNull(result[0].SuppliedAvgPricePerStar);
+        Assert.Equal(200m, result[0].SuppliedAvgPricePerStar!.Value);
+    }
+
     public void Dispose() => _factory.Dispose();
 }

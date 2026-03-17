@@ -35,6 +35,7 @@ Kávopíči is a web application for office coffee tastings. An admin sets the "
 - **Price per star** — ratio of price per kilogram to average rating; lower = better value for money.
 - **Blend detail** — star distribution, individual ratings with comments and tasting notes.
 - **My ratings** — full tasting history with retroactive rating of missed blends and **editing of existing ratings**.
+- **User overview** — per-user stats table: votes cast, average given, participation rate, favorite tasting note, supplied blends count, price/★ for supplied blends, and voting consistency (population std dev). Sortable by all columns.
 - **Blend comparison** — two blends side by side with rating distribution.
 - **CSV export** — download data to a file (including controversy and price/★).
 

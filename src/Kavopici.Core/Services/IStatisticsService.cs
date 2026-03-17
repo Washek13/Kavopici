@@ -8,4 +8,5 @@ public interface IStatisticsService
     Task<List<Rating>> GetUserRatingHistoryAsync(int userId);
     Task<List<SessionWithRating>> GetUserSessionHistoryAsync(int userId);
     Task<List<SupplierStatistics>> GetSupplierStatisticsAsync();
+    Task<List<UserStatistics>> GetUserStatisticsAsync();
 }
