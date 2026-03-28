@@ -48,6 +48,7 @@ public class StatisticsServiceTests : IDisposable
         Assert.Single(stats);
         Assert.Equal(3.0, stats[0].AverageRating);
         Assert.Equal(2, stats[0].RatingCount);
+        Assert.Equal(10, stats[0].Distribution.Length);
         Assert.Equal(0, stats[0].Distribution[0]); // 1 star
         Assert.Equal(1, stats[0].Distribution[1]); // 2 stars
         Assert.Equal(0, stats[0].Distribution[2]); // 3 stars
@@ -121,7 +122,7 @@ public class StatisticsServiceTests : IDisposable
         Assert.Equal("Jan", s.SupplierName);
         Assert.Equal(4.0, s.AverageRating);
         Assert.Equal(1, s.RatingCount);
-        Assert.Equal(new[] { 0, 0, 0, 1, 0 }, s.Distribution);
+        Assert.Equal(new[] { 0, 0, 0, 1, 0, 0, 0, 0, 0, 0 }, s.Distribution);
     }
 
     [Fact]
@@ -142,7 +143,7 @@ public class StatisticsServiceTests : IDisposable
         Assert.Single(stats);
         Assert.Equal(3.0, stats[0].AverageRating);
         Assert.Equal(3, stats[0].RatingCount);
-        Assert.Equal(new[] { 0, 0, 3, 0, 0 }, stats[0].Distribution);
+        Assert.Equal(new[] { 0, 0, 3, 0, 0, 0, 0, 0, 0, 0 }, stats[0].Distribution);
     }
 
     // --- ControversyLevel tests ---

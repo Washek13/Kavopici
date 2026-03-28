@@ -58,7 +58,7 @@ public class KavopiciDbContext : DbContext
         {
             e.HasKey(r => r.Id);
             e.Property(r => r.Stars).IsRequired();
-            e.ToTable(t => t.HasCheckConstraint("CK_Rating_Stars", "[Stars] >= 1 AND [Stars] <= 5"));
+            e.ToTable(t => t.HasCheckConstraint("CK_Rating_Stars", "[Stars] >= 1 AND [Stars] <= 10"));
             e.HasIndex(r => new { r.UserId, r.SessionId }).IsUnique();
             e.HasOne(r => r.Blend)
                 .WithMany(b => b.Ratings)

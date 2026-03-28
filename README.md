@@ -4,7 +4,7 @@
 
 ## About
 
-Kávopíči is a web application for office coffee tastings. An admin sets the "coffee of the day", coworkers rate it (1–5 stars), add a comment and tasting notes, and the app displays summary statistics, leaderboards, and blend comparisons.
+Kávopíči is a web application for office coffee tastings. An admin sets the "coffee of the day", coworkers rate it (1–10 stars), add a comment and tasting notes, and the app displays summary statistics, leaderboards, and blend comparisons.
 
 ### Target users
 
@@ -25,7 +25,7 @@ Kávopíči is a web application for office coffee tastings. An admin sets the "
 - **Coffee flavor wheel** — link to an interactive flavor wheel for better orientation in taste profiles.
 - Multiple "coffees of the day" — admin can set multiple blends for a session, each shown as a separate card.
 - **Secret voting** — blend details are revealed only after rating. Admin notes are visible before voting so users can tell samples apart.
-- Rating 1–5 stars, optional comment, and tasting note selection (Fruity, Nutty, Chocolatey, Caramel, Floral, Spiced, Citrusy, Honey).
+- Rating 1–10 stars, optional comment, and tasting note selection (Fruity, Nutty, Chocolatey, Caramel, Floral, Spiced, Citrusy, Honey).
 - Edit your own rating.
 - **Retroactive voting** — missed blends can be rated later from the "My Ratings" tab in Statistics.
 
@@ -115,7 +115,7 @@ Rating                  TastingNote              RatingTastingNote
 ├── BlendId (FK)        └── Name (unique)        └── TastingNoteId (PK, FK)
 ├── UserId (FK)
 ├── SessionId (FK)
-├── Stars (1–5, check)
+├── Stars (1–10, check)
 ├── Comment?
 └── CreatedAt
 

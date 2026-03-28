@@ -55,7 +55,7 @@ public class CsvExportServiceTests : IDisposable
 
         Assert.Single(lines);
         Assert.StartsWith("Název směsi;", lines[0]);
-        Assert.Contains("5★", lines[0]);
+        Assert.Contains("10★", lines[0]);
         Assert.Contains("Kontroverznost", lines[0]);
         Assert.Contains("Cena/★", lines[0]);
     }
@@ -90,8 +90,13 @@ public class CsvExportServiceTests : IDisposable
         Assert.Equal("0", columns[10]); // 3★
         Assert.Equal("1", columns[11]); // 4★
         Assert.Equal("0", columns[12]); // 5★
-        Assert.Equal("", columns[13]); // ControversyLevel — only 1 rating, null
-        Assert.Equal("", columns[14]); // PricePerformance — no price set
+        Assert.Equal("0", columns[13]); // 6★
+        Assert.Equal("0", columns[14]); // 7★
+        Assert.Equal("0", columns[15]); // 8★
+        Assert.Equal("0", columns[16]); // 9★
+        Assert.Equal("0", columns[17]); // 10★
+        Assert.Equal("", columns[18]); // ControversyLevel — only 1 rating, null
+        Assert.Equal("", columns[19]); // PricePerformance — no price set
     }
 
     [Fact]

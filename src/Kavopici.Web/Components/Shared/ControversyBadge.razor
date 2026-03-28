@@ -3,8 +3,8 @@
 @if (Level.HasValue)
 {
     var val = Level.Value;
-    var label = val < 0.5 ? L["Badge_Agreement"] : val < 1.5 ? L["Badge_MildDisagreement"] : L["Badge_Disagreement"];
-    var color = val < 0.5 ? "var(--success-green)" : val < 1.5 ? "var(--warning-orange)" : "var(--error-red)";
+    var label = val < 2.0 ? L["Badge_Agreement"] : val < 6.0 ? L["Badge_MildDisagreement"] : L["Badge_Disagreement"];
+    var color = val < 2.0 ? "var(--success-green)" : val < 6.0 ? "var(--warning-orange)" : "var(--error-red)";
     <span style="@($"color:{color};font-weight:600;font-size:{FontSize}px;")">@label</span>
 }
 else if (ShowDash)
