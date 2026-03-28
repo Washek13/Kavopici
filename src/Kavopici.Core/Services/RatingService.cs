@@ -7,7 +7,7 @@ namespace Kavopici.Services;
 public class RatingService : IRatingService
 {
     private const int MinStars = 1;
-    private const int MaxStars = 5;
+    private const int MaxStars = 10;
 
     private readonly IDbContextFactory<KavopiciDbContext> _contextFactory;
 

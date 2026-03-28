@@ -38,10 +38,10 @@ public class StatisticsService : IStatisticsService
 
             // Aggregate all ratings across the group
             var ratings = groupBlends.SelectMany(b => b.Ratings).ToList();
-            var distribution = new int[5];
+            var distribution = new int[10];
             foreach (var r in ratings)
             {
-                if (r.Stars >= 1 && r.Stars <= 5)
+                if (r.Stars >= 1 && r.Stars <= 10)
                     distribution[r.Stars - 1]++;
             }
 

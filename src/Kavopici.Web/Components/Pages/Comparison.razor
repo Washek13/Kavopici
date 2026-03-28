@@ -131,7 +131,7 @@ else
     {
         if (stats.RatingCount == 0) return;
         var maxCount = stats.Distribution.Max();
-        for (int i = 4; i >= 0; i--)
+        for (int i = 9; i >= 0; i--)
         {
             var count = stats.Distribution[i];
             var widthPct = maxCount > 0 ? (count / (double)maxCount) * 100 : 0;

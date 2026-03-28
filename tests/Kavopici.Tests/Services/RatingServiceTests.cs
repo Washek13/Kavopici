@@ -52,7 +52,7 @@ public class RatingServiceTests : IDisposable
         await _ratingService.SubmitRatingAsync(session.BlendId, user.Id, session.Id, 4, null);
 
         await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _ratingService.SubmitRatingAsync(session.BlendId, user.Id, session.Id, 5, null));
+            () => _ratingService.SubmitRatingAsync(session.BlendId, user.Id, session.Id, 10, null));
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class RatingServiceTests : IDisposable
             () => _ratingService.SubmitRatingAsync(session.BlendId, user.Id, session.Id, 0, null));
 
         await Assert.ThrowsAsync<ArgumentException>(
-            () => _ratingService.SubmitRatingAsync(session.BlendId, user.Id, session.Id, 6, null));
+            () => _ratingService.SubmitRatingAsync(session.BlendId, user.Id, session.Id, 11, null));
     }
 
     [Fact]
@@ -96,9 +96,9 @@ public class RatingServiceTests : IDisposable
         var rating = await _ratingService.SubmitRatingAsync(
             session.BlendId, user.Id, session.Id, 3, "OK");
 
-        var updated = await _ratingService.UpdateRatingAsync(rating.Id, 5, "Actually great!");
+        var updated = await _ratingService.UpdateRatingAsync(rating.Id, 10, "Actually great!");
 
-        Assert.Equal(5, updated.Stars);
+        Assert.Equal(10, updated.Stars);
         Assert.Equal("Actually great!", updated.Comment);
     }
 
@@ -135,7 +135,7 @@ public class RatingServiceTests : IDisposable
             () => _ratingService.UpdateRatingAsync(rating.Id, 0, null));
 
         await Assert.ThrowsAsync<ArgumentException>(
-            () => _ratingService.UpdateRatingAsync(rating.Id, 6, null));
+            () => _ratingService.UpdateRatingAsync(rating.Id, 11, null));
     }
 
     [Fact]
@@ -189,11 +189,11 @@ public class RatingServiceTests : IDisposable
             session.BlendId, user.Id, session.Id, 1, null);
         Assert.Equal(1, rating1.Stars);
 
-        // Create a second user to rate the same session with 5 stars
+        // Create a second user to rate the same session with 10 stars
         var user2 = await _userService.CreateUserAsync("User2");
-        var rating5 = await _ratingService.SubmitRatingAsync(
-            session.BlendId, user2.Id, session.Id, 5, null);
-        Assert.Equal(5, rating5.Stars);
+        var rating10 = await _ratingService.SubmitRatingAsync(
+            session.BlendId, user2.Id, session.Id, 10, null);
+        Assert.Equal(10, rating10.Stars);
     }
 
     [Fact]
