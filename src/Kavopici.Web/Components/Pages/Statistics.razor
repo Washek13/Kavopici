@@ -202,6 +202,8 @@ else if (tab == 3)
                     <th @onclick="@(() => SortUserBy("SuppliedBlendsCount"))">@L["Label_SuppliedBlends"]</th>
                     <th @onclick="@(() => SortUserBy("SuppliedAvgPricePerStar"))">@L["Label_SuppliedPricePerStar"]</th>
                     <th @onclick="@(() => SortUserBy("VotingConsistency"))">@L["Label_Consistency"]</th>
+                    <th @onclick="@(() => SortUserBy("CleanupCount"))">@L["Label_CleanupCount"]</th>
+                    <th @onclick="@(() => SortUserBy("CleanupReliability"))">@L["Label_CleanupReliability"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -225,6 +227,8 @@ else if (tab == 3)
                         <td>@stat.SuppliedBlendsCount</td>
                         <td>@(stat.SuppliedAvgPricePerStar.HasValue ? $"{stat.SuppliedAvgPricePerStar.Value:F0} Kč/★" : "—")</td>
                         <td>@(stat.VotingConsistency.HasValue ? stat.VotingConsistency.Value.ToString("F2") : "—")</td>
+                        <td>@stat.CleanupCount</td>
+                        <td>@(stat.CleanupReliability.HasValue ? $"{stat.CleanupReliability.Value:F0} %" : "—")</td>
                     </tr>
                 }
             </tbody>
@@ -333,6 +337,8 @@ else if (tab == 3)
             "SuppliedBlendsCount" => userStats.OrderByDescending(s => s.SuppliedBlendsCount).ToList(),
             "SuppliedAvgPricePerStar" => userStats.OrderBy(s => s.SuppliedAvgPricePerStar ?? decimal.MaxValue).ToList(),
             "VotingConsistency" => userStats.OrderBy(s => s.VotingConsistency ?? double.MaxValue).ToList(),
+            "CleanupCount" => userStats.OrderByDescending(s => s.CleanupCount).ToList(),
+            "CleanupReliability" => userStats.OrderByDescending(s => s.CleanupReliability ?? -1).ToList(),
             _ => userStats
         };
     }

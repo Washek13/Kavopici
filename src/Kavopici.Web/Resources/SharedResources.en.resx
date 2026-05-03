@@ -196,4 +196,19 @@
   <data name="Label_LinkedBlend" xml:space="preserve"><value>Link to blend</value></data>
   <data name="Heading_LinkedSources" xml:space="preserve"><value>Linked sources</value></data>
   <data name="Placeholder_NoLink" xml:space="preserve"><value>No link</value></data>
+
+  <!-- Cleanup person -->
+  <data name="Label_Cleanup" xml:space="preserve"><value>Cleanup</value></data>
+  <data name="Label_CleanupPerson" xml:space="preserve"><value>Cleanup by</value></data>
+  <data name="Label_CleanupCount" xml:space="preserve"><value>Cleanups</value></data>
+  <data name="Label_CleanupReliability" xml:space="preserve"><value>Cleanup reliability</value></data>
+  <data name="Btn_AssignCleanup" xml:space="preserve"><value>Pick cleaner</value></data>
+  <data name="Btn_ClearCleanup" xml:space="preserve"><value>Clear</value></data>
+  <data name="Btn_CleanupDone" xml:space="preserve"><value>Done</value></data>
+  <data name="Btn_CleanupNotDone" xml:space="preserve"><value>Not done</value></data>
+  <data name="Msg_CleanupAssigned" xml:space="preserve"><value>Cleaner picked: {0}</value></data>
+  <data name="Msg_CleanupCleared" xml:space="preserve"><value>Cleaner cleared.</value></data>
+  <data name="Msg_CleanupMarkedDone" xml:space="preserve"><value>Marked as done.</value></data>
+  <data name="Msg_CleanupMarkedNotDone" xml:space="preserve"><value>Marked as not done.</value></data>
+  <data name="Err_NoActiveUsersForCleanup" xml:space="preserve"><value>No active users.</value></data>
 </root>

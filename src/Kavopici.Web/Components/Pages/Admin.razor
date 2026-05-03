@@ -250,15 +250,52 @@
                     <tr>
                         <th>@L["Label_Blend"]</th>
                         <th>@L["Label_Note"]</th>
+                        <th>@L["Label_Cleanup"]</th>
                         <th>@L["Label_Actions"]</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var session in currentSessions)
                     {
+                        var sid = session.Id;
                         <tr>
                             <td><strong>@session.Blend.Name</strong> (@session.Blend.Roaster)</td>
                             <td class="text-muted">@(session.Comment ?? "—")</td>
+                            <td>
+                                <div class="flex items-center gap-8" style="flex-wrap:wrap;">
+                                    <select value="@(session.CleanupPersonId?.ToString() ?? "0")"
+                                            @onchange="@(e => OnCleanupSelectChanged(sid, e.Value?.ToString()))"
+                                            style="min-width:120px;">
+                                        <option value="0">—</option>
+                                        @foreach (var u in allUsers)
+                                        {
+                                            <option value="@u.Id">@u.Name</option>
+                                        }
+                                    </select>
+                                    <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
+                                            title="@L["Btn_AssignCleanup"]"
+                                            @onclick="() => AssignRandomCleanup(sid)">
+                                        🎲
+                                    </button>
+                                    @if (session.CleanupPersonId != null)
+                                    {
+                                        <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
+                                                @onclick="() => ClearCleanup(sid)">
+                                            @L["Btn_ClearCleanup"]
+                                        </button>
+                                        <button class="btn @(session.CleanupCompleted == true ? "btn-accent" : "btn-outline")"
+                                                style="padding:4px 10px;font-size:12px;"
+                                                @onclick="() => ToggleCleanupCompleted(sid, true)">
+                                            ✓ @L["Btn_CleanupDone"]
+                                        </button>
+                                        <button class="btn @(session.CleanupCompleted == false ? "btn-danger" : "btn-outline")"
+                                                style="padding:4px 10px;font-size:12px;"
+                                                @onclick="() => ToggleCleanupCompleted(sid, false)">
+                                            ✗ @L["Btn_CleanupNotDone"]
+                                        </button>
+                                    }
+                                </div>
+                            </td>
                             <td>
                                 <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;"
                                         @onclick="() => RemoveBlendOfDay(session.Id)">
@@ -533,6 +570,71 @@
             errorMessage = null;
             await SessionService.RemoveBlendOfTheDayAsync(sessionId);
             statusMessage = L["Msg_CoffeeOfDayRemoved"];
+            await LoadCurrentSessions();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task AssignRandomCleanup(int sessionId)
+    {
+        try
+        {
+            errorMessage = null;
+            var updated = await SessionService.AssignRandomCleanupPersonAsync(sessionId);
+            statusMessage = L["Msg_CleanupAssigned", updated.CleanupPerson?.Name ?? ""];
+            await LoadCurrentSessions();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task OnCleanupSelectChanged(int sessionId, string? value)
+    {
+        if (!int.TryParse(value, out var userId)) return;
+        try
+        {
+            errorMessage = null;
+            if (userId == 0)
+            {
+                await SessionService.ClearCleanupPersonAsync(sessionId);
+                statusMessage = L["Msg_CleanupCleared"];
+            }
+            else
+            {
+                var updated = await SessionService.SetCleanupPersonAsync(sessionId, userId);
+                statusMessage = L["Msg_CleanupAssigned", updated.CleanupPerson?.Name ?? ""];
+            }
+            await LoadCurrentSessions();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task ClearCleanup(int sessionId)
+    {
+        try
+        {
+            errorMessage = null;
+            await SessionService.ClearCleanupPersonAsync(sessionId);
+            statusMessage = L["Msg_CleanupCleared"];
+            await LoadCurrentSessions();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task ToggleCleanupCompleted(int sessionId, bool target)
+    {
+        try
+        {
+            errorMessage = null;
+            var session = currentSessions.FirstOrDefault(s => s.Id == sessionId);
+            // Clicking the active state again resets to pending (null)
+            bool? newValue = (session?.CleanupCompleted == target) ? (bool?)null : target;
+            await SessionService.SetCleanupCompletedAsync(sessionId, newValue);
+            statusMessage = newValue switch
+            {
+                true => L["Msg_CleanupMarkedDone"],
+                false => L["Msg_CleanupMarkedNotDone"],
+                _ => L["Msg_CleanupCleared"]
+            };
             await LoadCurrentSessions();
         }
         catch (Exception ex) { errorMessage = ex.Message; }

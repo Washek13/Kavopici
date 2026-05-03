@@ -52,6 +52,10 @@ public class KavopiciDbContext : DbContext
                 .WithMany(b => b.Sessions)
                 .HasForeignKey(s => s.BlendId)
                 .OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(s => s.CleanupPerson)
+                .WithMany()
+                .HasForeignKey(s => s.CleanupPersonId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
 
         modelBuilder.Entity<Rating>(e =>

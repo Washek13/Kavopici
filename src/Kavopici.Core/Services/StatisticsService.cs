@@ -129,9 +129,10 @@ public class StatisticsService : IStatisticsService
                 .ThenInclude(rtn => rtn.TastingNote)
             .ToListAsync();
 
-        var totalSessions = await context.TastingSessions
+        var sessions = await context.TastingSessions
             .Where(s => s.IsActive)
-            .CountAsync();
+            .ToListAsync();
+        var totalSessions = sessions.Count;
 
         var blends = await context.CoffeeBlends
             .Where(b => b.IsActive)
@@ -179,6 +180,14 @@ public class StatisticsService : IStatisticsService
                 votingConsistency = Math.Sqrt(variance);
             }
 
+            // Cleanup duty stats
+            var userCleanups = sessions.Where(s => s.CleanupPersonId == user.Id).ToList();
+            var cleanupCount = userCleanups.Count;
+            var resolvedCleanups = userCleanups.Where(s => s.CleanupCompleted.HasValue).ToList();
+            double? cleanupReliability = resolvedCleanups.Count > 0
+                ? resolvedCleanups.Count(s => s.CleanupCompleted == true) * 100.0 / resolvedCleanups.Count
+                : null;
+
             return new UserStatistics(
                 UserId: user.Id,
                 UserName: user.Name,
@@ -188,7 +197,9 @@ public class StatisticsService : IStatisticsService
                 FavoriteTastingNote: favoriteTastingNote,
                 SuppliedBlendsCount: suppliedBlendsCount,
                 SuppliedAvgPricePerStar: suppliedAvgPricePerStar,
-                VotingConsistency: votingConsistency
+                VotingConsistency: votingConsistency,
+                CleanupCount: cleanupCount,
+                CleanupReliability: cleanupReliability
             );
         })
         .OrderByDescending(u => u.VoteCount)
