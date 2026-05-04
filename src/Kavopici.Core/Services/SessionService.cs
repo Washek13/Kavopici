@@ -93,7 +93,47 @@ public class SessionService : ISessionService
         if (activeUserIds.Count == 0)
             throw new InvalidOperationException("Žádní aktivní uživatelé.");
 
-        var pickedId = activeUserIds[Random.Shared.Next(activeUserIds.Count)];
+        var lastPickedId = await context.TastingSessions
+            .Where(s => s.IsActive
+                     && s.Id != sessionId
+                     && s.CleanupPersonId != null)
+            .OrderByDescending(s => s.Date)
+            .ThenByDescending(s => s.CreatedAt)
+            .Select(s => s.CleanupPersonId)
+            .FirstOrDefaultAsync();
+
+        var candidates = lastPickedId != null
+            ? activeUserIds.Where(id => id != lastPickedId).ToList()
+            : activeUserIds;
+        if (candidates.Count == 0)
+            candidates = activeUserIds;
+
+        var windowStart = Today.AddDays(-30);
+        var completedCounts = await context.TastingSessions
+            .Where(s => s.IsActive
+                     && s.Id != sessionId
+                     && s.CleanupCompleted == true
+                     && s.CleanupPersonId != null
+                     && s.Date >= windowStart
+                     && s.Date <= Today)
+            .GroupBy(s => s.CleanupPersonId!.Value)
+            .Select(g => new { UserId = g.Key, Count = g.Count() })
+            .ToDictionaryAsync(x => x.UserId, x => x.Count);
+
+        var weights = candidates
+            .Select(id => 1.0 / (1.0 + (completedCounts.TryGetValue(id, out var c) ? c : 0)))
+            .ToList();
+        var total = weights.Sum();
+        var roll = Random.Shared.NextDouble() * total;
+
+        var pickedId = candidates[^1];
+        var cumulative = 0.0;
+        for (var i = 0; i < candidates.Count; i++)
+        {
+            cumulative += weights[i];
+            if (roll < cumulative) { pickedId = candidates[i]; break; }
+        }
+
         session.CleanupPersonId = pickedId;
         session.CleanupCompleted = null;
         await context.SaveChangesAsync();

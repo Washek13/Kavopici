@@ -430,5 +430,154 @@ public class SessionServiceTests : IDisposable
         Assert.Equal("Alice", sessions[0].CleanupPerson!.Name);
     }
 
+    // Inserts a historical session bypassing AddBlendOfTheDayAsync so we can control Date/CreatedAt/Completed.
+    private async Task<int> SeedHistoricalSessionAsync(int blendId, int? cleanupPersonId, bool? completed, DateOnly date, DateTime createdAt)
+    {
+        using var context = _factory.CreateDbContext();
+        var session = new TastingSession
+        {
+            BlendId = blendId,
+            Date = date,
+            IsActive = true,
+            CleanupPersonId = cleanupPersonId,
+            CleanupCompleted = completed,
+            CreatedAt = createdAt
+        };
+        context.TastingSessions.Add(session);
+        await context.SaveChangesAsync();
+        return session.Id;
+    }
+
+    [Fact]
+    public async Task AssignRandomCleanupPersonAsync_DoesNotPickSamePersonTwoInARow()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var bob = await _userService.CreateUserAsync("Bob");
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+
+        // Prior session assigned to Alice.
+        var prior = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        await _sessionService.SetCleanupPersonAsync(prior.Id, alice.Id);
+
+        // Roll a new session 30 times; should never pick Alice.
+        var current = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        for (int i = 0; i < 30; i++)
+        {
+            var updated = await _sessionService.AssignRandomCleanupPersonAsync(current.Id);
+            Assert.Equal(bob.Id, updated.CleanupPersonId);
+        }
+    }
+
+    [Fact]
+    public async Task AssignRandomCleanupPersonAsync_FallsBackWhenOnlyOneActiveUser()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+
+        var prior = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        await _sessionService.SetCleanupPersonAsync(prior.Id, alice.Id);
+
+        var current = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        var updated = await _sessionService.AssignRandomCleanupPersonAsync(current.Id);
+
+        Assert.Equal(alice.Id, updated.CleanupPersonId);
+    }
+
+    [Fact]
+    public async Task AssignRandomCleanupPersonAsync_BiasesAwayFromFrequentCleaners()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var bob = await _userService.CreateUserAsync("Bob");
+        var carol = await _userService.CreateUserAsync("Carol");
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        // Alice: 5 completed cleanups in the window.
+        for (int i = 0; i < 5; i++)
+            await SeedHistoricalSessionAsync(blend.Id, alice.Id, true, today.AddDays(-10), DateTime.UtcNow.AddDays(-10).AddSeconds(i));
+        // Bob: most-recent prior session — gets excluded as "last picked".
+        await SeedHistoricalSessionAsync(blend.Id, bob.Id, true, today.AddDays(-1), DateTime.UtcNow.AddDays(-1));
+
+        var current = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        // Candidates: [Alice, Carol]. Weights: Alice=1/6, Carol=1.
+        // P(Alice) ~14%, P(Carol) ~86%. With 200 rolls Carol picks should dominate.
+        int aliceCount = 0, carolCount = 0, bobCount = 0;
+        for (int i = 0; i < 200; i++)
+        {
+            var updated = await _sessionService.AssignRandomCleanupPersonAsync(current.Id);
+            if (updated.CleanupPersonId == alice.Id) aliceCount++;
+            else if (updated.CleanupPersonId == carol.Id) carolCount++;
+            else if (updated.CleanupPersonId == bob.Id) bobCount++;
+        }
+
+        Assert.Equal(0, bobCount); // Bob is the last picked → excluded.
+        Assert.True(carolCount > 140, $"Carol should be picked >70% of the time, got {carolCount}/200.");
+        Assert.True(aliceCount < 60, $"Alice should be picked <30% of the time, got {aliceCount}/200.");
+    }
+
+    [Fact]
+    public async Task AssignRandomCleanupPersonAsync_IgnoresCleanupsOutside30DayWindow()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var bob = await _userService.CreateUserAsync("Bob");
+        var carol = await _userService.CreateUserAsync("Carol");
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        // Alice: 5 completed cleanups, but 60 days ago — outside the window.
+        for (int i = 0; i < 5; i++)
+            await SeedHistoricalSessionAsync(blend.Id, alice.Id, true, today.AddDays(-60), DateTime.UtcNow.AddDays(-60).AddSeconds(i));
+        // Bob: most-recent prior session — excluded as "last picked".
+        await SeedHistoricalSessionAsync(blend.Id, bob.Id, true, today.AddDays(-1), DateTime.UtcNow.AddDays(-1));
+
+        var current = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        // Candidates: [Alice, Carol] with equal weights (Alice's old cleanups don't count).
+        int aliceCount = 0, carolCount = 0;
+        for (int i = 0; i < 200; i++)
+        {
+            var updated = await _sessionService.AssignRandomCleanupPersonAsync(current.Id);
+            if (updated.CleanupPersonId == alice.Id) aliceCount++;
+            else if (updated.CleanupPersonId == carol.Id) carolCount++;
+        }
+
+        // Each ~50%; loose bound 30-70% to avoid flakiness.
+        Assert.InRange(aliceCount, 60, 140);
+        Assert.InRange(carolCount, 60, 140);
+    }
+
+    [Fact]
+    public async Task AssignRandomCleanupPersonAsync_DoesNotCountSkippedOrPendingCleanups()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var bob = await _userService.CreateUserAsync("Bob");
+        var carol = await _userService.CreateUserAsync("Carol");
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        // Alice: 3 skipped, 2 pending — none should count toward weighting.
+        for (int i = 0; i < 3; i++)
+            await SeedHistoricalSessionAsync(blend.Id, alice.Id, false, today.AddDays(-10), DateTime.UtcNow.AddDays(-10).AddSeconds(i));
+        for (int i = 0; i < 2; i++)
+            await SeedHistoricalSessionAsync(blend.Id, alice.Id, null, today.AddDays(-9), DateTime.UtcNow.AddDays(-9).AddSeconds(i));
+        // Bob: most-recent prior session — excluded as "last picked".
+        await SeedHistoricalSessionAsync(blend.Id, bob.Id, true, today.AddDays(-1), DateTime.UtcNow.AddDays(-1));
+
+        var current = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        // Candidates: [Alice, Carol] with equal weights.
+        int aliceCount = 0, carolCount = 0;
+        for (int i = 0; i < 200; i++)
+        {
+            var updated = await _sessionService.AssignRandomCleanupPersonAsync(current.Id);
+            if (updated.CleanupPersonId == alice.Id) aliceCount++;
+            else if (updated.CleanupPersonId == carol.Id) carolCount++;
+        }
+
+        Assert.InRange(aliceCount, 60, 140);
+        Assert.InRange(carolCount, 60, 140);
+    }
+
     public void Dispose() => _factory.Dispose();
 }
