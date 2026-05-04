@@ -213,4 +213,70 @@
   <data name="Msg_CleanupMarkedDone" xml:space="preserve"><value>Označené ako upratané.</value></data>
   <data name="Msg_CleanupMarkedNotDone" xml:space="preserve"><value>Označené ako neupratané.</value></data>
   <data name="Err_NoActiveUsersForCleanup" xml:space="preserve"><value>Žiadni aktívni používatelia.</value></data>
+
+  <!-- Brand & flavor wheel URL (theme-aware via _Tea suffix) -->
+  <data name="Brand_AppName" xml:space="preserve"><value>KÁVOPÍČI</value></data>
+  <data name="Brand_AppName_Tea" xml:space="preserve"><value>ČAJOPYJOVÉ</value></data>
+  <data name="Url_FlavorWheel" xml:space="preserve"><value>https://notbadcoffee.com/flavor-wheel-en/</value></data>
+  <data name="Url_FlavorWheel_Tea" xml:space="preserve"><value>https://pathofcha.com/pages/tea-flavor-wheel</value></data>
+
+  <!-- Theme picker -->
+  <data name="Heading_SelectTheme" xml:space="preserve"><value>Vyberte tému</value></data>
+  <data name="Msg_SelectThemeOnce" xml:space="preserve"><value>Vyberte tému pre túto databázu. Voľba je trvalá a uložená v súbore databázy.</value></data>
+  <data name="Theme_Coffee" xml:space="preserve"><value>Káva</value></data>
+  <data name="Theme_Tea" xml:space="preserve"><value>Čaj</value></data>
+
+  <!-- Tea-themed tasting notes (IDs 9-16) -->
+  <data name="TastingNote_9" xml:space="preserve"><value>Kvetinová</value></data>
+  <data name="TastingNote_10" xml:space="preserve"><value>Ovocná</value></data>
+  <data name="TastingNote_11" xml:space="preserve"><value>Trávová</value></data>
+  <data name="TastingNote_12" xml:space="preserve"><value>Orechová</value></data>
+  <data name="TastingNote_13" xml:space="preserve"><value>Zemitá</value></data>
+  <data name="TastingNote_14" xml:space="preserve"><value>Drevitá</value></data>
+  <data name="TastingNote_15" xml:space="preserve"><value>Korenistá</value></data>
+  <data name="TastingNote_16" xml:space="preserve"><value>Sladká</value></data>
+
+  <!-- Tea-themed overrides -->
+  <data name="Login_Subtitle_Tea" xml:space="preserve"><value>Čajový denník vašej kancelárie</value></data>
+  <data name="Label_CoffeeOfDay_Tea" xml:space="preserve"><value>Čaj dňa</value></data>
+  <data name="Tab_CoffeeOfDay_Tea" xml:space="preserve"><value>Čaj dňa</value></data>
+  <data name="Heading_NoCoffeeToday_Tea" xml:space="preserve"><value>Dnes žiadny čaj</value></data>
+  <data name="Heading_CoffeesOfDay_Tea" xml:space="preserve"><value>Čaje dňa</value></data>
+  <data name="Heading_AddCoffeeOfDay_Tea" xml:space="preserve"><value>Pridať čaj dňa</value></data>
+  <data name="Btn_AddCoffeeOfDay_Tea" xml:space="preserve"><value>Pridať čaj dňa</value></data>
+  <data name="Msg_NoCoffeeSetByAdmin_Tea" xml:space="preserve"><value>Administrátor zatiaľ nenastavil dnešný čaj.</value></data>
+  <data name="Msg_NoCoffeeSet_Tea" xml:space="preserve"><value>Zatiaľ nebol nastavený žiadny čaj dňa.</value></data>
+  <data name="Msg_CoffeeOfDayAdded_Tea" xml:space="preserve"><value>Čaj dňa pridaný: {0}</value></data>
+  <data name="Msg_CoffeeOfDayRemoved_Tea" xml:space="preserve"><value>Čaj dňa bol odobraný.</value></data>
+  <data name="Placeholder_HowDidItTaste_Tea" xml:space="preserve"><value>Ako vám čaj chutil?</value></data>
+  <data name="Msg_FlavorWheel_Tea" xml:space="preserve"><value>Nie ste si istí chuťou? Pozrite si koliesko chutí čaju</value></data>
+  <data name="Msg_RateBeforeReveal_Tea" xml:space="preserve"><value>Ohodnoťte čaj pred odhalením detailov.</value></data>
+  <data name="Label_Roaster_Tea" xml:space="preserve"><value>Pestovateľ</value></data>
+  <data name="Label_RoastLevel_Tea" xml:space="preserve"><value>Druh čaju</value></data>
+  <data name="Label_Roasting_Tea" xml:space="preserve"><value>Druh</value></data>
+  <data name="RoastLevel_Light_Tea" xml:space="preserve"><value>Biely</value></data>
+  <data name="RoastLevel_MediumLight_Tea" xml:space="preserve"><value>Zelený</value></data>
+  <data name="RoastLevel_Medium_Tea" xml:space="preserve"><value>Oolong</value></data>
+  <data name="RoastLevel_MediumDark_Tea" xml:space="preserve"><value>Čierny</value></data>
+  <data name="RoastLevel_Dark_Tea" xml:space="preserve"><value>Pu-erh</value></data>
+  <data name="Label_Blend_Tea" xml:space="preserve"><value>Čaj</value></data>
+  <data name="Tab_Blends_Tea" xml:space="preserve"><value>Čaje</value></data>
+  <data name="Btn_AddBlend_Tea" xml:space="preserve"><value>Pridať čaj</value></data>
+  <data name="Heading_AddBlend_Tea" xml:space="preserve"><value>Pridať čaj</value></data>
+  <data name="Msg_BlendAdded_Tea" xml:space="preserve"><value>Čaj bol pridaný.</value></data>
+  <data name="Msg_BlendUpdated_Tea" xml:space="preserve"><value>Čaj bol aktualizovaný.</value></data>
+  <data name="Msg_BlendRemoved_Tea" xml:space="preserve"><value>Čaj {0} bol odstránený.</value></data>
+  <data name="Msg_BlendNotFound_Tea" xml:space="preserve"><value>Čaj nenájdený.</value></data>
+  <data name="Heading_Comparison_Tea" xml:space="preserve"><value>Porovnanie čajov</value></data>
+  <data name="Btn_CompareBlends_Tea" xml:space="preserve"><value>Porovnanie čajov</value></data>
+  <data name="Tab_BlendOverview_Tea" xml:space="preserve"><value>Prehľad čajov</value></data>
+  <data name="Label_BlendA_Tea" xml:space="preserve"><value>Čaj A</value></data>
+  <data name="Label_BlendB_Tea" xml:space="preserve"><value>Čaj B</value></data>
+  <data name="Err_EnterBlendName_Tea" xml:space="preserve"><value>Zadajte názov čaju.</value></data>
+  <data name="Err_EnterRoasterName_Tea" xml:space="preserve"><value>Zadajte názov pestovateľa.</value></data>
+  <data name="Err_SelectBlend_Tea" xml:space="preserve"><value>Vyberte čaj.</value></data>
+  <data name="Placeholder_SelectBlend_Tea" xml:space="preserve"><value>— vyberte čaj —</value></data>
+  <data name="Label_LinkedBlend_Tea" xml:space="preserve"><value>Prepojiť s čajom</value></data>
+  <data name="Label_SuppliedBlends_Tea" xml:space="preserve"><value>Dodané čaje</value></data>
+  <data name="Placeholder_NoteForTasters_Tea" xml:space="preserve"><value>Poznámka pre degustátorov (napr. Vzorka A)...</value></data>
 </root>

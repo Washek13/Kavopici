@@ -213,4 +213,70 @@
   <data name="Msg_CleanupMarkedDone" xml:space="preserve"><value>Marked as done.</value></data>
   <data name="Msg_CleanupMarkedNotDone" xml:space="preserve"><value>Marked as not done.</value></data>
   <data name="Err_NoActiveUsersForCleanup" xml:space="preserve"><value>No active users.</value></data>
+
+  <!-- Brand & flavor wheel URL (theme-aware via _Tea suffix) -->
+  <data name="Brand_AppName" xml:space="preserve"><value>KÁVOPÍČI</value></data>
+  <data name="Brand_AppName_Tea" xml:space="preserve"><value>ČAJOPYJOVÉ</value></data>
+  <data name="Url_FlavorWheel" xml:space="preserve"><value>https://notbadcoffee.com/flavor-wheel-en/</value></data>
+  <data name="Url_FlavorWheel_Tea" xml:space="preserve"><value>https://pathofcha.com/pages/tea-flavor-wheel</value></data>
+
+  <!-- Theme picker -->
+  <data name="Heading_SelectTheme" xml:space="preserve"><value>Select Theme</value></data>
+  <data name="Msg_SelectThemeOnce" xml:space="preserve"><value>Choose a theme for this database. The choice is permanent and stored in the database file.</value></data>
+  <data name="Theme_Coffee" xml:space="preserve"><value>Coffee</value></data>
+  <data name="Theme_Tea" xml:space="preserve"><value>Tea</value></data>
+
+  <!-- Tea-themed tasting notes (IDs 9-16) -->
+  <data name="TastingNote_9" xml:space="preserve"><value>Floral</value></data>
+  <data name="TastingNote_10" xml:space="preserve"><value>Fruity</value></data>
+  <data name="TastingNote_11" xml:space="preserve"><value>Grassy</value></data>
+  <data name="TastingNote_12" xml:space="preserve"><value>Nutty</value></data>
+  <data name="TastingNote_13" xml:space="preserve"><value>Earthy</value></data>
+  <data name="TastingNote_14" xml:space="preserve"><value>Woody</value></data>
+  <data name="TastingNote_15" xml:space="preserve"><value>Spicy</value></data>
+  <data name="TastingNote_16" xml:space="preserve"><value>Sweet</value></data>
+
+  <!-- Tea-themed overrides for coffee-specific strings -->
+  <data name="Login_Subtitle_Tea" xml:space="preserve"><value>Your office tea diary</value></data>
+  <data name="Label_CoffeeOfDay_Tea" xml:space="preserve"><value>Tea of the Day</value></data>
+  <data name="Tab_CoffeeOfDay_Tea" xml:space="preserve"><value>Tea of the Day</value></data>
+  <data name="Heading_NoCoffeeToday_Tea" xml:space="preserve"><value>No tea today</value></data>
+  <data name="Heading_CoffeesOfDay_Tea" xml:space="preserve"><value>Teas of the Day</value></data>
+  <data name="Heading_AddCoffeeOfDay_Tea" xml:space="preserve"><value>Add tea of the day</value></data>
+  <data name="Btn_AddCoffeeOfDay_Tea" xml:space="preserve"><value>Add tea of the day</value></data>
+  <data name="Msg_NoCoffeeSetByAdmin_Tea" xml:space="preserve"><value>The administrator has not set today's tea yet.</value></data>
+  <data name="Msg_NoCoffeeSet_Tea" xml:space="preserve"><value>No tea of the day has been set yet.</value></data>
+  <data name="Msg_CoffeeOfDayAdded_Tea" xml:space="preserve"><value>Tea of the day added: {0}</value></data>
+  <data name="Msg_CoffeeOfDayRemoved_Tea" xml:space="preserve"><value>Tea of the day has been removed.</value></data>
+  <data name="Placeholder_HowDidItTaste_Tea" xml:space="preserve"><value>How did the tea taste?</value></data>
+  <data name="Msg_FlavorWheel_Tea" xml:space="preserve"><value>Not sure about the flavor? Check out the tea flavor wheel</value></data>
+  <data name="Msg_RateBeforeReveal_Tea" xml:space="preserve"><value>Rate the tea before revealing the details.</value></data>
+  <data name="Label_Roaster_Tea" xml:space="preserve"><value>Producer</value></data>
+  <data name="Label_RoastLevel_Tea" xml:space="preserve"><value>Tea type</value></data>
+  <data name="Label_Roasting_Tea" xml:space="preserve"><value>Type</value></data>
+  <data name="RoastLevel_Light_Tea" xml:space="preserve"><value>White</value></data>
+  <data name="RoastLevel_MediumLight_Tea" xml:space="preserve"><value>Green</value></data>
+  <data name="RoastLevel_Medium_Tea" xml:space="preserve"><value>Oolong</value></data>
+  <data name="RoastLevel_MediumDark_Tea" xml:space="preserve"><value>Black</value></data>
+  <data name="RoastLevel_Dark_Tea" xml:space="preserve"><value>Pu-erh</value></data>
+  <data name="Label_Blend_Tea" xml:space="preserve"><value>Tea</value></data>
+  <data name="Tab_Blends_Tea" xml:space="preserve"><value>Teas</value></data>
+  <data name="Btn_AddBlend_Tea" xml:space="preserve"><value>Add tea</value></data>
+  <data name="Heading_AddBlend_Tea" xml:space="preserve"><value>Add tea</value></data>
+  <data name="Msg_BlendAdded_Tea" xml:space="preserve"><value>Tea has been added.</value></data>
+  <data name="Msg_BlendUpdated_Tea" xml:space="preserve"><value>Tea has been updated.</value></data>
+  <data name="Msg_BlendRemoved_Tea" xml:space="preserve"><value>Tea {0} has been removed.</value></data>
+  <data name="Msg_BlendNotFound_Tea" xml:space="preserve"><value>Tea not found.</value></data>
+  <data name="Heading_Comparison_Tea" xml:space="preserve"><value>Tea comparison</value></data>
+  <data name="Btn_CompareBlends_Tea" xml:space="preserve"><value>Compare teas</value></data>
+  <data name="Tab_BlendOverview_Tea" xml:space="preserve"><value>Tea overview</value></data>
+  <data name="Label_BlendA_Tea" xml:space="preserve"><value>Tea A</value></data>
+  <data name="Label_BlendB_Tea" xml:space="preserve"><value>Tea B</value></data>
+  <data name="Err_EnterBlendName_Tea" xml:space="preserve"><value>Enter the tea name.</value></data>
+  <data name="Err_EnterRoasterName_Tea" xml:space="preserve"><value>Enter the producer name.</value></data>
+  <data name="Err_SelectBlend_Tea" xml:space="preserve"><value>Select a tea.</value></data>
+  <data name="Placeholder_SelectBlend_Tea" xml:space="preserve"><value>— select tea —</value></data>
+  <data name="Label_LinkedBlend_Tea" xml:space="preserve"><value>Link to tea</value></data>
+  <data name="Label_SuppliedBlends_Tea" xml:space="preserve"><value>Supplied Teas</value></data>
+  <data name="Placeholder_NoteForTasters_Tea" xml:space="preserve"><value>Note for tasters (e.g. Sample A)...</value></data>
 </root>

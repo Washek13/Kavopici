@@ -1,12 +1,13 @@
 @inherits LayoutComponentBase
+@implements IDisposable
 @inject AppState AppState
 @inject UpdateState UpdateState
 @inject IUpdateService UpdateService
 @inject NavigationManager Nav
 @inject IJSRuntime JS
-@inject IStringLocalizer<SharedResources> L
+@inject IThemedLocalizer L
 
-<div class="app-container">
+<div class="app-container @ThemeCssClass">
     @if (UpdateState.IsUpdateAvailable)
     {
         <div class="update-banner">
@@ -37,7 +38,7 @@
         <header class="app-header">
             <div class="header-brand" @onclick="GoToDashboard">
                 <img src="icon-32.png" alt="" class="header-icon" />
-                KÁVOPÍČI
+                @L["Brand_AppName"]
             </div>
             <nav class="header-nav">
                 <button class="nav-btn" @onclick="GoToDashboard">@L["Nav_Dashboard"]</button>
@@ -77,9 +78,13 @@
     private bool isDownloading;
     private string currentCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
 
+    private string ThemeCssClass =>
+        AppState.CurrentTheme == Kavopici.Models.Enums.Theme.Tea ? "theme-tea" : "";
+
     protected override void OnInitialized()
     {
         AppState.OnChange += StateHasChanged;
+        AppState.OnThemeChange += StateHasChanged;
         UpdateState.OnChange += OnUpdateStateChanged;
     }
 
@@ -135,6 +140,7 @@
     public void Dispose()
     {
         AppState.OnChange -= StateHasChanged;
+        AppState.OnThemeChange -= StateHasChanged;
         UpdateState.OnChange -= OnUpdateStateChanged;
     }
 }

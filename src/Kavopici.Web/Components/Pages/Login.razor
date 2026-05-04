@@ -1,15 +1,17 @@
 @page "/"
+@implements IDisposable
 @inject IUserService UserService
 @inject IAppSettingsService AppSettings
+@inject IAppConfigService AppConfigService
 @inject IDbContextFactory<KavopiciDbContext> DbContextFactory
 @inject AppState AppState
 @inject NavigationManager Nav
 @inject IJSRuntime JS
-@inject IStringLocalizer<SharedResources> L
+@inject IThemedLocalizer L
 
-<div class="login-container">
-    <img src="icon-80.png" alt="Kávopíči" class="login-icon" />
-    <div class="login-title">KÁVOPÍČI</div>
+<div class="login-container @ThemeCssClass">
+    <img src="icon-80.png" alt="@L["Brand_AppName"]" class="login-icon" />
+    <div class="login-title">@L["Brand_AppName"]</div>
     <div class="login-subtitle">@L["Login_Subtitle"]</div>
     @if (errorMessage != null)
     {
@@ -71,6 +73,21 @@
                     </ul>
                 </div>
             }
+        </div>
+    }
+    else if (isThemePickerNeeded)
+    {
+        <div class="card" style="max-width:400px;width:100%;">
+            <h2>@L["Heading_SelectTheme"]</h2>
+            <p class="mb-16">@L["Msg_SelectThemeOnce"]</p>
+            <div class="btn-group" style="flex-direction:column;">
+                <button class="btn btn-primary w-full" @onclick="() => SelectTheme(Theme.Coffee)">
+                    ☕ @L["Theme_Coffee"]
+                </button>
+                <button class="btn btn-outline w-full" @onclick="() => SelectTheme(Theme.Tea)">
+                    🍵 @L["Theme_Tea"]
+                </button>
+            </div>
         </div>
     }
     else if (isFirstRun)
@@ -136,11 +153,20 @@
     private bool isFirstRun;
     private bool isLoading = true;
     private bool isDatabaseNotSelected;
+    private bool isThemePickerNeeded;
     private bool showLanguagePicker;
     private string? selectedDatabasePath;
     private string databasePathInput = "";
     private string newAdminName = "";
     private string? errorMessage;
+
+    private string ThemeCssClass =>
+        AppState.CurrentTheme == Theme.Tea ? "theme-tea" : "";
+
+    protected override void OnInitialized()
+    {
+        AppState.OnThemeChange += StateHasChanged;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -202,6 +228,7 @@
             {
                 isDatabaseNotSelected = true;
                 isFirstRun = false;
+                isThemePickerNeeded = false;
                 selectedDatabasePath = null;
                 return;
             }
@@ -219,7 +246,29 @@
 
             selectedDatabasePath = dbPath;
 
+            // Determine theme. Pre-existing databases (have users but no AppConfig) silently
+            // default to Coffee. Brand-new databases (no users, no AppConfig) show the
+            // theme picker before admin creation.
             var hasUsers = await UserService.HasAnyUsersAsync();
+            var config = await AppConfigService.GetOrNullAsync();
+
+            if (config == null)
+            {
+                if (hasUsers)
+                {
+                    // Legacy DB — predates the theme feature.
+                    config = await AppConfigService.CreateAsync(Theme.Coffee);
+                }
+                else
+                {
+                    isThemePickerNeeded = true;
+                    isFirstRun = false;
+                    return;
+                }
+            }
+
+            AppState.SetTheme(config.Theme);
+            isThemePickerNeeded = false;
             isFirstRun = !hasUsers;
 
             if (hasUsers)
@@ -230,12 +279,29 @@
             errorMessage = L["Err_OpenDatabaseFailed", ex.Message];
             isDatabaseNotSelected = true;
             isFirstRun = false;
+            isThemePickerNeeded = false;
             selectedDatabasePath = null;
             AppSettings.SetDatabasePath(null);
         }
         finally
         {
             isLoading = false;
+        }
+    }
+
+    private async Task SelectTheme(Theme theme)
+    {
+        try
+        {
+            errorMessage = null;
+            await AppConfigService.CreateAsync(theme);
+            AppState.SetTheme(theme);
+            isThemePickerNeeded = false;
+            await LoadUsers();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
         }
     }
 
@@ -291,7 +357,9 @@
         selectedDatabasePath = null;
         isDatabaseNotSelected = true;
         isFirstRun = false;
+        isThemePickerNeeded = false;
         errorMessage = null;
+        AppState.SetTheme(Theme.Coffee);
     }
 
     private void UseRecentDatabase(string path)
@@ -346,5 +414,10 @@
     {
         if (e.Key == "Enter")
             await CreateFirstAdmin();
+    }
+
+    public void Dispose()
+    {
+        AppState.OnThemeChange -= StateHasChanged;
     }
 }

@@ -4,7 +4,7 @@
 @inject IStatisticsService StatisticsService
 @inject AppState AppState
 @inject NavigationManager Nav
-@inject IStringLocalizer<SharedResources> L
+@inject IThemedLocalizer L
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 
@@ -99,12 +99,12 @@ else
 }
 
 @* Flavor Wheel Banner *@
-<a href="https://notbadcoffee.com/flavor-wheel-en/"
+<a href="@L["Url_FlavorWheel"]"
    target="_blank"
    rel="noopener noreferrer"
    class="flavor-wheel-banner">
     <div class="banner-content">
-        <span class="banner-icon">☕</span>
+        <span class="banner-icon">@(AppState.CurrentTheme == Theme.Tea ? "🍵" : "☕")</span>
         <span class="banner-text">@L["Msg_FlavorWheel"]</span>
     </div>
 </a>
