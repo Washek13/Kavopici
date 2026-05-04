@@ -110,6 +110,7 @@
   <data name="Btn_RemoveAdmin" xml:space="preserve"><value>Admin entfernen</value></data>
   <data name="Btn_AddAdmin" xml:space="preserve"><value>Admin hinzufügen</value></data>
   <data name="Btn_Deactivate" xml:space="preserve"><value>Deaktivieren</value></data>
+  <data name="Label_DeactivatedSuffix" xml:space="preserve"><value>(deaktiviert)</value></data>
   <data name="Heading_AddBlend" xml:space="preserve"><value>Mischung hinzufügen</value></data>
   <data name="Label_OriginOptional" xml:space="preserve"><value>Herkunft (optional)</value></data>
   <data name="Label_RoastLevel" xml:space="preserve"><value>Röstgrad</value></data>

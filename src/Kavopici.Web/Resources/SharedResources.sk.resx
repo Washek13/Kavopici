@@ -110,6 +110,7 @@
   <data name="Btn_RemoveAdmin" xml:space="preserve"><value>Odobrať admin</value></data>
   <data name="Btn_AddAdmin" xml:space="preserve"><value>Pridať admin</value></data>
   <data name="Btn_Deactivate" xml:space="preserve"><value>Deaktivovať</value></data>
+  <data name="Label_DeactivatedSuffix" xml:space="preserve"><value>(deaktivovaný)</value></data>
   <data name="Heading_AddBlend" xml:space="preserve"><value>Pridať zmes</value></data>
   <data name="Label_OriginOptional" xml:space="preserve"><value>Pôvod (voliteľný)</value></data>
   <data name="Label_RoastLevel" xml:space="preserve"><value>Stupeň praženia</value></data>

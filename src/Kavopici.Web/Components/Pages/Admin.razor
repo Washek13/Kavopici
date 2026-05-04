@@ -170,6 +170,10 @@
                                 {
                                     <option value="@u.Id">@u.Name</option>
                                 }
+                                @if (editBlendInactiveSupplier != null)
+                                {
+                                    <option value="@editBlendInactiveSupplier.Id">@editBlendInactiveSupplier.Name @L["Label_DeactivatedSuffix"]</option>
+                                }
                             </select>
                         </td>
                         <td>
@@ -258,6 +262,7 @@
                     @foreach (var session in currentSessions)
                     {
                         var sid = session.Id;
+                        var inactiveCleanup = session.CleanupPerson is { IsActive: false } cp ? cp : null;
                         <tr>
                             <td><strong>@session.Blend.Name</strong> (@session.Blend.Supplier.Name)</td>
                             <td class="text-muted">@(session.Comment ?? "—")</td>
@@ -270,6 +275,10 @@
                                         @foreach (var u in allUsers)
                                         {
                                             <option value="@u.Id">@u.Name</option>
+                                        }
+                                        @if (inactiveCleanup != null)
+                                        {
+                                            <option value="@inactiveCleanup.Id">@inactiveCleanup.Name @L["Label_DeactivatedSuffix"]</option>
                                         }
                                     </select>
                                     <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
@@ -375,6 +384,7 @@
     private decimal? editBlendPriceCzk;
     private int editLinkedBlendId;
     private int? editOriginalLinkedBlendId;
+    private User? editBlendInactiveSupplier;
 
     // Blend of day form
     private int selectedBlendOfDayId;
@@ -396,11 +406,7 @@
 
     private async Task LoadUsers()
     {
-        try
-        {
-            var users = await UserService.GetAllUsersAsync();
-            allUsers = users.Where(u => u.IsActive).ToList();
-        }
+        try { allUsers = await UserService.GetActiveUsersAsync(); }
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
@@ -486,7 +492,7 @@
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
-    private void StartBlendEdit(CoffeeBlend blend)
+    private async Task StartBlendEdit(CoffeeBlend blend)
     {
         editingBlendId = blend.Id;
         editBlendName = blend.Name;
@@ -494,6 +500,9 @@
         editBlendOrigin = blend.Origin;
         editBlendRoastLevel = blend.RoastLevel;
         editBlendSupplierId = blend.SupplierId;
+        editBlendInactiveSupplier = allUsers.Any(u => u.Id == blend.SupplierId)
+            ? null
+            : await UserService.GetByIdAsync(blend.SupplierId);
         editBlendWeightGrams = blend.WeightGrams;
         editBlendPriceCzk = blend.PriceCzk;
         editLinkedBlendId = blend.LinkedBlendId ?? 0;
@@ -503,6 +512,7 @@
     private void CancelBlendEdit()
     {
         editingBlendId = null;
+        editBlendInactiveSupplier = null;
     }
 
     private async Task SaveBlendEdit()
@@ -529,6 +539,7 @@
             }
 
             editingBlendId = null;
+            editBlendInactiveSupplier = null;
             statusMessage = L["Msg_BlendUpdated"];
             await LoadBlends();
         }
