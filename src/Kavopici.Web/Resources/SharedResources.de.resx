@@ -24,6 +24,8 @@
   <data name="Login_DatabaseInstruction" xml:space="preserve"><value>Geben Sie den Datenbankpfad ein. Wenn die Datei nicht existiert, wird eine neue erstellt.</value></data>
   <data name="Label_DatabasePath" xml:space="preserve"><value>Datenbankpfad</value></data>
   <data name="Btn_OpenOrCreateDatabase" xml:space="preserve"><value>Datenbank öffnen / erstellen</value></data>
+  <data name="Label_RecentDatabases" xml:space="preserve"><value>Zuletzt verwendete Datenbanken</value></data>
+  <data name="Btn_RemoveRecentDatabase" xml:space="preserve"><value>Aus Liste entfernen</value></data>
   <data name="Heading_Welcome" xml:space="preserve"><value>Willkommen!</value></data>
   <data name="Login_FirstAdminInstruction" xml:space="preserve"><value>Erstellen Sie den ersten Administrator, um zu beginnen.</value></data>
   <data name="Label_AdminName" xml:space="preserve"><value>Administratorname</value></data>

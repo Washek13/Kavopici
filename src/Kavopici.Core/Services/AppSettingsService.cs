@@ -5,6 +5,8 @@ namespace Kavopici.Services;
 
 public class AppSettingsService : IAppSettingsService
 {
+    private const int MaxRecentPaths = 5;
+
     private static readonly string SettingsDir = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "Kavopici");
@@ -14,6 +16,8 @@ public class AppSettingsService : IAppSettingsService
     private AppSettings _settings = new();
 
     public string? DatabasePath => _settings.DatabasePath;
+
+    public IReadOnlyList<string> RecentDatabasePaths => _settings.RecentDatabasePaths.AsReadOnly();
 
     public void Load()
     {
@@ -33,8 +37,32 @@ public class AppSettingsService : IAppSettingsService
 
     public void SetDatabasePath(string? path)
     {
-        _settings.DatabasePath = string.IsNullOrEmpty(path) ? null : ExpandPath(path);
+        if (string.IsNullOrEmpty(path))
+        {
+            _settings.DatabasePath = null;
+        }
+        else
+        {
+            var expanded = ExpandPath(path);
+            _settings.DatabasePath = expanded;
+
+            _settings.RecentDatabasePaths.RemoveAll(p => string.Equals(p, expanded, StringComparison.OrdinalIgnoreCase));
+            _settings.RecentDatabasePaths.Insert(0, expanded);
+            if (_settings.RecentDatabasePaths.Count > MaxRecentPaths)
+                _settings.RecentDatabasePaths.RemoveRange(MaxRecentPaths, _settings.RecentDatabasePaths.Count - MaxRecentPaths);
+        }
+
         Save();
+    }
+
+    public void RemoveRecentDatabasePath(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+            return;
+
+        var removed = _settings.RecentDatabasePaths.RemoveAll(p => string.Equals(p, path, StringComparison.OrdinalIgnoreCase));
+        if (removed > 0)
+            Save();
     }
 
     public static string ExpandPath(string path)
@@ -81,5 +109,6 @@ public class AppSettingsService : IAppSettingsService
     private class AppSettings
     {
         public string? DatabasePath { get; set; }
+        public List<string> RecentDatabasePaths { get; set; } = new();
     }
 }

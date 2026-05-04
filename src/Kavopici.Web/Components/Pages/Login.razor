@@ -46,6 +46,31 @@
                     disabled="@string.IsNullOrWhiteSpace(databasePathInput)">
                 @L["Btn_OpenOrCreateDatabase"]
             </button>
+            @if (AppSettings.RecentDatabasePaths.Count > 0)
+            {
+                <div class="form-group" style="margin-top:16px;">
+                    <label>@L["Label_RecentDatabases"]</label>
+                    <ul style="list-style:none;padding:0;margin:0;">
+                        @foreach (var path in AppSettings.RecentDatabasePaths)
+                        {
+                            <li style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                                <button type="button"
+                                        class="btn"
+                                        style="flex:1;text-align:left;background:none;color:var(--coffee-brown);text-decoration:underline;padding:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;"
+                                        title="@path"
+                                        @onclick="() => UseRecentDatabase(path)">
+                                    @path
+                                </button>
+                                <button type="button"
+                                        class="btn"
+                                        style="background:none;color:var(--text-muted);padding:2px 6px;"
+                                        title="@L["Btn_RemoveRecentDatabase"]"
+                                        @onclick="() => RemoveRecentDatabase(path)">×</button>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
         </div>
     }
     else if (isFirstRun)
@@ -267,6 +292,17 @@
         isDatabaseNotSelected = true;
         isFirstRun = false;
         errorMessage = null;
+    }
+
+    private void UseRecentDatabase(string path)
+    {
+        databasePathInput = path;
+        errorMessage = null;
+    }
+
+    private void RemoveRecentDatabase(string path)
+    {
+        AppSettings.RemoveRecentDatabasePath(path);
     }
 
     private void SelectUser(User user) => selectedUser = user;
