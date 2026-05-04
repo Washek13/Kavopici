@@ -18,6 +18,7 @@ Kávopíči is a web application for office coffee tastings. An admin sets the "
 ### Login
 - Profile selection from a list (no passwords — trusted environment).
 - **Auto-login** — the selected user is remembered via a browser cookie. On page refresh or app restart, the user is logged in automatically. Logging out clears the cookie.
+- **Recent databases** — login screen lists up to 5 recently used database paths for one-click access; individual entries can be removed.
 - On first launch: language selection (🇨🇿 CS / 🇸🇰 SK / 🇬🇧 EN / 🇩🇪 DE), database setup (opens existing or creates new based on the path), and first admin creation.
 
 ### Dashboard
@@ -35,7 +36,7 @@ Kávopíči is a web application for office coffee tastings. An admin sets the "
 - **Price per star** — ratio of price per kilogram to average rating; lower = better value for money.
 - **Blend detail** — star distribution, individual ratings with comments and tasting notes.
 - **My ratings** — full tasting history with retroactive rating of missed blends and **editing of existing ratings**.
-- **User overview** — per-user stats table: votes cast, average given, participation rate, favorite tasting note, supplied blends count, price/★ for supplied blends, and voting consistency (population std dev). Sortable by all columns.
+- **User overview** — per-user stats table: votes cast, average given, participation rate, favorite tasting note, supplied blends count, price/★ for supplied blends, voting consistency (population std dev), cleanup assignments, and cleanup completion rate (%). Sortable by all columns.
 - **Blend comparison** — two blends side by side with rating distribution.
 - **CSV export** — download data to a file (including controversy and price/★).
 
@@ -43,12 +44,20 @@ Kávopíči is a web application for office coffee tastings. An admin sets the "
 - **Users** — add, deactivate, grant/revoke admin rights (last admin cannot be removed).
 - **Blends** — add (name, roaster, origin, roast level, supplier, weight, price), edit existing blends and remove (soft delete). Price per kg is calculated automatically from weight and price. **Linked blends** — link the same coffee blend across different suppliers so their ratings aggregate into a single row in statistics.
 - **Coffee of the day** — add and remove blends for the daily tasting session (multiple blends supported), optional note per blend.
+- **Cleanup person** — per session: randomly assign (weighted toward users with fewer recent completions; same person not picked twice in a row), manually pick from active users, or clear. Mark cleanup as completed or not completed.
 - **CSV export** — export statistics.
 
 ### Localization
 - Four supported languages: **Czech, Slovak, English, German**.
 - Language is selected on first launch and stored in a cookie. Can be changed at any time via the header switcher.
 - Everything is translated, including tasting notes, roast levels, and the bug report template.
+
+### Theming
+- Two themes: **Coffee** and **Tea** — chosen once when creating a new database; cannot be changed afterwards.
+- Theme is stored in the database (`AppConfig` table) and determines which tasting notes are available and the visual CSS palette.
+  - **Coffee** — Fruity, Nutty, Chocolatey, Caramel, Floral, Spiced, Citrusy, Honey.
+  - **Tea** — Floral, Fruity, Grassy, Nutty, Earthy, Woody, Spiced, Sweet.
+- Legacy databases automatically default to Coffee.
 
 ### Auto-update
 - Checks for new versions via GitHub Releases in the background on startup.
@@ -77,17 +86,17 @@ Kávopíči is a web application for office coffee tastings. An admin sets the "
 Kavopici.sln
 ├── src/
 │   ├── Kavopici.Core/          # Domain logic, models, services, database
-│   │   ├── Models/             # User, CoffeeBlend, TastingSession, Rating, TastingNote, BlendStatistics
+│   │   ├── Models/             # User, CoffeeBlend, TastingSession, Rating, TastingNote, BlendStatistics, AppConfig
 │   │   ├── Data/               # KavopiciDbContext, DbContextFactory, SQLite pragma interceptor
 │   │   └── Services/           # UserService, BlendService, SessionService, RatingService,
-│   │                           # StatisticsService, CsvExportService, AppSettingsService, IUpdateService
+│   │                           # StatisticsService, CsvExportService, AppSettingsService, AppConfigService, IUpdateService
 │   └── Kavopici.Web/           # ASP.NET Core app (entry point)
 │       ├── Components/
 │       │   ├── Pages/          # Login, Dashboard, Statistics, BlendDetail, Comparison, Admin
 │       │   ├── Shared/         # StarRating, BlendCard, UserInitials, ControversyBadge
 │       │   └── Layout/         # MainLayout (navigation, update banner)
 │       ├── Resources/          # SharedResources.resx + satellites (.cs/.sk/.en/.de)
-│       ├── Services/           # AppState, UpdateService, UpdateState
+│       ├── Services/           # AppState, UpdateService, UpdateState, ThemedLocalizer
 │       └── wwwroot/            # CSS, icons, favicon
 └── tests/
     └── Kavopici.Tests/         # Unit tests (UserService, RatingService, SessionService, StatisticsService)
@@ -102,9 +111,9 @@ User                    CoffeeBlend              TastingSession
 ├── IsAdmin             ├── Roaster              ├── Date (DateOnly)
 ├── IsActive            ├── Origin?              ├── IsActive
 └── CreatedAt           ├── RoastLevel (enum)    ├── Comment?
-                        ├── SupplierId (FK→User) └── CreatedAt
-                        ├── WeightGrams?
-                        ├── PriceCzk?
+                        ├── SupplierId (FK→User) ├── CleanupPersonId? (FK→User)
+                        ├── WeightGrams?         ├── CleanupCompleted?
+                        ├── PriceCzk?            └── CreatedAt
                         ├── PricePerKg? (calc.)
                         ├── LinkedBlendId? (FK→self)
                         ├── IsActive
@@ -120,6 +129,11 @@ Rating                  TastingNote              RatingTastingNote
 └── CreatedAt
 
 Unique: (UserId, SessionId) — one rating per user per session.
+
+AppConfig
+├── Id
+├── Theme (Coffee | Tea)
+└── CreatedAt
 ```
 
 **RoastLevel**: `Light`, `MediumLight`, `Medium`, `MediumDark`, `Dark`
@@ -188,6 +202,7 @@ The app checks for new versions automatically. When an update is available, a ba
 ## Configuration
 
 - **Database path** — stored in `%APPDATA%/Kavopici/settings.json`. Selected by the user on first launch.
+- **Theme** — stored in the `AppConfig` table inside the database; set once at database creation (Coffee or Tea).
 - **SQLite pragmas** — DELETE journal, busy timeout 30 s, synchronous NORMAL, Pooling=False (set automatically via interceptor).
 - **Port** — `http://localhost:5201` (configurable in `appsettings.json`).
 
