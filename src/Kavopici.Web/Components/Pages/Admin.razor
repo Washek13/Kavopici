@@ -259,7 +259,7 @@
                     {
                         var sid = session.Id;
                         <tr>
-                            <td><strong>@session.Blend.Name</strong> (@session.Blend.Roaster)</td>
+                            <td><strong>@session.Blend.Name</strong> (@session.Blend.Supplier.Name)</td>
                             <td class="text-muted">@(session.Comment ?? "—")</td>
                             <td>
                                 <div class="flex items-center gap-8" style="flex-wrap:wrap;">
@@ -321,7 +321,7 @@
                 <option value="0">@L["Placeholder_SelectBlend"]</option>
                 @foreach (var b in allBlends)
                 {
-                    <option value="@b.Id">@b.Name (@b.Roaster)</option>
+                    <option value="@b.Id">@b.Name (@b.Supplier.Name)</option>
                 }
             </select>
         </div>
