@@ -24,6 +24,8 @@
   <data name="Login_DatabaseInstruction" xml:space="preserve"><value>Zadajte cestu k databáze. Ak súbor neexistuje, vytvorí sa nový.</value></data>
   <data name="Label_DatabasePath" xml:space="preserve"><value>Cesta k databáze</value></data>
   <data name="Btn_OpenOrCreateDatabase" xml:space="preserve"><value>Otvoriť / vytvoriť databázu</value></data>
+  <data name="Label_RecentDatabases" xml:space="preserve"><value>Naposledy použité databázy</value></data>
+  <data name="Btn_RemoveRecentDatabase" xml:space="preserve"><value>Odstrániť zo zoznamu</value></data>
   <data name="Heading_Welcome" xml:space="preserve"><value>Vitajte!</value></data>
   <data name="Login_FirstAdminInstruction" xml:space="preserve"><value>Vytvorte prvého administrátora pre začatie.</value></data>
   <data name="Label_AdminName" xml:space="preserve"><value>Meno administrátora</value></data>
