@@ -7,7 +7,7 @@
 @inject IJSRuntime JS
 @inject IThemedLocalizer L
 
-<div class="app-container @ThemeCssClass">
+<div class="app-container">
     @if (UpdateState.IsUpdateAvailable)
     {
         <div class="update-banner">
@@ -78,19 +78,37 @@
     private bool isDownloading;
     private string currentCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
 
-    private string ThemeCssClass =>
-        AppState.CurrentTheme == Kavopici.Models.Enums.Theme.Tea ? "theme-tea" : "";
-
     protected override void OnInitialized()
     {
         AppState.OnChange += StateHasChanged;
-        AppState.OnThemeChange += StateHasChanged;
+        AppState.OnThemeChange += OnThemeChanged;
         UpdateState.OnChange += OnUpdateStateChanged;
     }
 
     private void OnUpdateStateChanged()
     {
         InvokeAsync(StateHasChanged);
+    }
+
+    private async void OnThemeChanged()
+    {
+        await InvokeAsync(async () =>
+        {
+            await ApplyThemeToBodyAsync();
+            StateHasChanged();
+        });
+    }
+
+    private async Task ApplyThemeToBodyAsync()
+    {
+        await JS.InvokeVoidAsync("setThemeClass",
+            AppState.CurrentTheme == Kavopici.Models.Enums.Theme.Tea ? "Tea" : "Coffee");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await ApplyThemeToBodyAsync();
     }
 
     private async Task InstallUpdate()
@@ -140,7 +158,7 @@
     public void Dispose()
     {
         AppState.OnChange -= StateHasChanged;
-        AppState.OnThemeChange -= StateHasChanged;
+        AppState.OnThemeChange -= OnThemeChanged;
         UpdateState.OnChange -= OnUpdateStateChanged;
     }
 }

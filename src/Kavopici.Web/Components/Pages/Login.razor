@@ -1,5 +1,4 @@
 @page "/"
-@implements IDisposable
 @inject IUserService UserService
 @inject IAppSettingsService AppSettings
 @inject IAppConfigService AppConfigService
@@ -9,7 +8,7 @@
 @inject IJSRuntime JS
 @inject IThemedLocalizer L
 
-<div class="login-container @ThemeCssClass">
+<div class="login-container">
     <img src="icon-80.png" alt="@L["Brand_AppName"]" class="login-icon" />
     <div class="login-title">@L["Brand_AppName"]</div>
     <div class="login-subtitle">@L["Login_Subtitle"]</div>
@@ -159,14 +158,6 @@
     private string databasePathInput = "";
     private string newAdminName = "";
     private string? errorMessage;
-
-    private string ThemeCssClass =>
-        AppState.CurrentTheme == Theme.Tea ? "theme-tea" : "";
-
-    protected override void OnInitialized()
-    {
-        AppState.OnThemeChange += StateHasChanged;
-    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -416,8 +407,4 @@
             await CreateFirstAdmin();
     }
 
-    public void Dispose()
-    {
-        AppState.OnThemeChange -= StateHasChanged;
-    }
 }
