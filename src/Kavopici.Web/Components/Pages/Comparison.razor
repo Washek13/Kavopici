@@ -2,7 +2,7 @@
 @inject IStatisticsService StatisticsService
 @inject AppState AppState
 @inject NavigationManager Nav
-@inject IStringLocalizer<SharedResources> L
+@inject IThemedLocalizer L
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 

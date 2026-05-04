@@ -12,6 +12,7 @@ public class KavopiciDbContext : DbContext
     public DbSet<Rating> Ratings => Set<Rating>();
     public DbSet<TastingNote> TastingNotes => Set<TastingNote>();
     public DbSet<RatingTastingNote> RatingTastingNotes => Set<RatingTastingNote>();
+    public DbSet<AppConfig> AppConfigs => Set<AppConfig>();
 
     public KavopiciDbContext(DbContextOptions<KavopiciDbContext> options)
         : base(options) { }
@@ -82,18 +83,20 @@ public class KavopiciDbContext : DbContext
         {
             e.HasKey(n => n.Id);
             e.Property(n => n.Name).IsRequired().HasMaxLength(50);
-            e.HasIndex(n => n.Name).IsUnique();
+            e.Property(n => n.Theme).HasConversion<string>().HasMaxLength(20).IsRequired();
+            e.HasIndex(n => new { n.Theme, n.Name }).IsUnique();
 
-            // Seed default tasting notes
+            // Seed default coffee tasting notes (IDs 1-8). Tea notes (IDs 9-16)
+            // are inserted at runtime by AppConfigService when a tea database is created.
             e.HasData(
-                new TastingNote { Id = 1, Name = "Ovocná" },
-                new TastingNote { Id = 2, Name = "Ořechová" },
-                new TastingNote { Id = 3, Name = "Čokoládová" },
-                new TastingNote { Id = 4, Name = "Karamelová" },
-                new TastingNote { Id = 5, Name = "Květinová" },
-                new TastingNote { Id = 6, Name = "Kořeněná" },
-                new TastingNote { Id = 7, Name = "Citrusová" },
-                new TastingNote { Id = 8, Name = "Medová" }
+                new { Id = 1, Name = "Ovocná", Theme = Theme.Coffee },
+                new { Id = 2, Name = "Ořechová", Theme = Theme.Coffee },
+                new { Id = 3, Name = "Čokoládová", Theme = Theme.Coffee },
+                new { Id = 4, Name = "Karamelová", Theme = Theme.Coffee },
+                new { Id = 5, Name = "Květinová", Theme = Theme.Coffee },
+                new { Id = 6, Name = "Kořeněná", Theme = Theme.Coffee },
+                new { Id = 7, Name = "Citrusová", Theme = Theme.Coffee },
+                new { Id = 8, Name = "Medová", Theme = Theme.Coffee }
             );
         });
 
@@ -108,6 +111,12 @@ public class KavopiciDbContext : DbContext
                 .WithMany(n => n.RatingTastingNotes)
                 .HasForeignKey(rtn => rtn.TastingNoteId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<AppConfig>(e =>
+        {
+            e.HasKey(c => c.Id);
+            e.Property(c => c.Theme).HasConversion<string>().HasMaxLength(20).IsRequired();
         });
     }
 }

@@ -44,9 +44,11 @@ builder.Services.AddTransient<ISessionService, SessionService>();
 builder.Services.AddTransient<IRatingService, RatingService>();
 builder.Services.AddTransient<IStatisticsService, StatisticsService>();
 builder.Services.AddTransient<ICsvExportService, CsvExportService>();
+builder.Services.AddTransient<IAppConfigService, AppConfigService>();
 
 // Web-specific services (scoped per circuit/session)
 builder.Services.AddScoped<AppState>();
+builder.Services.AddScoped<IThemedLocalizer, ThemedLocalizer>();
 builder.Services.AddSingleton<IUpdateService, UpdateService>();
 builder.Services.AddSingleton<UpdateState>();
 
@@ -122,8 +124,10 @@ try
 <title>Kávopíči</title>
 <style>
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+  /* Neutral grays so the splash reads OK on either coffee or tea databases —
+     the database-specific theme is loaded only after login, after the splash. */
   body {{
-    background: #FFF8F0;
+    background: #F5F5F5;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -141,12 +145,12 @@ try
   .splash h1 {{
     font-family: 'Georgia', serif;
     font-size: 42px;
-    color: #2C1810;
+    color: #2A2A2A;
     letter-spacing: 3px;
     margin-bottom: 24px;
   }}
   .loading {{
-    color: #4A2C2A;
+    color: #555555;
     font-size: 16px;
   }}
   .loading::after {{

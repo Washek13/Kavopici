@@ -1,4 +1,4 @@
-/* === Kavopici Coffee Theme === */
+/* === Kavopici Coffee Theme (default) === */
 :root {
     --coffee-dark: #2C1810;
     --coffee-medium: #4A2C2A;
@@ -14,14 +14,27 @@
     --success-green: #2E7D32;
 }
 
+/* === Tea Theme override ===
+   The CSS variable names (--coffee-*) stay coffee-named for low churn — they are
+   semantic tokens. Only the values flip when the body has the `theme-tea` class. */
+.theme-tea {
+    --coffee-dark: #1B3A1F;
+    --coffee-medium: #2E5D34;
+    --coffee-brown: #4A7C2A;
+    --coffee-light: #7BA05B;
+    --espresso: #14301A;
+    --cream: #F4F8EE;
+    --off-white: #F8FBF4;
+    --amber-gold: #B8C642;
+    --silver: #A8B0A2;
+}
+
 /* === Reset & Base === */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
     font-family: 'Segoe UI', Arial, sans-serif;
     font-size: 15px;
-    color: var(--coffee-dark);
-    background: var(--off-white);
     min-height: 100vh;
 }
 
@@ -30,6 +43,8 @@ html, body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    color: var(--coffee-dark);
+    background: var(--off-white);
 }
 
 .app-header {
@@ -353,7 +368,9 @@ textarea { resize: vertical; min-height: 60px; }
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 80vh;
+    min-height: 100vh;
+    color: var(--coffee-dark);
+    background: var(--off-white);
 }
 .login-icon {
     width: 80px;

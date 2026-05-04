@@ -213,4 +213,70 @@
   <data name="Msg_CleanupMarkedDone" xml:space="preserve"><value>Als erledigt markiert.</value></data>
   <data name="Msg_CleanupMarkedNotDone" xml:space="preserve"><value>Als nicht erledigt markiert.</value></data>
   <data name="Err_NoActiveUsersForCleanup" xml:space="preserve"><value>Keine aktiven Benutzer.</value></data>
+
+  <!-- Brand & flavor wheel URL (theme-aware via _Tea suffix) -->
+  <data name="Brand_AppName" xml:space="preserve"><value>KÁVOPÍČI</value></data>
+  <data name="Brand_AppName_Tea" xml:space="preserve"><value>ČAJOPYJOVÉ</value></data>
+  <data name="Url_FlavorWheel" xml:space="preserve"><value>https://notbadcoffee.com/flavor-wheel-en/</value></data>
+  <data name="Url_FlavorWheel_Tea" xml:space="preserve"><value>https://pathofcha.com/pages/tea-flavor-wheel</value></data>
+
+  <!-- Theme picker -->
+  <data name="Heading_SelectTheme" xml:space="preserve"><value>Thema auswählen</value></data>
+  <data name="Msg_SelectThemeOnce" xml:space="preserve"><value>Wählen Sie ein Thema für diese Datenbank. Die Wahl ist dauerhaft und wird in der Datenbankdatei gespeichert.</value></data>
+  <data name="Theme_Coffee" xml:space="preserve"><value>Kaffee</value></data>
+  <data name="Theme_Tea" xml:space="preserve"><value>Tee</value></data>
+
+  <!-- Tea-themed tasting notes (IDs 9-16) -->
+  <data name="TastingNote_9" xml:space="preserve"><value>Blumig</value></data>
+  <data name="TastingNote_10" xml:space="preserve"><value>Fruchtig</value></data>
+  <data name="TastingNote_11" xml:space="preserve"><value>Grasig</value></data>
+  <data name="TastingNote_12" xml:space="preserve"><value>Nussig</value></data>
+  <data name="TastingNote_13" xml:space="preserve"><value>Erdig</value></data>
+  <data name="TastingNote_14" xml:space="preserve"><value>Holzig</value></data>
+  <data name="TastingNote_15" xml:space="preserve"><value>Würzig</value></data>
+  <data name="TastingNote_16" xml:space="preserve"><value>Süß</value></data>
+
+  <!-- Tea-themed overrides -->
+  <data name="Login_Subtitle_Tea" xml:space="preserve"><value>Das Tee-Tagebuch Ihres Büros</value></data>
+  <data name="Label_CoffeeOfDay_Tea" xml:space="preserve"><value>Tee des Tages</value></data>
+  <data name="Tab_CoffeeOfDay_Tea" xml:space="preserve"><value>Tee des Tages</value></data>
+  <data name="Heading_NoCoffeeToday_Tea" xml:space="preserve"><value>Heute kein Tee</value></data>
+  <data name="Heading_CoffeesOfDay_Tea" xml:space="preserve"><value>Tees des Tages</value></data>
+  <data name="Heading_AddCoffeeOfDay_Tea" xml:space="preserve"><value>Tee des Tages hinzufügen</value></data>
+  <data name="Btn_AddCoffeeOfDay_Tea" xml:space="preserve"><value>Tee des Tages hinzufügen</value></data>
+  <data name="Msg_NoCoffeeSetByAdmin_Tea" xml:space="preserve"><value>Der Administrator hat den heutigen Tee noch nicht festgelegt.</value></data>
+  <data name="Msg_NoCoffeeSet_Tea" xml:space="preserve"><value>Es wurde noch kein Tee des Tages festgelegt.</value></data>
+  <data name="Msg_CoffeeOfDayAdded_Tea" xml:space="preserve"><value>Tee des Tages hinzugefügt: {0}</value></data>
+  <data name="Msg_CoffeeOfDayRemoved_Tea" xml:space="preserve"><value>Tee des Tages wurde entfernt.</value></data>
+  <data name="Placeholder_HowDidItTaste_Tea" xml:space="preserve"><value>Wie hat der Tee geschmeckt?</value></data>
+  <data name="Msg_FlavorWheel_Tea" xml:space="preserve"><value>Unsicher beim Geschmack? Schau dir das Tee-Aromenrad an</value></data>
+  <data name="Msg_RateBeforeReveal_Tea" xml:space="preserve"><value>Bewerte den Tee, bevor die Details angezeigt werden.</value></data>
+  <data name="Label_Roaster_Tea" xml:space="preserve"><value>Erzeuger</value></data>
+  <data name="Label_RoastLevel_Tea" xml:space="preserve"><value>Teesorte</value></data>
+  <data name="Label_Roasting_Tea" xml:space="preserve"><value>Sorte</value></data>
+  <data name="RoastLevel_Light_Tea" xml:space="preserve"><value>Weiß</value></data>
+  <data name="RoastLevel_MediumLight_Tea" xml:space="preserve"><value>Grün</value></data>
+  <data name="RoastLevel_Medium_Tea" xml:space="preserve"><value>Oolong</value></data>
+  <data name="RoastLevel_MediumDark_Tea" xml:space="preserve"><value>Schwarz</value></data>
+  <data name="RoastLevel_Dark_Tea" xml:space="preserve"><value>Pu-erh</value></data>
+  <data name="Label_Blend_Tea" xml:space="preserve"><value>Tee</value></data>
+  <data name="Tab_Blends_Tea" xml:space="preserve"><value>Tees</value></data>
+  <data name="Btn_AddBlend_Tea" xml:space="preserve"><value>Tee hinzufügen</value></data>
+  <data name="Heading_AddBlend_Tea" xml:space="preserve"><value>Tee hinzufügen</value></data>
+  <data name="Msg_BlendAdded_Tea" xml:space="preserve"><value>Tee wurde hinzugefügt.</value></data>
+  <data name="Msg_BlendUpdated_Tea" xml:space="preserve"><value>Tee wurde aktualisiert.</value></data>
+  <data name="Msg_BlendRemoved_Tea" xml:space="preserve"><value>Tee {0} wurde entfernt.</value></data>
+  <data name="Msg_BlendNotFound_Tea" xml:space="preserve"><value>Tee nicht gefunden.</value></data>
+  <data name="Heading_Comparison_Tea" xml:space="preserve"><value>Tee-Vergleich</value></data>
+  <data name="Btn_CompareBlends_Tea" xml:space="preserve"><value>Tees vergleichen</value></data>
+  <data name="Tab_BlendOverview_Tea" xml:space="preserve"><value>Tee-Übersicht</value></data>
+  <data name="Label_BlendA_Tea" xml:space="preserve"><value>Tee A</value></data>
+  <data name="Label_BlendB_Tea" xml:space="preserve"><value>Tee B</value></data>
+  <data name="Err_EnterBlendName_Tea" xml:space="preserve"><value>Geben Sie den Tee-Namen ein.</value></data>
+  <data name="Err_EnterRoasterName_Tea" xml:space="preserve"><value>Geben Sie den Erzeuger-Namen ein.</value></data>
+  <data name="Err_SelectBlend_Tea" xml:space="preserve"><value>Wählen Sie einen Tee.</value></data>
+  <data name="Placeholder_SelectBlend_Tea" xml:space="preserve"><value>— Tee wählen —</value></data>
+  <data name="Label_LinkedBlend_Tea" xml:space="preserve"><value>Mit Tee verknüpfen</value></data>
+  <data name="Label_SuppliedBlends_Tea" xml:space="preserve"><value>Gelieferte Tees</value></data>
+  <data name="Placeholder_NoteForTasters_Tea" xml:space="preserve"><value>Notiz für Verkoster (z.B. Probe A)...</value></data>
 </root>

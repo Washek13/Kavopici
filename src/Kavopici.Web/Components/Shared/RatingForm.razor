@@ -1,6 +1,6 @@
 @inject IRatingService RatingService
 @inject AppState AppState
-@inject IStringLocalizer<SharedResources> L
+@inject IThemedLocalizer L
 
 @if (errorMessage != null)
 {
@@ -91,7 +91,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        availableNotes = await RatingService.GetAllTastingNotesAsync();
+        availableNotes = await RatingService.GetAllTastingNotesAsync(AppState.CurrentTheme);
         PopulateFromRating(ExistingRating);
     }
 

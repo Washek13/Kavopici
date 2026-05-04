@@ -256,6 +256,21 @@ public class RatingServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task GetAllTastingNotesAsync_TeaTheme_ReturnsOnlyTeaNotes()
+    {
+        var configService = new AppConfigService(_factory);
+        await configService.CreateAsync(Theme.Tea);
+
+        var teaNotes = await _ratingService.GetAllTastingNotesAsync(Theme.Tea);
+        var coffeeNotes = await _ratingService.GetAllTastingNotesAsync(Theme.Coffee);
+
+        Assert.Equal(8, teaNotes.Count);
+        Assert.Equal(8, coffeeNotes.Count);
+        Assert.All(teaNotes, n => Assert.Equal(Theme.Tea, n.Theme));
+        Assert.All(coffeeNotes, n => Assert.Equal(Theme.Coffee, n.Theme));
+    }
+
+    [Fact]
     public async Task SetRatingNotesAsync_AddsNotes()
     {
         var (user, session) = await SetupAsync();

@@ -31,6 +31,13 @@
             var m = document.cookie.match(/Kavopici\.User=(\d+)/);
             return m ? m[1] : null;
         };
+        window.setThemeClass = function (theme) {
+            if (theme === 'Tea') {
+                document.body.classList.add('theme-tea');
+            } else {
+                document.body.classList.remove('theme-tea');
+            }
+        };
         window.downloadFile = function (fileName, contentType, byteArray) {
             var blob = new Blob([byteArray], { type: contentType });
             var url = URL.createObjectURL(blob);

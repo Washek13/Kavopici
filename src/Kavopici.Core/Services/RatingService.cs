@@ -1,5 +1,6 @@
 using Kavopici.Data;
 using Kavopici.Models;
+using Kavopici.Models.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kavopici.Services;
@@ -110,10 +111,13 @@ public class RatingService : IRatingService
             .ToListAsync();
     }
 
-    public async Task<List<TastingNote>> GetAllTastingNotesAsync()
+    public async Task<List<TastingNote>> GetAllTastingNotesAsync(Theme theme = Theme.Coffee)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
-        return await context.TastingNotes.OrderBy(n => n.Name).ToListAsync();
+        return await context.TastingNotes
+            .Where(n => n.Theme == theme)
+            .OrderBy(n => n.Id)
+            .ToListAsync();
     }
 
     public async Task SetRatingNotesAsync(int ratingId, List<int> noteIds)

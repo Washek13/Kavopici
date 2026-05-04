@@ -6,7 +6,7 @@
 @inject AppState AppState
 @inject NavigationManager Nav
 @inject IJSRuntime JS
-@inject IStringLocalizer<SharedResources> L
+@inject IThemedLocalizer L
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 @if (!AppState.IsAdmin) { Nav.NavigateTo("/dashboard"); return; }
