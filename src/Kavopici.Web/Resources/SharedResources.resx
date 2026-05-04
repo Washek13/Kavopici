@@ -196,4 +196,19 @@
   <data name="Label_LinkedBlend" xml:space="preserve"><value>Propojit se směsí</value></data>
   <data name="Heading_LinkedSources" xml:space="preserve"><value>Propojené zdroje</value></data>
   <data name="Placeholder_NoLink" xml:space="preserve"><value>Žádné propojení</value></data>
+
+  <!-- Cleanup person -->
+  <data name="Label_Cleanup" xml:space="preserve"><value>Úklid</value></data>
+  <data name="Label_CleanupPerson" xml:space="preserve"><value>Uklízí</value></data>
+  <data name="Label_CleanupCount" xml:space="preserve"><value>Počet úklidů</value></data>
+  <data name="Label_CleanupReliability" xml:space="preserve"><value>Spolehlivost úklidu</value></data>
+  <data name="Btn_AssignCleanup" xml:space="preserve"><value>Vylosovat uklízeče</value></data>
+  <data name="Btn_ClearCleanup" xml:space="preserve"><value>Zrušit</value></data>
+  <data name="Btn_CleanupDone" xml:space="preserve"><value>Uklizeno</value></data>
+  <data name="Btn_CleanupNotDone" xml:space="preserve"><value>Neuklizeno</value></data>
+  <data name="Msg_CleanupAssigned" xml:space="preserve"><value>Uklízeč vybrán: {0}</value></data>
+  <data name="Msg_CleanupCleared" xml:space="preserve"><value>Uklízeč zrušen.</value></data>
+  <data name="Msg_CleanupMarkedDone" xml:space="preserve"><value>Označeno jako uklizeno.</value></data>
+  <data name="Msg_CleanupMarkedNotDone" xml:space="preserve"><value>Označeno jako neuklizeno.</value></data>
+  <data name="Err_NoActiveUsersForCleanup" xml:space="preserve"><value>Žádní aktivní uživatelé.</value></data>
 </root>

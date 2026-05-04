@@ -251,5 +251,184 @@ public class SessionServiceTests : IDisposable
         Assert.Empty(history);
     }
 
+    // --- Cleanup person tests ---
+
+    [Fact]
+    public async Task AssignRandomCleanupPersonAsync_SetsActiveUser()
+    {
+        var supplier = await _userService.CreateUserAsync("Supplier", isAdmin: true);
+        var alice = await _userService.CreateUserAsync("Alice");
+        var bob = await _userService.CreateUserAsync("Bob");
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, supplier.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        var updated = await _sessionService.AssignRandomCleanupPersonAsync(session.Id);
+
+        Assert.NotNull(updated.CleanupPersonId);
+        Assert.Contains(updated.CleanupPersonId.Value, new[] { supplier.Id, alice.Id, bob.Id });
+        Assert.NotNull(updated.CleanupPerson);
+        Assert.Null(updated.CleanupCompleted);
+    }
+
+    [Fact]
+    public async Task AssignRandomCleanupPersonAsync_ExcludesInactiveUsers()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var bob = await _userService.CreateUserAsync("Bob");
+        await _userService.DeactivateUserAsync(bob.Id);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        // Run several rolls to make sure inactive Bob is never selected
+        for (int i = 0; i < 30; i++)
+        {
+            var updated = await _sessionService.AssignRandomCleanupPersonAsync(session.Id);
+            Assert.Equal(alice.Id, updated.CleanupPersonId);
+        }
+    }
+
+    [Fact]
+    public async Task AssignRandomCleanupPersonAsync_ThrowsWhenNoActiveUsers()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        // Force every user inactive directly via the context (the service blocks
+        // deactivating the last admin, which we want to bypass for this test).
+        using (var context = _factory.CreateDbContext())
+        {
+            foreach (var u in context.Users)
+                u.IsActive = false;
+            await context.SaveChangesAsync();
+        }
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.AssignRandomCleanupPersonAsync(session.Id));
+    }
+
+    [Fact]
+    public async Task AssignRandomCleanupPersonAsync_ThrowsWhenSessionMissing()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.AssignRandomCleanupPersonAsync(999));
+    }
+
+    [Fact]
+    public async Task AssignRandomCleanupPersonAsync_ResetsCompletedToPending()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await _sessionService.AssignRandomCleanupPersonAsync(session.Id);
+        await _sessionService.SetCleanupCompletedAsync(session.Id, true);
+
+        var rerolled = await _sessionService.AssignRandomCleanupPersonAsync(session.Id);
+
+        Assert.Null(rerolled.CleanupCompleted);
+    }
+
+    [Fact]
+    public async Task SetCleanupPersonAsync_SetsSpecifiedUser()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var bob = await _userService.CreateUserAsync("Bob");
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        var updated = await _sessionService.SetCleanupPersonAsync(session.Id, bob.Id);
+
+        Assert.Equal(bob.Id, updated.CleanupPersonId);
+        Assert.Equal("Bob", updated.CleanupPerson?.Name);
+        Assert.Null(updated.CleanupCompleted);
+    }
+
+    [Fact]
+    public async Task SetCleanupPersonAsync_ThrowsWhenUserInactive()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var bob = await _userService.CreateUserAsync("Bob");
+        await _userService.DeactivateUserAsync(bob.Id);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.SetCleanupPersonAsync(session.Id, bob.Id));
+    }
+
+    [Fact]
+    public async Task SetCleanupPersonAsync_ThrowsWhenUserMissing()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.SetCleanupPersonAsync(session.Id, 999));
+    }
+
+    [Fact]
+    public async Task ClearCleanupPersonAsync_RemovesAssignment()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await _sessionService.SetCleanupPersonAsync(session.Id, alice.Id);
+        await _sessionService.SetCleanupCompletedAsync(session.Id, true);
+
+        var cleared = await _sessionService.ClearCleanupPersonAsync(session.Id);
+
+        Assert.Null(cleared.CleanupPersonId);
+        Assert.Null(cleared.CleanupCompleted);
+    }
+
+    [Fact]
+    public async Task SetCleanupCompletedAsync_MarksDoneAndNotDoneAndPending()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        await _sessionService.SetCleanupPersonAsync(session.Id, alice.Id);
+
+        var done = await _sessionService.SetCleanupCompletedAsync(session.Id, true);
+        Assert.True(done.CleanupCompleted);
+
+        var notDone = await _sessionService.SetCleanupCompletedAsync(session.Id, false);
+        Assert.False(notDone.CleanupCompleted);
+
+        var pending = await _sessionService.SetCleanupCompletedAsync(session.Id, null);
+        Assert.Null(pending.CleanupCompleted);
+    }
+
+    [Fact]
+    public async Task SetCleanupCompletedAsync_ThrowsWhenNoPersonAssigned()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.SetCleanupCompletedAsync(session.Id, true));
+    }
+
+    [Fact]
+    public async Task GetTodaySessionsAsync_IncludesCleanupPerson()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        await _sessionService.SetCleanupPersonAsync(session.Id, alice.Id);
+
+        var sessions = await _sessionService.GetTodaySessionsAsync();
+
+        Assert.Single(sessions);
+        Assert.NotNull(sessions[0].CleanupPerson);
+        Assert.Equal("Alice", sessions[0].CleanupPerson!.Name);
+    }
+
     public void Dispose() => _factory.Dispose();
 }

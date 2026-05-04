@@ -25,6 +25,7 @@ public class SessionService : ISessionService
             .Where(s => s.Date == Today && s.IsActive)
             .Include(s => s.Blend)
                 .ThenInclude(b => b.Supplier)
+            .Include(s => s.CleanupPerson)
             .OrderBy(s => s.CreatedAt)
             .ToListAsync();
     }
@@ -71,7 +72,86 @@ public class SessionService : ISessionService
         return await context.TastingSessions
             .Include(s => s.Blend)
                 .ThenInclude(b => b.Supplier)
+            .Include(s => s.CleanupPerson)
             .OrderByDescending(s => s.Date)
             .ToListAsync();
+    }
+
+    public async Task<TastingSession> AssignRandomCleanupPersonAsync(int sessionId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var session = await context.TastingSessions.FindAsync(sessionId);
+        if (session == null || !session.IsActive)
+            throw new InvalidOperationException("Sezení nebylo nalezeno.");
+
+        var activeUserIds = await context.Users
+            .Where(u => u.IsActive)
+            .Select(u => u.Id)
+            .ToListAsync();
+
+        if (activeUserIds.Count == 0)
+            throw new InvalidOperationException("Žádní aktivní uživatelé.");
+
+        var pickedId = activeUserIds[Random.Shared.Next(activeUserIds.Count)];
+        session.CleanupPersonId = pickedId;
+        session.CleanupCompleted = null;
+        await context.SaveChangesAsync();
+
+        await context.Entry(session).Reference(s => s.CleanupPerson).LoadAsync();
+        return session;
+    }
+
+    public async Task<TastingSession> SetCleanupPersonAsync(int sessionId, int userId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var session = await context.TastingSessions.FindAsync(sessionId);
+        if (session == null || !session.IsActive)
+            throw new InvalidOperationException("Sezení nebylo nalezeno.");
+
+        var user = await context.Users.FindAsync(userId);
+        if (user == null || !user.IsActive)
+            throw new InvalidOperationException("Uživatel nebyl nalezen nebo není aktivní.");
+
+        session.CleanupPersonId = userId;
+        session.CleanupCompleted = null;
+        await context.SaveChangesAsync();
+
+        await context.Entry(session).Reference(s => s.CleanupPerson).LoadAsync();
+        return session;
+    }
+
+    public async Task<TastingSession> ClearCleanupPersonAsync(int sessionId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var session = await context.TastingSessions.FindAsync(sessionId);
+        if (session == null || !session.IsActive)
+            throw new InvalidOperationException("Sezení nebylo nalezeno.");
+
+        session.CleanupPersonId = null;
+        session.CleanupCompleted = null;
+        await context.SaveChangesAsync();
+
+        return session;
+    }
+
+    public async Task<TastingSession> SetCleanupCompletedAsync(int sessionId, bool? completed)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var session = await context.TastingSessions.FindAsync(sessionId);
+        if (session == null || !session.IsActive)
+            throw new InvalidOperationException("Sezení nebylo nalezeno.");
+
+        if (session.CleanupPersonId == null)
+            throw new InvalidOperationException("K sezení není přiřazena osoba pro úklid.");
+
+        session.CleanupCompleted = completed;
+        await context.SaveChangesAsync();
+
+        await context.Entry(session).Reference(s => s.CleanupPerson).LoadAsync();
+        return session;
     }
 }

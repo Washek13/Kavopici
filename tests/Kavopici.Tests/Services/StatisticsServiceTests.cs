@@ -701,5 +701,86 @@ public class StatisticsServiceTests : IDisposable
         Assert.Equal(200m, result[0].SuppliedAvgPricePerStar!.Value);
     }
 
+    // --- Cleanup stats tests ---
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_CleanupCount_CountsAllAssignments()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Blend", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var s1 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        var s2 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        var s3 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await _sessionService.SetCleanupPersonAsync(s1.Id, alice.Id);                      // pending
+        await _sessionService.SetCleanupPersonAsync(s2.Id, alice.Id);
+        await _sessionService.SetCleanupCompletedAsync(s2.Id, true);                       // done
+        await _sessionService.SetCleanupPersonAsync(s3.Id, alice.Id);
+        await _sessionService.SetCleanupCompletedAsync(s3.Id, false);                      // not done
+
+        var result = await _statisticsService.GetUserStatisticsAsync();
+
+        var aliceStats = result.Single(u => u.UserId == alice.Id);
+        Assert.Equal(3, aliceStats.CleanupCount);
+    }
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_CleanupReliability_OnlyResolvedCount()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Blend", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var s1 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        var s2 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        var s3 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await _sessionService.SetCleanupPersonAsync(s1.Id, alice.Id);                      // pending
+        await _sessionService.SetCleanupPersonAsync(s2.Id, alice.Id);
+        await _sessionService.SetCleanupCompletedAsync(s2.Id, true);                       // done
+        await _sessionService.SetCleanupPersonAsync(s3.Id, alice.Id);
+        await _sessionService.SetCleanupCompletedAsync(s3.Id, false);                      // not done
+
+        var result = await _statisticsService.GetUserStatisticsAsync();
+
+        // 1 done out of 2 resolved = 50%, pending excluded from denominator
+        var aliceStats = result.Single(u => u.UserId == alice.Id);
+        Assert.NotNull(aliceStats.CleanupReliability);
+        Assert.Equal(50.0, aliceStats.CleanupReliability!.Value, precision: 5);
+    }
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_CleanupReliability_NullWhenNoResolved()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Blend", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var s1 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await _sessionService.SetCleanupPersonAsync(s1.Id, alice.Id);                      // pending only
+
+        var result = await _statisticsService.GetUserStatisticsAsync();
+
+        var aliceStats = result.Single(u => u.UserId == alice.Id);
+        Assert.Equal(1, aliceStats.CleanupCount);
+        Assert.Null(aliceStats.CleanupReliability);
+    }
+
+    [Fact]
+    public async Task GetUserStatisticsAsync_CleanupReliability_HundredPercentAllDone()
+    {
+        var alice = await _userService.CreateUserAsync("Alice", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Blend", "Roaster", null, RoastLevel.Medium, alice.Id);
+        var s1 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        var s2 = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await _sessionService.SetCleanupPersonAsync(s1.Id, alice.Id);
+        await _sessionService.SetCleanupCompletedAsync(s1.Id, true);
+        await _sessionService.SetCleanupPersonAsync(s2.Id, alice.Id);
+        await _sessionService.SetCleanupCompletedAsync(s2.Id, true);
+
+        var result = await _statisticsService.GetUserStatisticsAsync();
+
+        var aliceStats = result.Single(u => u.UserId == alice.Id);
+        Assert.Equal(100.0, aliceStats.CleanupReliability!.Value, precision: 5);
+    }
+
     public void Dispose() => _factory.Dispose();
 }

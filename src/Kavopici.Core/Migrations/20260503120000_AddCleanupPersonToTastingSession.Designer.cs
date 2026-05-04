@@ -3,6 +3,7 @@ using System;
 using Kavopici.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kavopici.Migrations
 {
     [DbContext(typeof(KavopiciDbContext))]
-    partial class KavopiciDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260503120000_AddCleanupPersonToTastingSession")]
+    partial class AddCleanupPersonToTastingSession
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
@@ -146,42 +149,42 @@ namespace Kavopici.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Ovocn\u00e1"
+                            Name = "Ovocná"
                         },
                         new
                         {
                             Id = 2,
-                            Name = "O\u0159echov\u00e1"
+                            Name = "Ořechová"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "\u010cokol\u00e1dov\u00e1"
+                            Name = "Čokoládová"
                         },
                         new
                         {
                             Id = 4,
-                            Name = "Karamelov\u00e1"
+                            Name = "Karamelová"
                         },
                         new
                         {
                             Id = 5,
-                            Name = "Kv\u011btinov\u00e1"
+                            Name = "Květinová"
                         },
                         new
                         {
                             Id = 6,
-                            Name = "Ko\u0159en\u011bn\u00e1"
+                            Name = "Kořeněná"
                         },
                         new
                         {
                             Id = 7,
-                            Name = "Citrusov\u00e1"
+                            Name = "Citrusová"
                         },
                         new
                         {
                             Id = 8,
-                            Name = "Medov\u00e1"
+                            Name = "Medová"
                         });
                 });
 

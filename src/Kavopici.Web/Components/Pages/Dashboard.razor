@@ -48,6 +48,21 @@ else if (todaySessions.Count > 0)
         <div class="card">
             <h2>@L["Label_CoffeeOfDay"] — @session.Date.ToString("d. M. yyyy")</h2>
 
+            @if (session.CleanupPerson != null)
+            {
+                <p class="text-muted" style="margin:4px 0 12px 0;">
+                    🧽 @L["Label_CleanupPerson"]: <strong>@session.CleanupPerson.Name</strong>
+                    @if (session.CleanupCompleted == true)
+                    {
+                        <span style="color:var(--success-green, #2e7d32);"> ✓</span>
+                    }
+                    else if (session.CleanupCompleted == false)
+                    {
+                        <span style="color:var(--warning-orange, #c62828);"> ✗</span>
+                    }
+                </p>
+            }
+
             @if (!isRevealed)
             {
                 <div class="secret-overlay">
