@@ -592,7 +592,8 @@ else if (tab == 3)
             list = list.Where(r =>
                 (r.BlendName?.ToLowerInvariant().Contains(s) ?? false) ||
                 (r.Roaster?.ToLowerInvariant().Contains(s) ?? false) ||
-                (r.Origin?.ToLowerInvariant().Contains(s) ?? false));
+                (r.Origin?.ToLowerInvariant().Contains(s) ?? false) ||
+                (r.SupplierName?.ToLowerInvariant().Contains(s) ?? false));
         }
         if (!string.IsNullOrEmpty(selectedSupplier))
         {

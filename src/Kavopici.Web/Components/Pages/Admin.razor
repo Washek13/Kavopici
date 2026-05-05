@@ -46,10 +46,6 @@
             {
                 <div class="page-header">
                     <h1 style="font-size:30px;">@L["Admin_TodaySession"]</h1>
-                    @if (currentSessions.Count > 0)
-                    {
-                        <span class="badge-running"><span class="dot"></span> @L["Admin_Running"]</span>
-                    }
                 </div>
                 <div style="font-size:13px;color:var(--coffee-medium);margin-bottom:18px;">
                     @DateTime.Today.ToString("dddd d. M. yyyy") · @currentSessions.Count @CoffeeWord(currentSessions.Count)
@@ -446,6 +442,7 @@
         return allBlends.Where(b =>
             b.Name.Contains(s, StringComparison.OrdinalIgnoreCase)
             || b.Roaster.Contains(s, StringComparison.OrdinalIgnoreCase)
+            || (b.Supplier != null && b.Supplier.Name.Contains(s, StringComparison.OrdinalIgnoreCase))
             || (b.Origin != null && b.Origin.Contains(s, StringComparison.OrdinalIgnoreCase))).ToList();
     }
 

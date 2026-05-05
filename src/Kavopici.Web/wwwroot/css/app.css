@@ -1953,22 +1953,6 @@ kbd {
     border-top: 1px dashed var(--border);
 }
 
-/* === Badge generics === */
-.badge-running {
-    padding: 2px 10px;
-    background: rgba(46, 125, 50, 0.12);
-    border: 1px solid var(--success-green);
-    border-radius: 999px;
-    font-size: 11px;
-    color: var(--success-green);
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-}
-.badge-running .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success-green); }
-
 /* === Responsive (container-query driven) === */
 @container (max-width: 1000px) {
     .coffee-card-grid.cols-3 { grid-template-columns: repeat(2, 1fr); }

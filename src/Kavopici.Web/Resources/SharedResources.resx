@@ -207,7 +207,7 @@
   <data name="Summary_WorstRated" xml:space="preserve"><value>Nejhůře hodnocená</value></data>
   <data name="Summary_MostExpensive" xml:space="preserve"><value>Nejdražší / kg</value></data>
   <data name="Summary_YourBest" xml:space="preserve"><value>Vaše nej</value></data>
-  <data name="Filter_Search" xml:space="preserve"><value>Hledat (název, pražírna, původ)…</value></data>
+  <data name="Filter_Search" xml:space="preserve"><value>Hledat (název, pražírna, dodavatel, původ)…</value></data>
   <data name="Filter_SearchToday" xml:space="preserve"><value>Hledat (název, dodavatel, původ)…</value></data>
   <data name="Filter_Supplier" xml:space="preserve"><value>Dodávající:</value></data>
   <data name="Filter_All" xml:space="preserve"><value>Všichni</value></data>
