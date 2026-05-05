@@ -25,7 +25,7 @@
     --espresso: #14301A;
     --cream: #F4F8EE;
     --off-white: #F8FBF4;
-    --amber-gold: #5C6E1F;
+    --amber-gold: #D4A017;
     --silver: #5F6B58;
     --border: #d6e0c8;
     --border-strong: #b9c8a4;
@@ -1184,13 +1184,13 @@ textarea { resize: vertical; min-height: 60px; }
     font-size: 10.5px;
     letter-spacing: 1.4px;
     text-transform: uppercase;
-    color: #8B6914;
+    color: var(--amber-gold);
     font-weight: 700;
     margin-bottom: 2px;
 }
 .flavor-of-day .quote {
     font-size: 13.5px;
-    color: var(--coffee-dark);
+    color: var(--cream);
     font-family: Georgia, serif;
     font-style: italic;
 }
