@@ -261,6 +261,7 @@
   <data name="Detail_Collapse" xml:space="preserve"><value>Sbalit</value></data>
   <data name="Detail_TagCloud" xml:space="preserve"><value>Tag cloud</value></data>
   <data name="Detail_NoTones" xml:space="preserve"><value>Zatím žádné chuťové tóny.</value></data>
+  <data name="Detail_TonesCount" xml:space="preserve"><value>{0} tónů</value></data>
   <data name="Comp_Tip" xml:space="preserve"><value>Nejlepší metrika je zelená s ✓ NEJ. Levnější Kč/kg = lepší.</value></data>
   <data name="Comp_TipLabel" xml:space="preserve"><value>Tip</value></data>
   <data name="Comp_AddCoffee" xml:space="preserve"><value>Přidat kávu</value></data>
@@ -319,7 +320,7 @@
   <data name="Admin_LibCount_Tea" xml:space="preserve"><value>{0} čajů celkem · prochází ručně schválenou knihovnou</value></data>
   <data name="Admin_UserStats" xml:space="preserve"><value>{0} členů · {1} adminové</value></data>
   <data name="Admin_Used" xml:space="preserve"><value>Použito</value></data>
-  <data name="Admin_BroughtBy" xml:space="preserve"><value>Donáší</value></data>
+  <data name="Admin_BroughtBy" xml:space="preserve"><value>Donesl</value></data>
   <data name="Admin_LastSeen" xml:space="preserve"><value>Naposled</value></data>
   <data name="Admin_RatedCount" xml:space="preserve"><value>Hodnoceno</value></data>
   <data name="Login_DbCount" xml:space="preserve"><value>{0} session · {1} káv ohodnoceno</value></data>

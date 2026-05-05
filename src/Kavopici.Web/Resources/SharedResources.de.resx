@@ -280,4 +280,173 @@
   <data name="Label_LinkedBlend_Tea" xml:space="preserve"><value>Mit Tee verknüpfen</value></data>
   <data name="Label_SuppliedBlends_Tea" xml:space="preserve"><value>Gelieferte Tees</value></data>
   <data name="Placeholder_NoteForTasters_Tea" xml:space="preserve"><value>Notiz für Verkoster (z.B. Probe A)...</value></data>
+  <data name="Nav_Comparison" xml:space="preserve"><value>Vergleich</value></data>
+  <data name="Live_SessionRunning" xml:space="preserve"><value>Session läuft</value></data>
+  <data name="Live_PeopleVotedToday" xml:space="preserve"><value>Heute haben bereits {0} Personen bewertet · Session läuft</value></data>
+  <data name="Live_NobodyVotedYet" xml:space="preserve"><value>Heute hat noch niemand bewertet · Session wartet</value></data>
+  <data name="Badge_ControversyCalm" xml:space="preserve"><value>einig</value></data>
+  <data name="Badge_ControversyMild" xml:space="preserve"><value>geteilt</value></data>
+  <data name="Badge_ControversyHigh" xml:space="preserve"><value>kontrovers</value></data>
+  <data name="Label_AdminNote" xml:space="preserve"><value>Admin-Notiz</value></data>
+  <data name="Msg_RevealAfterRating" xml:space="preserve"><value>nach der Bewertung sichtbar</value></data>
+  <data name="Heading_TodaysTasting" xml:space="preserve"><value>Heutige Verkostung</value></data>
+  <data name="Label_TopAllTime" xml:space="preserve"><value>Top-Mischung (all-time)</value></data>
+  <data name="Label_YourRatingsCount" xml:space="preserve"><value>Deine Bewertungen</value></data>
+  <data name="Label_TodaysSession" xml:space="preserve"><value>Heutige Session</value></data>
+  <data name="Label_VotedShort" xml:space="preserve"><value>{0}/{1} bewertet</value></data>
+  <data name="Label_HistoricalAvg" xml:space="preserve"><value>Ø historisch</value></data>
+  <data name="Label_VotesShort" xml:space="preserve"><value>St.</value></data>
+  <data name="Label_StatsAfterVote" xml:space="preserve"><value>Statistik nach Abstimmung</value></data>
+  <data name="Label_LeaderboardTop4" xml:space="preserve"><value>Bestenliste · Top 4</value></data>
+  <data name="Label_AllArrow" xml:space="preserve"><value>alle →</value></data>
+  <data name="Label_FlavorWheelTitle" xml:space="preserve"><value>Coffee Flavor Wheel</value></data>
+  <data name="Label_FlavorWheelSub" xml:space="preserve"><value>Hilft beim Benennen von Aromanoten</value></data>
+  <data name="Label_FlavorWheelTitle_Tea" xml:space="preserve"><value>Tea Flavor Wheel</value></data>
+  <data name="Label_KbdHint" xml:space="preserve"><value>Tastatur:</value></data>
+  <data name="Btn_SaveRating" xml:space="preserve"><value>Speichern</value></data>
+  <data name="Btn_EditRating" xml:space="preserve"><value>Bewertung bearbeiten</value></data>
+  <data name="Btn_Done" xml:space="preserve"><value>FERTIG</value></data>
+  <data name="Heading_Statistics" xml:space="preserve"><value>Statistiken</value></data>
+  <data name="Stats_Subtitle" xml:space="preserve"><value>{0} Kaffees · {1} Stimmen · all-time</value></data>
+  <data name="Summary_BestRated" xml:space="preserve"><value>Bestbewertet</value></data>
+  <data name="Summary_WorstRated" xml:space="preserve"><value>Schlechtest bewertet</value></data>
+  <data name="Summary_MostExpensive" xml:space="preserve"><value>Teuerster / kg</value></data>
+  <data name="Summary_YourBest" xml:space="preserve"><value>Dein Bestes</value></data>
+  <data name="Filter_Search" xml:space="preserve"><value>Suchen (Name, Rösterei, Lieferant, Herkunft)…</value></data>
+  <data name="Filter_SearchToday" xml:space="preserve"><value>Suchen (Name, Lieferant, Herkunft)…</value></data>
+  <data name="Filter_Supplier" xml:space="preserve"><value>Lieferant:</value></data>
+  <data name="Filter_All" xml:space="preserve"><value>Alle</value></data>
+  <data name="Filter_Sort" xml:space="preserve"><value>Sortieren:</value></data>
+  <data name="Sort_Average" xml:space="preserve"><value>Ø Bewertung</value></data>
+  <data name="Sort_MyRating" xml:space="preserve"><value>Meine Bewertung</value></data>
+  <data name="Sort_VoteCount" xml:space="preserve"><value>Anzahl Stimmen</value></data>
+  <data name="Sort_PricePerKg" xml:space="preserve"><value>Kč/kg</value></data>
+  <data name="Sort_Controversy" xml:space="preserve"><value>Kontroverse</value></data>
+  <data name="Sort_Date" xml:space="preserve"><value>Datum</value></data>
+  <data name="Col_Coffee" xml:space="preserve"><value>Kaffee · Rösterei</value></data>
+  <data name="Col_Avg" xml:space="preserve"><value>Ø</value></data>
+  <data name="Col_Votes" xml:space="preserve"><value>Stimmen</value></data>
+  <data name="Col_Trend" xml:space="preserve"><value>Trend</value></data>
+  <data name="Col_YouVsAvg" xml:space="preserve"><value>Du vs Ø</value></data>
+  <data name="Section_TrendInTime" xml:space="preserve"><value>Bewertungstrend über Zeit</value></data>
+  <data name="Section_Distribution" xml:space="preserve"><value>Bewertungsverteilung</value></data>
+  <data name="Section_FlavorTones" xml:space="preserve"><value>Aromanoten</value></data>
+  <data name="Section_FlavorProfile" xml:space="preserve"><value>Aromaprofil</value></data>
+  <data name="Section_Comments" xml:space="preserve"><value>Kommentare</value></data>
+  <data name="Section_AllVotes" xml:space="preserve"><value>Alle Stimmen</value></data>
+  <data name="Section_RatingsAndTrends" xml:space="preserve"><value>Bewertungen &amp; Trends</value></data>
+  <data name="Section_YourRating" xml:space="preserve"><value>Deine Bewertung</value></data>
+  <data name="Section_Origin" xml:space="preserve"><value>Herkunft</value></data>
+  <data name="Hint_Last5" xml:space="preserve"><value>letzte Bewertungen nach der Session</value></data>
+  <data name="Hint_YourVoteHighlighted" xml:space="preserve"><value>deine Stimme hervorgehoben</value></data>
+  <data name="Hint_FromAllVotes" xml:space="preserve"><value>aus allen Stimmen</value></data>
+  <data name="Hint_NoComments" xml:space="preserve"><value>Noch keine Kommentare.</value></data>
+  <data name="Btn_OpenBlendDetail" xml:space="preserve"><value>Kaffee-Detail öffnen →</value></data>
+  <data name="Btn_OpenDetail" xml:space="preserve"><value>Detail öffnen</value></data>
+  <data name="Stats_NavMyRatingsSub" xml:space="preserve"><value>{0} Bewertungen</value></data>
+  <data name="Stats_NavSuppliersSub" xml:space="preserve"><value>{0} Lieferanten</value></data>
+  <data name="Btn_AddCompare" xml:space="preserve"><value>+ Vergleichen</value></data>
+  <data name="Btn_EditMyRating" xml:space="preserve"><value>Meine Bewertung bearbeiten</value></data>
+  <data name="Heading_BlendDetail" xml:space="preserve"><value>Kaffee-Detail</value></data>
+  <data name="Detail_TocContents" xml:space="preserve"><value>Inhalt</value></data>
+  <data name="Detail_GroupRating" xml:space="preserve"><value>Gruppenbewertung</value></data>
+  <data name="Detail_YourRating" xml:space="preserve"><value>Deine Bewertung</value></data>
+  <data name="Detail_Price" xml:space="preserve"><value>Preis</value></data>
+  <data name="Detail_BroughtBy" xml:space="preserve"><value>Mitgebracht von</value></data>
+  <data name="Detail_TastingDate" xml:space="preserve"><value>Verkostungsdatum</value></data>
+  <data name="Detail_CleanupAssigned" xml:space="preserve"><value>Aufräumen zugewiesen</value></data>
+  <data name="Detail_VotedTimes" xml:space="preserve"><value>{0}× bewertet</value></data>
+  <data name="Detail_TasterName" xml:space="preserve"><value>Verkoster</value></data>
+  <data name="Detail_RatingShort" xml:space="preserve"><value>Bew.</value></data>
+  <data name="Detail_TonesShort" xml:space="preserve"><value>Noten</value></data>
+  <data name="Detail_CommentColumn" xml:space="preserve"><value>Kommentar</value></data>
+  <data name="Detail_When" xml:space="preserve"><value>Wann</value></data>
+  <data name="Detail_NoComment" xml:space="preserve"><value>— ohne Kommentar —</value></data>
+  <data name="Detail_ShowAll" xml:space="preserve"><value>Alle {0} anzeigen</value></data>
+  <data name="Detail_Collapse" xml:space="preserve"><value>Einklappen</value></data>
+  <data name="Detail_TagCloud" xml:space="preserve"><value>Tag-Cloud</value></data>
+  <data name="Detail_NoTones" xml:space="preserve"><value>Noch keine Aromanoten.</value></data>
+  <data name="Detail_TonesCount" xml:space="preserve"><value>{0} Noten</value></data>
+  <data name="Comp_Tip" xml:space="preserve"><value>Die beste Kennzahl ist grün mit ✓ BEST. Niedrigerer Kč/kg = besser.</value></data>
+  <data name="Comp_TipLabel" xml:space="preserve"><value>Tipp</value></data>
+  <data name="Comp_AddCoffee" xml:space="preserve"><value>Kaffee hinzufügen</value></data>
+  <data name="Comp_PickFromAll" xml:space="preserve"><value>aus allen Kaffees auswählen</value></data>
+  <data name="Comp_Reset" xml:space="preserve"><value>Zurücksetzen</value></data>
+  <data name="Comp_MaxN" xml:space="preserve"><value>{0} {1} · max 4</value></data>
+  <data name="Comp_Swap" xml:space="preserve"><value>⇆ Tauschen</value></data>
+  <data name="Comp_GroupAvg" xml:space="preserve"><value>Gruppen-Ø</value></data>
+  <data name="Comp_NotRated" xml:space="preserve"><value>nicht bewertet</value></data>
+  <data name="Comp_VoteCount" xml:space="preserve"><value>Anzahl Stimmen</value></data>
+  <data name="Comp_PricePerKg" xml:space="preserve"><value>Preis pro kg</value></data>
+  <data name="Comp_TastingDate" xml:space="preserve"><value>Verkostungsdatum</value></data>
+  <data name="Comp_Trend" xml:space="preserve"><value>Trend (letzte 5 Verkostungen)</value></data>
+  <data name="Comp_DistributionVotes" xml:space="preserve"><value>Stimmenverteilung</value></data>
+  <data name="Comp_Best" xml:space="preserve"><value>✓ BEST</value></data>
+  <data name="Comp_PickCoffee" xml:space="preserve"><value>Kaffee wählen</value></data>
+  <data name="Comp_OverlayTrendTitle" xml:space="preserve"><value>Bewertungstrend — überlagert</value></data>
+  <data name="Comp_OverlayTrendHint" xml:space="preserve"><value>alle ausgewählten Kaffees in einem Diagramm</value></data>
+  <data name="Comp_NoResults" xml:space="preserve"><value>Keine Ergebnisse.</value></data>
+  <data name="Comp_AddFirst" xml:space="preserve"><value>+ Ersten Kaffee hinzufügen</value></data>
+  <data name="Comp_PickAtLeastOne" xml:space="preserve"><value>Wähle mindestens einen Kaffee zum Vergleichen</value></data>
+  <data name="Comp_BroughtBy" xml:space="preserve"><value>mitgebracht von: {0}</value></data>
+  <data name="Comp_OutOf" xml:space="preserve"><value>{0} von {1} Verkostern</value></data>
+  <data name="Word_Coffee_1" xml:space="preserve"><value>Kaffee</value></data>
+  <data name="Word_Coffee_234" xml:space="preserve"><value>Kaffees</value></data>
+  <data name="Word_Coffee_5" xml:space="preserve"><value>Kaffees</value></data>
+  <data name="Admin_PillTitle" xml:space="preserve"><value>Admin</value></data>
+  <data name="Admin_BackToApp" xml:space="preserve"><value>↩ zurück zur App</value></data>
+  <data name="Admin_Heading" xml:space="preserve"><value>Verwaltung</value></data>
+  <data name="Admin_TodaySession" xml:space="preserve"><value>Heutige Session</value></data>
+  <data name="Admin_Library" xml:space="preserve"><value>Kaffee-Bibliothek</value></data>
+  <data name="Admin_Users" xml:space="preserve"><value>Benutzer</value></data>
+  <data name="Admin_Library_Tea" xml:space="preserve"><value>Tee-Bibliothek</value></data>
+  <data name="Admin_BlendsCount" xml:space="preserve"><value>{0} Kaffees</value></data>
+  <data name="Admin_BlendsCount_Tea" xml:space="preserve"><value>{0} Tees</value></data>
+  <data name="Admin_UsersCount" xml:space="preserve"><value>{0} Mitglieder</value></data>
+  <data name="Admin_DateRunning" xml:space="preserve"><value>{0} · läuft</value></data>
+  <data name="Admin_Running" xml:space="preserve"><value>LÄUFT</value></data>
+  <data name="Admin_SecretLabel" xml:space="preserve"><value>Geheim?</value></data>
+  <data name="Admin_Secret" xml:space="preserve"><value>Geheim</value></data>
+  <data name="Admin_Revealed" xml:space="preserve"><value>Aufgedeckt</value></data>
+  <data name="Admin_AdminNote" xml:space="preserve"><value>Admin-Notiz</value></data>
+  <data name="Admin_AdminNotePh" xml:space="preserve"><value>Admin-Notiz für diesen Kaffee…</value></data>
+  <data name="Admin_AddFromLibrary" xml:space="preserve"><value>Aus Bibliothek hinzufügen</value></data>
+  <data name="Admin_AvailableCount" xml:space="preserve"><value>{0} verfügbar</value></data>
+  <data name="Admin_AutoCleanupTitle" xml:space="preserve"><value>Auto-Zuweisung Aufräumen</value></data>
+  <data name="Admin_AutoCleanupDesc" xml:space="preserve"><value>Wir weisen jedem Kaffee zufällig jemanden zum Aufräumen zu. Nie zweimal hintereinander dieselbe Person. Du kannst oben manuell überschreiben.</value></data>
+  <data name="Admin_RerollAll" xml:space="preserve"><value>🎲 Neu würfeln</value></data>
+  <data name="Admin_RerollOne" xml:space="preserve"><value>Aufräumen für diesen Kaffee neu würfeln</value></data>
+  <data name="Admin_AddBlendBtn" xml:space="preserve"><value>+ Neuer Kaffee</value></data>
+  <data name="Admin_AddBlendBtn_Tea" xml:space="preserve"><value>+ Neuer Tee</value></data>
+  <data name="Admin_InviteBtn" xml:space="preserve"><value>+ Einladen</value></data>
+  <data name="Admin_NoCoffeesYet" xml:space="preserve"><value>Noch keine Kaffees. Füge welche aus der Bibliothek rechts hinzu.</value></data>
+  <data name="Admin_NoCoffeesYet_Tea" xml:space="preserve"><value>Noch keine Tees. Füge welche aus der Bibliothek rechts hinzu.</value></data>
+  <data name="Admin_LibCount" xml:space="preserve"><value>{0} Kaffees insgesamt · stöbere in der manuell kuratierten Bibliothek</value></data>
+  <data name="Admin_LibCount_Tea" xml:space="preserve"><value>{0} Tees insgesamt · stöbere in der manuell kuratierten Bibliothek</value></data>
+  <data name="Admin_UserStats" xml:space="preserve"><value>{0} Mitglieder · {1} Admins</value></data>
+  <data name="Admin_Used" xml:space="preserve"><value>Verwendet</value></data>
+  <data name="Admin_BroughtBy" xml:space="preserve"><value>Mitgebracht von</value></data>
+  <data name="Admin_LastSeen" xml:space="preserve"><value>Zuletzt gesehen</value></data>
+  <data name="Admin_RatedCount" xml:space="preserve"><value>Bewertet</value></data>
+  <data name="Login_DbCount" xml:space="preserve"><value>{0} Sessions · {1} Kaffees bewertet</value></data>
+  <data name="Login_StatsBlends" xml:space="preserve"><value>Kaffees bewertet</value></data>
+  <data name="Login_StatsBlends_Tea" xml:space="preserve"><value>Tees bewertet</value></data>
+  <data name="Login_StatsSessions" xml:space="preserve"><value>Sessions insgesamt</value></data>
+  <data name="Login_StatsTasters" xml:space="preserve"><value>aktive Verkoster</value></data>
+  <data name="Login_StatsTopAvg" xml:space="preserve"><value>Top-Durchschnitt</value></data>
+  <data name="Login_DatabasesHeading" xml:space="preserve"><value>Datenbanken</value></data>
+  <data name="Login_DbActive" xml:space="preserve"><value>AKTIV</value></data>
+  <data name="Login_DbOpenLink" xml:space="preserve"><value>öffnen →</value></data>
+  <data name="Login_DbOpenOther" xml:space="preserve"><value>+ Andere öffnen…</value></data>
+  <data name="Login_DbCreateNew" xml:space="preserve"><value>+ Neue erstellen…</value></data>
+  <data name="Login_LocalApp" xml:space="preserve"><value>Lokale App, keine Cloud</value></data>
+  <data name="Login_PickProfile" xml:space="preserve"><value>Wähle dein Profil</value></data>
+  <data name="Login_Quote" xml:space="preserve"><value>„Kaffee ist wie Menschen — am besten in guter Gesellschaft."</value></data>
+  <data name="Login_Quote_Tea" xml:space="preserve"><value>„Tee ist eine stille Pause in einer lauten Welt."</value></data>
+  <data name="Login_QuoteAuthor" xml:space="preserve"><value>— wahrscheinlich jemand aus dem Marketing</value></data>
+  <data name="Login_FlavorOfDay" xml:space="preserve"><value>Aromanote des Tages</value></data>
+  <data name="Login_FlavorOfDayQuote" xml:space="preserve"><value>„Heidelbeere, dunkle Schokolade, Abgang wie Haselnuss."</value></data>
+  <data name="Login_FlavorOfDayQuote_Tea" xml:space="preserve"><value>„Zitronenschale, Jasmin, Abgang wie frisches Gras."</value></data>
+  <data name="Login_AppVersion" xml:space="preserve"><value>Kávopíči · interne Verkostung</value></data>
+  <data name="Login_AppVersion_Tea" xml:space="preserve"><value>Čajopyjové · interne Verkostung</value></data>
 </root>

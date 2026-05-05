@@ -179,7 +179,7 @@ else
             <section id="flavors" class="detail-section">
                 <div class="head">
                     <h2>@L["Section_FlavorProfile"]</h2>
-                    <span class="section-hint">@noteCounts.Count tónů</span>
+                    <span class="section-hint">@string.Format(L["Detail_TonesCount"], noteCounts.Count)</span>
                 </div>
                 <div style="display:grid;grid-template-columns:320px 1fr;gap:30px;align-items:center;">
                     <FlavorWheel Active="@noteCounts.Keys" Counts="@noteCounts" NoteNames="@NoteNames" />
