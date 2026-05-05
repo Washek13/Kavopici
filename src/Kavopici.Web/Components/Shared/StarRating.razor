@@ -1,15 +1,19 @@
-@* Interactive star rating component *@
-<div class="star-rating @(ReadOnly ? "readonly" : "interactive")">
+@* Interactive star rating component (1–10) *@
+<div class="star-rating @(ReadOnly ? "readonly" : "") @(Large ? "large" : "") @(Small ? "small" : "")"
+     @onmouseleave="OnHoverOut">
     @for (int i = 1; i <= MaxStars; i++)
     {
         var starValue = i;
-        <span class="star @(starValue <= Value ? "filled" : "empty") @(starValue <= _hoverValue && !ReadOnly ? "hover" : "")"
+        var filled = !ReadOnly && _hoverValue > 0
+            ? starValue <= _hoverValue
+            : starValue <= Value;
+        var hovering = !ReadOnly && _hoverValue == starValue;
+        <span class="star @(filled ? "filled" : "") @(hovering ? "hover" : "")"
               @onclick="() => OnClick(starValue)"
               @onmouseover="() => OnHover(starValue)"
-              @onmouseout="OnHoverOut"
               title="@starValue">&#9733;</span>
     }
-    @if (Value > 0)
+    @if (ShowValue && Value > 0)
     {
         <span class="star-value">@Value / @MaxStars</span>
     }
@@ -21,6 +25,9 @@
     [Parameter] public int Value { get; set; }
     [Parameter] public EventCallback<int> ValueChanged { get; set; }
     [Parameter] public bool ReadOnly { get; set; }
+    [Parameter] public bool Large { get; set; }
+    [Parameter] public bool Small { get; set; }
+    [Parameter] public bool ShowValue { get; set; } = true;
 
     private int _hoverValue;
 
@@ -36,8 +43,5 @@
         if (!ReadOnly) _hoverValue = star;
     }
 
-    private void OnHoverOut()
-    {
-        _hoverValue = 0;
-    }
+    private void OnHoverOut() => _hoverValue = 0;
 }

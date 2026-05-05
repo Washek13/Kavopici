@@ -1,0 +1,20 @@
+@inject IThemedLocalizer L
+
+<span class="roast-badge" title="@L[$"RoastLevel_{Level}"]">
+    <span class="roast-dot @CssClass"></span>
+    <span>@L[$"RoastLevel_{Level}"]</span>
+</span>
+
+@code {
+    [Parameter, EditorRequired] public RoastLevel Level { get; set; }
+
+    private string CssClass => Level switch
+    {
+        RoastLevel.Light => "light",
+        RoastLevel.MediumLight => "medium-light",
+        RoastLevel.Medium => "medium",
+        RoastLevel.MediumDark => "medium-dark",
+        RoastLevel.Dark => "dark",
+        _ => "medium"
+    };
+}

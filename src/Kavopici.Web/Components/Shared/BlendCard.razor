@@ -1,27 +1,39 @@
 @inject IThemedLocalizer L
 
-<div class="blend-card">
-    <h3 class="blend-name">@Blend.Name</h3>
-    <div class="blend-details">
-        <div class="blend-detail"><span class="label">@L["Label_Roaster"]:</span> @Blend.Roaster</div>
-        @if (!string.IsNullOrEmpty(Blend.Origin))
-        {
-            <div class="blend-detail"><span class="label">@L["Label_Origin"]:</span> @Blend.Origin</div>
-        }
-        <div class="blend-detail"><span class="label">@L["Label_Roasting"]:</span> @L[$"RoastLevel_{Blend.RoastLevel}"]</div>
-        <div class="blend-detail"><span class="label">@L["Label_Supplier"]:</span> @Blend.Supplier.Name</div>
-        @if (Blend.PricePerKg.HasValue)
-        {
-            <div class="blend-detail"><span class="label">@L["Label_PricePerKg"]:</span> @Blend.PricePerKg.Value.ToString("F0") Kč</div>
-        }
+<div class="about-box @(Locked ? "locked" : "")">
+    <div class="about-box-content">
+        <div class="blend-name">@Blend.Name</div>
+        <div class="blend-meta">
+            @Blend.Roaster
+            @if (!string.IsNullOrEmpty(Blend.Origin))
+            {
+                <span> · @Blend.Origin</span>
+            }
+            <span> · </span><RoastBadge Level="Blend.RoastLevel" />
+        </div>
+        <div class="blend-supplier">
+            @L["Label_Supplier"]: @Blend.Supplier.Name
+            @if (Blend.WeightGrams.HasValue) { <span> · @Blend.WeightGrams.Value g</span> }
+            @if (Blend.PriceCzk.HasValue) { <span> · @Blend.PriceCzk.Value.ToString("F0") Kč</span> }
+            @if (Blend.PricePerKg.HasValue) { <span> (@Blend.PricePerKg.Value.ToString("F0") Kč/kg)</span> }
+        </div>
     </div>
+    @if (Locked)
+    {
+        <div class="lock-overlay">
+            <div class="lock-pill">🔒 @L["Msg_RevealAfterRating"]</div>
+        </div>
+    }
     @if (!string.IsNullOrEmpty(SessionComment))
     {
-        <div class="blend-comment">@SessionComment</div>
+        <div class="admin-note">
+            <b>@L["Label_AdminNote"]:</b> @SessionComment
+        </div>
     }
 </div>
 
 @code {
     [Parameter, EditorRequired] public CoffeeBlend Blend { get; set; } = null!;
     [Parameter] public string? SessionComment { get; set; }
+    [Parameter] public bool Locked { get; set; }
 }

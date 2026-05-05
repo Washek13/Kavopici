@@ -2,18 +2,51 @@
 
 @if (Level.HasValue)
 {
-    var val = Level.Value;
-    var label = val < 2.0 ? L["Badge_Agreement"] : val < 6.0 ? L["Badge_MildDisagreement"] : L["Badge_Disagreement"];
-    var color = val < 2.0 ? "var(--success-green)" : val < 6.0 ? "var(--warning-orange)" : "var(--error-red)";
-    <span style="@($"color:{color};font-weight:600;font-size:{FontSize}px;")">@label</span>
+    @if (Gauge)
+    {
+        var t = Math.Min(1.0, Level.Value / 2.5);
+        var lblKey = t < 0.33 ? "Badge_ControversyCalm"
+                   : t < 0.66 ? "Badge_ControversyMild"
+                   : "Badge_ControversyHigh";
+        // green → amber → red
+        string c;
+        if (t < 0.5)
+        {
+            var f = t / 0.5;
+            var r = (int)Math.Round(46 + (212 - 46) * f);
+            var g = (int)Math.Round(125 + (160 - 125) * f);
+            var b = (int)Math.Round(50 + (23 - 50) * f);
+            c = $"rgb({r},{g},{b})";
+        }
+        else
+        {
+            var f = (t - 0.5) / 0.5;
+            var r = (int)Math.Round(212 + (165 - 212) * f);
+            var g = (int)Math.Round(160 + (15 - 160) * f);
+            var b = (int)Math.Round(23 + (20 - 23) * f);
+            c = $"rgb({r},{g},{b})";
+        }
+        <span class="controversy-gauge" title="@L[lblKey]">
+            <span class="bar"><span class="fill" style="width:@(Math.Round(t * 100))%;background:@c;"></span></span>
+            <span class="label">@L[lblKey]</span>
+        </span>
+    }
+    else
+    {
+        var val = Level.Value;
+        var labelKey = val < 2.0 ? "Badge_Agreement" : val < 6.0 ? "Badge_MildDisagreement" : "Badge_Disagreement";
+        var color = val < 2.0 ? "var(--success-green)" : val < 6.0 ? "var(--warning-orange)" : "var(--error-red)";
+        <span style="@($"color:{color};font-weight:600;font-size:{FontSize}px;")">@L[labelKey]</span>
+    }
 }
 else if (ShowDash)
 {
-    <span>—</span>
+    <span class="text-muted">—</span>
 }
 
 @code {
     [Parameter] public double? Level { get; set; }
     [Parameter] public int FontSize { get; set; } = 14;
     [Parameter] public bool ShowDash { get; set; }
+    [Parameter] public bool Gauge { get; set; }
 }

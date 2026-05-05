@@ -1,0 +1,39 @@
+@{
+    var diff = My - Avg;
+    const double cap = 4.0;
+    var ratio = Math.Max(-cap, Math.Min(cap, diff)) / cap;
+    var halfW = Width / 2.0;
+    var barW = Math.Abs(ratio) * halfW;
+    var isPlus = diff >= 0;
+    var hasMy = My > 0;
+    var color = !hasMy ? "transparent" : (isPlus ? "var(--success-green)" : "var(--error-red)");
+    var deltaClass = !hasMy ? "zero" : (isPlus ? "plus" : "minus");
+    var fillStyle = isPlus
+        ? $"left:50%;width:{barW.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}px;background:{color};"
+        : $"left:calc(50% - {barW.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}px);width:{barW.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}px;background:{color};";
+}
+<div class="diverging-bar">
+    <div class="track" style="width:@(Width)px;">
+        <div class="midline"></div>
+        @if (hasMy)
+        {
+            <div class="fill" style="@fillStyle"></div>
+        }
+    </div>
+    <div class="delta @deltaClass">
+        @if (!hasMy)
+        {
+            <span>—</span>
+        }
+        else
+        {
+            <span>@(isPlus ? "+" : "")@diff.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)</span>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public int My { get; set; }
+    [Parameter] public double Avg { get; set; }
+    [Parameter] public int Width { get; set; } = 80;
+}

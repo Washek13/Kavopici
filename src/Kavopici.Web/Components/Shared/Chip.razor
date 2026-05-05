@@ -1,0 +1,37 @@
+@if (OnClick.HasDelegate)
+{
+    <span class="chip @SizeClass @(On ? "on" : "") clickable"
+          style="@StyleAttr"
+          @onclick="HandleClick">@ChildContent</span>
+}
+else
+{
+    <span class="chip @SizeClass @(On ? "on" : "")"
+          style="@StyleAttr">@ChildContent</span>
+}
+
+@code {
+    [Parameter] public bool On { get; set; }
+    [Parameter] public bool Small { get; set; }
+    [Parameter] public string? Color { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+
+    private string SizeClass => Small ? "chip-sm" : "";
+
+    private string StyleAttr
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(Color)) return "";
+            return On
+                ? $"background:{Color};color:#fff;border-color:{Color};"
+                : $"color:{Color};border-color:{Color};";
+        }
+    }
+
+    private async Task HandleClick()
+    {
+        if (OnClick.HasDelegate) await OnClick.InvokeAsync();
+    }
+}

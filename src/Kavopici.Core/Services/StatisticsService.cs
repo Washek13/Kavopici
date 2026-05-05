@@ -206,6 +206,39 @@ public class StatisticsService : IStatisticsService
         .ToList();
     }
 
+    public async Task<List<double>> GetBlendTrendAsync(int blendId, int take = 5)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        // Resolve linked-group blend IDs so the trend covers the full group.
+        var rootId = await context.CoffeeBlends
+            .Where(b => b.Id == blendId)
+            .Select(b => b.LinkedBlendId ?? b.Id)
+            .FirstOrDefaultAsync();
+        if (rootId == 0) return new List<double>();
+
+        var groupIds = await context.CoffeeBlends
+            .Where(b => b.Id == rootId || b.LinkedBlendId == rootId)
+            .Select(b => b.Id)
+            .ToListAsync();
+
+        // Per-session average across the group, ordered oldest-first.
+        var perSession = await context.Ratings
+            .Where(r => groupIds.Contains(r.BlendId))
+            .GroupBy(r => new { r.SessionId, r.Session.Date })
+            .Select(g => new { g.Key.Date, Avg = g.Average(x => (double)x.Stars) })
+            .OrderBy(x => x.Date)
+            .ToListAsync();
+
+        if (perSession.Count == 0) return new List<double>();
+
+        // Take the most recent N, preserving chronological order.
+        return perSession
+            .Skip(Math.Max(0, perSession.Count - take))
+            .Select(x => x.Avg)
+            .ToList();
+    }
+
     public async Task<List<SessionWithRating>> GetUserSessionHistoryAsync(int userId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();

@@ -1,5 +1,10 @@
 @page "/"
+@layout Kavopici.Web.Components.Layout.LoginLayout
 @inject IUserService UserService
+@inject IBlendService BlendService
+@inject IStatisticsService StatisticsService
+@inject ISessionService SessionService
+@inject IRatingService RatingService
 @inject IAppSettingsService AppSettings
 @inject IAppConfigService AppConfigService
 @inject IDbContextFactory<KavopiciDbContext> DbContextFactory
@@ -8,17 +13,9 @@
 @inject IJSRuntime JS
 @inject IThemedLocalizer L
 
-<div class="login-container">
-    <img src="icon-80.png" alt="@L["Brand_AppName"]" class="login-icon" />
-    <div class="login-title">@L["Brand_AppName"]</div>
-    <div class="login-subtitle">@L["Login_Subtitle"]</div>
-    @if (errorMessage != null)
-    {
-        <div class="msg-error" style="max-width:500px;width:100%;">@errorMessage</div>
-    }
-
-    @if (showLanguagePicker)
-    {
+@if (showLanguagePicker)
+{
+    <div class="login-centered">
         <div class="card" style="max-width:400px;width:100%;">
             <h2>@L["Lang_SelectLanguage"]</h2>
             <div class="btn-group" style="flex-direction:column;">
@@ -28,16 +25,24 @@
                 <button class="btn btn-outline w-full" @onclick='() => SelectLanguage("de")'>🇩🇪 @L["Lang_German"]</button>
             </div>
         </div>
-    }
-    else if (isLoading)
-    {
+    </div>
+}
+else if (isLoading)
+{
+    <div class="login-centered">
         <div class="loading">@L["Msg_Loading"]</div>
-    }
-    else if (isDatabaseNotSelected)
-    {
-        <div class="card" style="max-width:400px;width:100%;">
+    </div>
+}
+else if (isDatabaseNotSelected)
+{
+    <div class="login-centered">
+        <div class="coffee-mark"><div class="disc"><span>☕</span></div></div>
+        <div class="title-big">@L["Brand_AppName"]</div>
+        <div class="sub">@L["Login_Subtitle"]</div>
+        @if (errorMessage != null) { <div class="msg-error" style="max-width:500px;width:100%;">@errorMessage</div> }
+        <div class="card" style="max-width:460px;width:100%;">
             <h2>@L["Heading_SelectDatabase"]</h2>
-            <p class="mb-16">@L["Login_DatabaseInstruction"]</p>
+            <p class="text-muted mb-16">@L["Login_DatabaseInstruction"]</p>
             <div class="form-group">
                 <label>@L["Label_DatabasePath"]</label>
                 <input type="text" @bind="databasePathInput" @bind:event="oninput"
@@ -55,16 +60,12 @@
                         @foreach (var path in AppSettings.RecentDatabasePaths)
                         {
                             <li style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-                                <button type="button"
-                                        class="btn"
-                                        style="flex:1;text-align:left;background:none;color:var(--coffee-brown);text-decoration:underline;padding:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;"
+                                <button type="button" class="btn btn-ghost"
+                                        style="flex:1;text-align:left;color:var(--coffee-brown);text-decoration:underline;padding:6px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;background:none;border-color:transparent;"
                                         title="@path"
-                                        @onclick="() => UseRecentDatabase(path)">
-                                    @path
-                                </button>
-                                <button type="button"
-                                        class="btn"
-                                        style="background:none;color:var(--text-muted);padding:2px 6px;"
+                                        @onclick="() => UseRecentDatabase(path)">@path</button>
+                                <button type="button" class="btn btn-ghost"
+                                        style="background:none;color:var(--silver);padding:2px 8px;border-color:transparent;"
                                         title="@L["Btn_RemoveRecentDatabase"]"
                                         @onclick="() => RemoveRecentDatabase(path)">×</button>
                             </li>
@@ -73,27 +74,27 @@
                 </div>
             }
         </div>
-    }
-    else if (isThemePickerNeeded)
-    {
+    </div>
+}
+else if (isThemePickerNeeded)
+{
+    <div class="login-centered">
         <div class="card" style="max-width:400px;width:100%;">
             <h2>@L["Heading_SelectTheme"]</h2>
-            <p class="mb-16">@L["Msg_SelectThemeOnce"]</p>
+            <p class="text-muted mb-16">@L["Msg_SelectThemeOnce"]</p>
             <div class="btn-group" style="flex-direction:column;">
-                <button class="btn btn-primary w-full" @onclick="() => SelectTheme(Theme.Coffee)">
-                    ☕ @L["Theme_Coffee"]
-                </button>
-                <button class="btn btn-outline w-full" @onclick="() => SelectTheme(Theme.Tea)">
-                    🍵 @L["Theme_Tea"]
-                </button>
+                <button class="btn btn-primary w-full" @onclick="() => SelectTheme(Theme.Coffee)">☕ @L["Theme_Coffee"]</button>
+                <button class="btn btn-outline w-full" @onclick="() => SelectTheme(Theme.Tea)">🍵 @L["Theme_Tea"]</button>
             </div>
         </div>
-    }
-    else if (isFirstRun)
-    {
+    </div>
+}
+else if (isFirstRun)
+{
+    <div class="login-centered">
         <div class="card" style="max-width:400px;width:100%;">
             <h2>@L["Heading_Welcome"]</h2>
-            <p class="mb-16">@L["Login_FirstAdminInstruction"]</p>
+            <p class="text-muted mb-16">@L["Login_FirstAdminInstruction"]</p>
             <div class="form-group">
                 <label>@L["Label_AdminName"]</label>
                 <input type="text" @bind="newAdminName" @bind:event="oninput"
@@ -104,47 +105,179 @@
                 @L["Btn_CreateAndContinue"]
             </button>
         </div>
-    }
-    else
-    {
-        <div class="user-grid">
-            @foreach (var user in users)
-            {
-                <div class="user-card @(selectedUser?.Id == user.Id ? "selected" : "")"
-                     @onclick="() => SelectUser(user)"
-                     @ondblclick="() => LoginUser(user)">
-                    <UserInitials Name="@user.Name" Size="48" />
-                    <span style="font-weight:600;">@user.Name</span>
-                    @if (user.IsAdmin)
+    </div>
+}
+else
+{
+    <div class="login-shell">
+        <!-- LEFT — main -->
+        <div class="left">
+            <div class="login-corner-brand">@L["Login_AppVersion"]</div>
+            @if (errorMessage != null) { <div class="msg-error" style="max-width:560px;">@errorMessage</div> }
+
+            <div class="login-hero">
+                <div class="login-hero-row">
+                    <div class="coffee-mark">
+                        <div class="steam-wrap">
+                            <div class="steam s1"></div>
+                            <div class="steam s2"></div>
+                            <div class="steam s3"></div>
+                        </div>
+                        <div class="disc">
+                            @if (AppState.CurrentTheme == Theme.Tea)
+                            {
+                                <img src="icon-tea.svg" alt="" />
+                            }
+                            else
+                            {
+                                <span>☕</span>
+                            }
+                        </div>
+                    </div>
+                    <div>
+                        <div class="login-title-big">@L["Brand_AppName"]</div>
+                        <div class="login-subtitle-big">@L["Login_Subtitle"]</div>
+                    </div>
+                </div>
+
+                <div class="live-counter">
+                    <span class="dot"></span>
+                    @if (peopleVotedToday > 0)
                     {
-                        <span style="font-size:11px;color:var(--amber-gold);">Admin</span>
+                        <span class="text">@string.Format(L["Live_PeopleVotedToday"], peopleVotedToday)</span>
+                    }
+                    else
+                    {
+                        <span class="text">@L["Live_NobodyVotedYet"]</span>
                     }
                 </div>
-            }
-        </div>
 
-        @if (selectedUser != null)
-        {
-            <button class="btn btn-primary mt-16" @onclick="LoginSelected">
-                @L["Btn_LoginAs"] @selectedUser.Name
-            </button>
-        }
-    }
+                <div class="section-label" style="margin-bottom:12px;">@L["Login_PickProfile"]</div>
+                <div class="user-grid">
+                    @foreach (var user in users)
+                    {
+                        var sel = selectedUser?.Id == user.Id;
+                        <div class="user-card @(sel ? "selected" : "")"
+                             @onclick="() => SelectUser(user)"
+                             @ondblclick="() => LoginUser(user)">
+                            <UserInitials Name="@user.Name" Size="46" />
+                            <span class="name">@user.Name</span>
+                            @if (user.IsAdmin)
+                            {
+                                <span class="role-tag">@L["Role_Admin"]</span>
+                            }
+                        </div>
+                    }
+                </div>
 
-    @if (!showLanguagePicker && !isDatabaseNotSelected && !isLoading && selectedDatabasePath != null)
-    {
-        <div style="margin-top:16px;text-align:center;">
-            <div class="text-muted" style="font-size:12px;max-width:350px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
-                 title="@selectedDatabasePath">
-                @selectedDatabasePath
+                @if (selectedUser != null)
+                {
+                    <div style="margin-top:24px;display:flex;gap:12px;align-items:center;">
+                        <button class="btn btn-accent" @onclick="LoginSelected">
+                            @L["Btn_LoginAs"] @selectedUser.Name
+                            <span style="font-size:15px;">→</span>
+                        </button>
+                        @if (selectedDatabasePath != null)
+                        {
+                            <span class="text-muted" style="font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;"
+                                  title="@selectedDatabasePath">@selectedDatabasePath</span>
+                            <button class="btn btn-ghost btn-sm" @onclick="CloseDatabase">@L["Btn_CloseDatabase"]</button>
+                        }
+                    </div>
+                }
             </div>
-            <button class="btn" style="background:none;color:var(--coffee-brown);font-size:13px;text-decoration:underline;padding:4px;"
-                    @onclick="CloseDatabase">
-                @L["Btn_CloseDatabase"]
-            </button>
+
+            <div class="login-footer">
+                <div>© Kávopíči 2025</div>
+                <div>·</div>
+                <div>@L["Login_LocalApp"]</div>
+                <div style="flex:1;"></div>
+                <div class="lang-pills">
+                    @foreach (var (code, label) in new [] { ("cs","CS"), ("sk","SK"), ("en","EN"), ("de","DE") })
+                    {
+                        var isActive = string.Equals(currentCulture, code, StringComparison.OrdinalIgnoreCase);
+                        <button class="pill @(isActive ? "active" : "")" @onclick="() => SwitchLanguage(code)">@label</button>
+                    }
+                </div>
+            </div>
         </div>
-    }
-</div>
+
+        <!-- RIGHT — espresso panel -->
+        <div class="right">
+            <div class="section-label" style="color:var(--amber-gold);">@L["Login_DatabasesHeading"]</div>
+
+            <div class="db-list">
+                @{
+                    var current = selectedDatabasePath;
+                    var paths = AppSettings.RecentDatabasePaths.ToList();
+                    if (current != null && !paths.Any(p => string.Equals(p, current, StringComparison.OrdinalIgnoreCase)))
+                        paths.Insert(0, current);
+                }
+                @foreach (var p in paths)
+                {
+                    var isCurrent = string.Equals(p, current, StringComparison.OrdinalIgnoreCase);
+                    <div class="db-row @(isCurrent ? "active" : "")" @onclick="() => UseRecentDatabaseDirect(p)">
+                        <div class="top-row">
+                            <div class="path">@p</div>
+                            @if (isCurrent)
+                            {
+                                <span class="badge-active">@L["Login_DbActive"]</span>
+                            }
+                            else
+                            {
+                                <span style="font-size:11px;color:rgba(255,255,255,0.55);">@L["Login_DbOpenLink"]</span>
+                                <button class="remove" title="@L["Btn_RemoveRecentDatabase"]"
+                                        @onclick:stopPropagation="true"
+                                        @onclick="() => RemoveRecentDatabase(p)">×</button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div style="display:flex;gap:8px;">
+                <button class="btn-dashed" @onclick="ShowOpenOther">@L["Login_DbOpenOther"]</button>
+                <button class="btn-dashed" @onclick="ShowOpenOther">@L["Login_DbCreateNew"]</button>
+            </div>
+
+            <div class="right-divider"></div>
+
+            <div class="flavor-of-day">
+                <div class="emoji">🫐</div>
+                <div style="flex:1;min-width:0;">
+                    <div class="lbl">@L["Login_FlavorOfDay"]</div>
+                    <div class="quote">@L["Login_FlavorOfDayQuote"]</div>
+                </div>
+            </div>
+
+            <div class="right-stats">
+                <div class="tile">
+                    <div class="v">@stats_sessions</div>
+                    <div class="l">@L["Login_StatsSessions"]</div>
+                </div>
+                <div class="tile">
+                    <div class="v">@stats_blends</div>
+                    <div class="l">@L["Login_StatsBlends"]</div>
+                </div>
+                <div class="tile">
+                    <div class="v">@stats_users</div>
+                    <div class="l">@L["Login_StatsTasters"]</div>
+                </div>
+                <div class="tile">
+                    <div class="v">@(stats_topAvg?.ToString("F1") ?? "—")</div>
+                    <div class="l">@L["Login_StatsTopAvg"]</div>
+                </div>
+            </div>
+
+            <div style="flex:1;"></div>
+
+            <div class="quote-block">
+                @L["Login_Quote"]
+                <div class="author">@L["Login_QuoteAuthor"]</div>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     private List<User> users = new();
@@ -158,6 +291,13 @@
     private string databasePathInput = "";
     private string newAdminName = "";
     private string? errorMessage;
+    private string currentCulture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+
+    private int stats_sessions;
+    private int stats_blends;
+    private int stats_users;
+    private double? stats_topAvg;
+    private int peopleVotedToday;
 
     protected override async Task OnInitializedAsync()
     {
@@ -182,7 +322,6 @@
                 return;
             }
 
-            // Auto-login from cookie
             var userCookie = await JS.InvokeAsync<string?>("getUserCookie");
             if (!string.IsNullOrEmpty(userCookie) && int.TryParse(userCookie, out var userId))
             {
@@ -193,8 +332,6 @@
                     Nav.NavigateTo("/dashboard");
                     return;
                 }
-
-                // Stale cookie — user deleted or deactivated
                 await JS.InvokeVoidAsync("clearUserCookie");
             }
         }
@@ -206,6 +343,12 @@
         Nav.NavigateTo("/", forceLoad: true);
     }
 
+    private async Task SwitchLanguage(string code)
+    {
+        await JS.InvokeVoidAsync("setCultureCookie", code);
+        Nav.NavigateTo(Nav.Uri, forceLoad: true);
+    }
+
     private async Task LoadUsers()
     {
         try
@@ -214,7 +357,6 @@
             errorMessage = null;
 
             var dbPath = AppSettings.DatabasePath;
-
             if (string.IsNullOrEmpty(dbPath))
             {
                 isDatabaseNotSelected = true;
@@ -225,7 +367,6 @@
             }
 
             isDatabaseNotSelected = false;
-
             if (selectedDatabasePath != dbPath)
             {
                 await Task.Run(async () =>
@@ -234,12 +375,8 @@
                     await db.Database.MigrateAsync();
                 });
             }
-
             selectedDatabasePath = dbPath;
 
-            // Determine theme. Pre-existing databases (have users but no AppConfig) silently
-            // default to Coffee. Brand-new databases (no users, no AppConfig) show the
-            // theme picker before admin creation.
             var hasUsers = await UserService.HasAnyUsersAsync();
             var config = await AppConfigService.GetOrNullAsync();
 
@@ -247,7 +384,6 @@
             {
                 if (hasUsers)
                 {
-                    // Legacy DB — predates the theme feature.
                     config = await AppConfigService.CreateAsync(Theme.Coffee);
                 }
                 else
@@ -263,7 +399,10 @@
             isFirstRun = !hasUsers;
 
             if (hasUsers)
+            {
                 users = await UserService.GetActiveUsersAsync();
+                await LoadStats();
+            }
         }
         catch (Exception ex)
         {
@@ -280,6 +419,33 @@
         }
     }
 
+    private async Task LoadStats()
+    {
+        try
+        {
+            var sessions = await SessionService.GetSessionHistoryAsync();
+            stats_sessions = sessions.Count;
+            var blends = await BlendService.GetActiveBlendsAsync();
+            stats_blends = blends.Count;
+            stats_users = users.Count;
+            var blendStats = await StatisticsService.GetBlendStatisticsAsync();
+            stats_topAvg = blendStats.Count > 0 ? blendStats.Max(b => b.AverageRating) : (double?)null;
+
+            var todays = await SessionService.GetTodaySessionsAsync();
+            if (todays.Count > 0)
+            {
+                var voters = new HashSet<int>();
+                foreach (var s in todays)
+                {
+                    var rs = await RatingService.GetRatingsForSessionAsync(s.Id);
+                    foreach (var r in rs) voters.Add(r.UserId);
+                }
+                peopleVotedToday = voters.Count;
+            }
+        }
+        catch { /* ignore */ }
+    }
+
     private async Task SelectTheme(Theme theme)
     {
         try
@@ -290,10 +456,7 @@
             isThemePickerNeeded = false;
             await LoadUsers();
         }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
+        catch (Exception ex) { errorMessage = ex.Message; }
     }
 
     private async Task OpenOrCreateDatabase()
@@ -302,42 +465,23 @@
         {
             errorMessage = null;
             var path = databasePathInput.Trim();
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                errorMessage = L["Err_EnterDatabasePath"];
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(path)) { errorMessage = L["Err_EnterDatabasePath"]; return; }
+            if (!path.EndsWith(".db", StringComparison.OrdinalIgnoreCase)) path += ".db";
 
-            if (!path.EndsWith(".db", StringComparison.OrdinalIgnoreCase))
-                path += ".db";
-
-            // Expand path before using it for file operations
             var expandedPath = AppSettingsService.ExpandPath(path);
-
             if (!File.Exists(expandedPath))
             {
-                // Create parent directory if needed
                 var dir = Path.GetDirectoryName(expandedPath);
-                if (!string.IsNullOrEmpty(dir))
-                    Directory.CreateDirectory(dir);
+                if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
             }
 
             AppSettings.SetDatabasePath(path);
             databasePathInput = "";
             await LoadUsers();
         }
-        catch (UnauthorizedAccessException)
-        {
-            errorMessage = L["Err_CannotCreateDatabase"];
-        }
-        catch (PathTooLongException)
-        {
-            errorMessage = L["Err_DatabasePathTooLong"];
-        }
-        catch (Exception ex)
-        {
-            errorMessage = L["Err_OpenDatabaseFailed", ex.Message];
-        }
+        catch (UnauthorizedAccessException) { errorMessage = L["Err_CannotCreateDatabase"]; }
+        catch (PathTooLongException) { errorMessage = L["Err_DatabasePathTooLong"]; }
+        catch (Exception ex) { errorMessage = L["Err_OpenDatabaseFailed", ex.Message]; }
     }
 
     private void CloseDatabase()
@@ -359,10 +503,24 @@
         errorMessage = null;
     }
 
-    private void RemoveRecentDatabase(string path)
+    private async Task UseRecentDatabaseDirect(string path)
     {
-        AppSettings.RemoveRecentDatabasePath(path);
+        if (string.Equals(path, selectedDatabasePath, StringComparison.OrdinalIgnoreCase)) return;
+        AppSettings.SetDatabasePath(path);
+        await LoadUsers();
     }
+
+    private void ShowOpenOther()
+    {
+        // Switch back to the path-input flow
+        AppSettings.SetDatabasePath(null);
+        users.Clear();
+        selectedDatabasePath = null;
+        isDatabaseNotSelected = true;
+        errorMessage = null;
+    }
+
+    private void RemoveRecentDatabase(string path) => AppSettings.RemoveRecentDatabasePath(path);
 
     private void SelectUser(User user) => selectedUser = user;
 
@@ -375,8 +533,7 @@
 
     private async Task LoginSelected()
     {
-        if (selectedUser != null)
-            await LoginUser(selectedUser);
+        if (selectedUser != null) await LoginUser(selectedUser);
     }
 
     private async Task CreateFirstAdmin()
@@ -384,27 +541,18 @@
         try
         {
             errorMessage = null;
-            if (string.IsNullOrWhiteSpace(newAdminName))
-            {
-                errorMessage = L["Err_EnterAdminName"];
-                return;
-            }
+            if (string.IsNullOrWhiteSpace(newAdminName)) { errorMessage = L["Err_EnterAdminName"]; return; }
             var admin = await UserService.CreateUserAsync(newAdminName.Trim(), isAdmin: true);
             isFirstRun = false;
             newAdminName = "";
             await LoadUsers();
             selectedUser = users.FirstOrDefault(u => u.Id == admin.Id);
         }
-        catch (Exception ex)
-        {
-            errorMessage = ex.Message;
-        }
+        catch (Exception ex) { errorMessage = ex.Message; }
     }
 
     private async Task HandleAdminKeyDown(KeyboardEventArgs e)
     {
-        if (e.Key == "Enter")
-            await CreateFirstAdmin();
+        if (e.Key == "Enter") await CreateFirstAdmin();
     }
-
 }
