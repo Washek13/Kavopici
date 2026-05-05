@@ -1,5 +1,6 @@
 @page "/statistics"
 @inject IStatisticsService StatisticsService
+@inject IRatingService RatingService
 @inject ICsvExportService CsvExportService
 @inject AppState AppState
 @inject NavigationManager Nav
@@ -8,19 +9,50 @@
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 
-<h1>@L["Nav_Statistics"]</h1>
-
-@if (errorMessage != null)
-{
-    <div class="msg-error">@errorMessage</div>
-}
-
-<div class="tab-bar">
-    <button class="tab-btn @(tab == 0 ? "active" : "")" @onclick="() => tab = 0">@L["Tab_BlendOverview"]</button>
-    <button class="tab-btn @(tab == 1 ? "active" : "")" @onclick="() => tab = 1">@L["Tab_MyRatings"]</button>
-    <button class="tab-btn @(tab == 2 ? "active" : "")" @onclick="() => tab = 2">@L["Tab_SupplierOverview"]</button>
-    <button class="tab-btn @(tab == 3 ? "active" : "")" @onclick="() => tab = 3">@L["Tab_UserOverview"]</button>
+<div class="page-header">
+    <h1>@L["Heading_Statistics"]</h1>
+    <span class="subtitle">@string.Format(L["Stats_Subtitle"], blendStats.Count, totalVotes)</span>
+    <div style="flex:1;"></div>
+    <button class="btn btn-outline btn-sm" @onclick="ExportCsv">@L["Btn_ExportCsv"]</button>
+    <button class="btn btn-outline btn-sm" @onclick="GoToComparison">@L["Btn_CompareBlends"]</button>
 </div>
+
+@if (errorMessage != null) { <div class="msg-error">@errorMessage</div> }
+
+<div class="stats-shell">
+    <aside class="side-nav">
+        <nav>
+            <button class="nav-item @(tab == 0 ? "active" : "")" @onclick="() => tab = 0">
+                <div class="icon">☕</div>
+                <div class="text">
+                    <div class="nm">@L["Tab_BlendOverview"]</div>
+                    <div class="sub">@string.Format(L["Admin_BlendsCount"], blendStats.Count)</div>
+                </div>
+            </button>
+            <button class="nav-item @(tab == 1 ? "active" : "")" @onclick="() => tab = 1">
+                <div class="icon">⭐</div>
+                <div class="text">
+                    <div class="nm">@L["Tab_MyRatings"]</div>
+                    <div class="sub">@string.Format(L["Stats_NavMyRatingsSub"], userSessions.Count)</div>
+                </div>
+            </button>
+            <button class="nav-item @(tab == 2 ? "active" : "")" @onclick="() => tab = 2">
+                <div class="icon">🤝</div>
+                <div class="text">
+                    <div class="nm">@L["Tab_SupplierOverview"]</div>
+                    <div class="sub">@string.Format(L["Stats_NavSuppliersSub"], supplierStats.Count)</div>
+                </div>
+            </button>
+            <button class="nav-item @(tab == 3 ? "active" : "")" @onclick="() => tab = 3">
+                <div class="icon">👥</div>
+                <div class="text">
+                    <div class="nm">@L["Tab_UserOverview"]</div>
+                    <div class="sub">@string.Format(L["Admin_UsersCount"], userStats.Count)</div>
+                </div>
+            </button>
+        </nav>
+    </aside>
+    <div class="stats-content">
 
 @if (isLoading)
 {
@@ -28,71 +60,286 @@
 }
 else if (tab == 0)
 {
-    <div class="flex items-center justify-between mb-16">
-        <div class="btn-group">
-            <button class="btn btn-outline" @onclick="GoToComparison">@L["Btn_CompareBlends"]</button>
-            <button class="btn btn-outline" @onclick="ExportCsv">@L["Btn_ExportCsv"]</button>
-        </div>
-    </div>
-
     @if (blendStats.Count == 0)
     {
-        <div class="panel text-center">
-            <p class="text-muted">@L["Msg_NoStatistics"]</p>
-        </div>
+        <div class="card text-center"><p class="text-muted">@L["Msg_NoStatistics"]</p></div>
     }
     else
     {
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th @onclick="@(() => SortBy("BlendName"))">@L["Label_Blend"]</th>
-                    <th @onclick="@(() => SortBy("AverageRating"))">@L["Label_Average"]</th>
-                    <th @onclick="@(() => SortBy("ControversyLevel"))">@L["Label_Controversy"]</th>
-                    <th @onclick="@(() => SortBy("RatingCount"))">@L["Label_Count"]</th>
-                    <th @onclick="@(() => SortBy("Roaster"))">@L["Label_Roaster"]</th>
-                    <th @onclick="@(() => SortBy("SupplierName"))">@L["Label_Supplier"]</th>
-                    <th @onclick="@(() => SortBy("PricePerKg"))">@L["Label_PricePerKg"]</th>
-                    <th @onclick="@(() => SortBy("PricePerformance"))">@L["Label_PricePerStar"]</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var stat in blendStats)
-                {
-                    <tr style="cursor:pointer;" @onclick="@(() => GoToBlendDetail(stat.BlendId))">
-                        <td><strong>@stat.BlendName</strong></td>
-                        <td>
-                            <span style="color:var(--amber-gold);font-weight:600;">
-                                @(stat.RatingCount > 0 ? stat.AverageRating.ToString("F1") : "—")
-                            </span>
-                            @if (stat.RatingCount > 0)
-                            {
-                                <span> &#9733;</span>
-                            }
-                        </td>
-                        <td><ControversyBadge Level="stat.ControversyLevel" ShowDash="true" /></td>
-                        <td>@stat.RatingCount</td>
-                        <td>@stat.Roaster</td>
-                        <td>@stat.SupplierName</td>
-                        <td>@(stat.PricePerKg.HasValue ? $"{stat.PricePerKg.Value:F0} Kč" : "—")</td>
-                        <td>@(stat.PricePerformance.HasValue ? $"{stat.PricePerformance.Value:F0} Kč/★" : "—")</td>
-                    </tr>
+        <!-- Summary cards (4-up) -->
+        <div class="summary-cards">
+            @{
+                var topBlend = blendStats.OrderByDescending(s => s.AverageRating).First();
+                var bottomBlend = blendStats.Where(s => s.RatingCount > 0).OrderBy(s => s.AverageRating).FirstOrDefault();
+                var expensive = blendStats.Where(s => s.PricePerKg.HasValue).OrderByDescending(s => s.PricePerKg!.Value).FirstOrDefault();
+                var myTop = userRatings.Count > 0
+                    ? userRatings.OrderByDescending(r => r.Stars).FirstOrDefault()
+                    : null;
+            }
+            <div class="summary-card" @onclick="() => SelectBlend(topBlend.BlendId)">
+                <div class="accent-stripe" style="background:var(--success-green);"></div>
+                <div class="body">
+                    <div class="row">
+                        <div class="lbl">@L["Summary_BestRated"]</div>
+                        <div class="val" style="color:var(--success-green);">Ø @topBlend.AverageRating.ToString("F1")</div>
+                    </div>
+                    <div class="big">@topBlend.BlendName</div>
+                    <div class="sub">@(topBlend.Origin ?? "")</div>
+                </div>
+            </div>
+            @if (bottomBlend != null)
+            {
+                <div class="summary-card" @onclick="() => SelectBlend(bottomBlend.BlendId)">
+                    <div class="accent-stripe" style="background:var(--error-red);"></div>
+                    <div class="body">
+                        <div class="row">
+                            <div class="lbl">@L["Summary_WorstRated"]</div>
+                            <div class="val" style="color:var(--error-red);">Ø @bottomBlend.AverageRating.ToString("F1")</div>
+                        </div>
+                        <div class="big">@bottomBlend.BlendName</div>
+                        <div class="sub">@(bottomBlend.Origin ?? "")</div>
+                    </div>
+                </div>
+            }
+            else { <div></div> }
+            @if (expensive != null)
+            {
+                <div class="summary-card" @onclick="() => SelectBlend(expensive.BlendId)">
+                    <div class="accent-stripe" style="background:var(--coffee-brown);"></div>
+                    <div class="body">
+                        <div class="row">
+                            <div class="lbl">@L["Summary_MostExpensive"]</div>
+                            <div class="val" style="color:var(--coffee-brown);">@expensive.PricePerKg!.Value.ToString("F0") Kč</div>
+                        </div>
+                        <div class="big">@expensive.BlendName</div>
+                        <div class="sub">@(expensive.Origin ?? "")</div>
+                    </div>
+                </div>
+            }
+            else { <div></div> }
+            @if (myTop != null)
+            {
+                <div class="summary-card" @onclick="() => SelectBlend(myTop.BlendId)">
+                    <div class="accent-stripe" style="background:var(--amber-gold);"></div>
+                    <div class="body">
+                        <div class="row">
+                            <div class="lbl">@L["Summary_YourBest"]</div>
+                            <div class="val" style="color:var(--amber-gold);">@myTop.Stars/10</div>
+                        </div>
+                        <div class="big">@myTop.Blend.Name</div>
+                        <div class="sub">@(myTop.Blend.Origin ?? "")</div>
+                    </div>
+                </div>
+            }
+            else { <div></div> }
+        </div>
+
+        <!-- Filter bar -->
+        <div class="filter-bar">
+            <div class="search-wrap">
+                <span class="icon">🔍</span>
+                <input type="text" placeholder="@L["Filter_Search"]" @bind="search" @bind:event="oninput" />
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <span class="lbl">@L["Filter_Supplier"]</span>
+                <select @bind="selectedSupplier">
+                    <option value="">@L["Filter_All"]</option>
+                    @foreach (var s in supplierNames)
+                    {
+                        <option value="@s">@s</option>
+                    }
+                </select>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+                <span class="lbl">@L["Filter_Sort"]</span>
+                <select @bind="sortKey">
+                    <option value="avg">@L["Sort_Average"]</option>
+                    <option value="my">@L["Sort_MyRating"]</option>
+                    <option value="n">@L["Sort_VoteCount"]</option>
+                    <option value="ppk">@L["Sort_PricePerKg"]</option>
+                    <option value="ctrl">@L["Sort_Controversy"]</option>
+                    <option value="name">@L["Label_Blend"]</option>
+                </select>
+                <button class="btn-icon" @onclick="() => sortDir = sortDir == 'd' ? 'a' : 'd'">@(sortDir == 'd' ? "↓" : "↑")</button>
+            </div>
+        </div>
+
+        <!-- Split table + detail -->
+        <div class="stats-split">
+            <div class="stats-table">
+                <div class="stats-table-head">
+                    <div>@L["Col_Coffee"]</div>
+                    <div class="text-center">@L["Col_Avg"]</div>
+                    <div class="text-right">@L["Col_Votes"]</div>
+                    <div class="text-right">@L["Sort_PricePerKg"]</div>
+                    <div>@L["Label_Controversy"]</div>
+                    <div>@L["Col_YouVsAvg"]</div>
+                </div>
+                @{
+                    var visible = ApplyFilterAndSort();
                 }
-            </tbody>
-        </table>
+                @for (var i = 0; i < visible.Count; i++)
+                {
+                    var r = visible[i];
+                    var rowId = r.BlendId;
+                    var isSel = rowId == selectedId;
+                    var myStars = myStarsByBlend.GetValueOrDefault(r.BlendId, 0);
+                    var rowClass = $"stats-row {(isSel ? "selected" : (i % 2 == 1 ? "zebra" : ""))}";
+                    <div class="@rowClass" @onclick="() => SelectBlend(rowId)">
+                        <div>
+                            <div class="name">@r.BlendName</div>
+                            <div class="roaster-row">
+                                <span>@r.Roaster</span>
+                                <RoastBadge Level="r.RoastLevel" />
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="avg-big">@(r.RatingCount > 0 ? r.AverageRating.ToString("F1") : "—")</div>
+                            @if (r.RatingCount > 0)
+                            {
+                                <StarRating Value="@((int)Math.Round(r.AverageRating))" ReadOnly="true" Small="true" ShowValue="false" />
+                            }
+                        </div>
+                        <div class="text-right text-medium">@r.RatingCount×</div>
+                        <div class="text-right" style="font-family:Georgia,serif;font-size:14px;color:var(--coffee-dark);">
+                            @(r.PricePerKg.HasValue ? r.PricePerKg.Value.ToString("F0") : "—")
+                        </div>
+                        <div>
+                            <ControversyBadge Level="r.ControversyLevel" Gauge="true" />
+                        </div>
+                        <div>
+                            <DivergingBar My="myStars" Avg="r.AverageRating" Width="80" />
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Detail panel -->
+            @{
+                var sel = blendStats.FirstOrDefault(s => s.BlendId == selectedId) ?? blendStats.FirstOrDefault();
+            }
+            @if (sel != null)
+            {
+                <div class="stats-detail">
+                    <div class="head">
+                        <div class="flag-big">☕</div>
+                        <div style="flex:1;min-width:0;">
+                            <div class="det-name">@sel.BlendName</div>
+                            <div style="font-size:12.5px;color:var(--coffee-medium);margin-top:3px;">
+                                @sel.Roaster @if (!string.IsNullOrEmpty(sel.Origin)) { <span> · @sel.Origin</span>}
+                                · <RoastBadge Level="sel.RoastLevel" />
+                            </div>
+                            <div style="font-size:11.5px;color:var(--silver);margin-top:2px;">
+                                @L["Label_Supplier"]: @sel.SupplierName
+                                @if (sel.PricePerKg.HasValue) { <span> · @sel.PricePerKg.Value.ToString("F0") Kč/kg</span> }
+                            </div>
+                        </div>
+                        <div>
+                            <div class="det-score">@(sel.RatingCount > 0 ? sel.AverageRating.ToString("F1") : "—")</div>
+                            <div style="font-size:11px;color:var(--coffee-medium);margin-top:2px;text-align:right;">@string.Format(L["Detail_VotedTimes"], sel.RatingCount)</div>
+                            @{
+                                var myV = myStarsByBlend.GetValueOrDefault(sel.BlendId, 0);
+                            }
+                            @if (myV > 0)
+                            {
+                                <div class="your-vote-chip">@L["Detail_YourRating"] <b style="font-family:Georgia,serif;font-size:13px;">@myV</b>/10</div>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="section-block">
+                        <div class="label-row">
+                            <div class="section-label">@L["Section_TrendInTime"]</div>
+                            <div class="section-hint">@L["Hint_Last5"]</div>
+                        </div>
+                        @{
+                            var t = blendTrends.GetValueOrDefault(sel.BlendId, Array.Empty<double>());
+                        }
+                        @if (t.Length >= 2)
+                        {
+                            <LineChart Data="t" Height="140" />
+                        }
+                        else
+                        {
+                            <div class="text-muted" style="font-size:12px;font-style:italic;padding:14px 0;">—</div>
+                        }
+                    </div>
+
+                    <div class="section-block">
+                        <div class="label-row">
+                            <div class="section-label">@L["Section_Distribution"]</div>
+                            @if (myV > 0) { <div class="section-hint">@L["Hint_YourVoteHighlighted"]</div> }
+                        </div>
+                        <Histogram Counts="sel.Distribution" My="@(myV > 0 ? (int?)myV : null)" />
+                    </div>
+
+                    <div class="section-block">
+                        <div class="label-row">
+                            <div class="section-label">@L["Section_FlavorTones"]</div>
+                            <div class="section-hint">@L["Hint_FromAllVotes"]</div>
+                        </div>
+                        <FlavorWheel Active="@noteCountsForBlend.GetValueOrDefault(sel.BlendId, new()).Keys"
+                                     NoteNames="@NoteNames" Compact="true" />
+                    </div>
+
+                    <div class="section-block">
+                        <div class="label-row">
+                            <div class="section-label">@string.Format("{0} ({1})", L["Section_Comments"], commentsByBlend.GetValueOrDefault(sel.BlendId, new()).Count)</div>
+                        </div>
+                        @{
+                            var comments = commentsByBlend.GetValueOrDefault(sel.BlendId, new());
+                        }
+                        @if (comments.Count == 0)
+                        {
+                            <div class="text-muted" style="font-size:12.5px;font-style:italic;padding:14px 0;">@L["Hint_NoComments"]</div>
+                        }
+                        else
+                        {
+                            <div style="display:flex;flex-direction:column;gap:10px;">
+                                @foreach (var c in comments.Take(5))
+                                {
+                                    <div style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--off-white);border:1px solid var(--border);border-radius:8px;">
+                                        <UserInitials Name="@c.User.Name" Size="28" />
+                                        <div style="flex:1;min-width:0;">
+                                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+                                                <span style="font-size:13px;font-weight:600;color:var(--coffee-dark);">@c.User.Name</span>
+                                                <span style="padding:1px 7px;background:var(--coffee-brown);color:#fff;border-radius:999px;font-size:11px;font-weight:700;">@c.Stars/10</span>
+                                            </div>
+                                            <div style="font-size:12.5px;color:var(--coffee-medium);line-height:1.5;">@c.Comment</div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <div style="display:flex;gap:8px;margin-top:6px;">
+                        <button class="btn btn-primary btn-sm" style="flex:1;" @onclick="() => GoToBlendDetail(sel.BlendId)">@L["Btn_OpenBlendDetail"]</button>
+                        <button class="btn btn-outline btn-sm" @onclick="() => GoToCompare(sel.BlendId)">@L["Btn_AddCompare"]</button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="kbd-tip-strip">
+            <span style="text-transform:uppercase;letter-spacing:1.3px;font-weight:700;">@L["Comp_TipLabel"]</span>
+            <span style="display:flex;align-items:center;gap:6px;">
+                <span style="width:36px;height:6px;background:linear-gradient(90deg,var(--success-green),var(--amber-gold),var(--error-red));border-radius:3px;"></span>
+                @L["Label_Controversy"]: @L["Badge_ControversyCalm"] → @L["Badge_ControversyHigh"]
+            </span>
+        </div>
     }
 }
 else if (tab == 1)
 {
+    <!-- My ratings tab — preserve original behavior (retroactive rating) -->
     @if (userSessions.Count == 0)
     {
-        <div class="panel text-center">
-            <p class="text-muted">@L["Msg_NoTastings"]</p>
-        </div>
+        <div class="card text-center"><p class="text-muted">@L["Msg_NoTastings"]</p></div>
     }
     else
     {
-        <table class="data-table">
+        <div class="data-table-wrap"><table class="data-table">
             <thead>
                 <tr>
                     <th>@L["Label_Date"]</th>
@@ -107,30 +354,25 @@ else if (tab == 1)
                     var sessionId = item.Session.Id;
                     var isRevealed = item.HasRated || revealedSessions.Contains(sessionId) || item.Session.Date != DateOnly.FromDateTime(DateTime.Today);
                     var isExpanded = expandedSessions.Contains(sessionId);
-
-                    <tr>
+                    var hasExpansion = item.HasRated || isExpanded;
+                    <tr class="@(hasExpansion ? "has-expansion" : "")">
                         <td>@item.Session.Date.ToString("d. M. yyyy")</td>
                         <td>
-                            @if (isRevealed)
-                            {
-                                <strong>@item.Session.Blend.Name</strong>
-                            }
-                            else
-                            {
-                                <em class="text-muted">@L["Label_SecretVoting"]</em>
-                            }
+                            @if (isRevealed) { <strong>@item.Session.Blend.Name</strong> }
+                            else { <em class="text-muted">@L["Label_SecretVoting"]</em> }
                         </td>
                         <td class="text-muted">@(item.Session.Comment ?? "—")</td>
                         <td>
                             @if (!item.HasRated && !isExpanded)
                             {
-                                <button class="btn btn-outline btn-sm" @onclick="() => ExpandRatingForm(sessionId)">
-                                    @L["Btn_Rate"]
-                                </button>
+                                <button class="btn btn-outline btn-xs" @onclick="() => ExpandRatingForm(sessionId)">@L["Btn_Rate"]</button>
+                            }
+                            else if (item.HasRated && item.UserRating != null)
+                            {
+                                <span style="color:var(--amber-gold);font-weight:600;">@item.UserRating.Stars/10 ★</span>
                             }
                         </td>
                     </tr>
-
                     @if (item.HasRated || isExpanded)
                     {
                         <tr>
@@ -146,25 +388,23 @@ else if (tab == 1)
                     }
                 }
             </tbody>
-        </table>
+        </table></div>
     }
 }
 else if (tab == 2)
 {
     @if (supplierStats.Count == 0)
     {
-        <div class="panel text-center">
-            <p class="text-muted">@L["Msg_NoSuppliers"]</p>
-        </div>
+        <div class="card text-center"><p class="text-muted">@L["Msg_NoSuppliers"]</p></div>
     }
     else
     {
-        <table class="data-table">
+        <div class="data-table-wrap"><table class="data-table">
             <thead>
                 <tr>
-                    <th @onclick="@(() => SortSupplierBy("SupplierName"))">@L["Label_Supplier"]</th>
-                    <th @onclick="@(() => SortSupplierBy("TotalSessionCount"))">@L["Label_Total"]</th>
-                    <th @onclick="@(() => SortSupplierBy("Last30DaysSessionCount"))">@L["Label_Last30Days"]</th>
+                    <th>@L["Label_Supplier"]</th>
+                    <th>@L["Label_Total"]</th>
+                    <th>@L["Label_Last30Days"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -177,51 +417,39 @@ else if (tab == 2)
                     </tr>
                 }
             </tbody>
-        </table>
+        </table></div>
     }
 }
-
 else if (tab == 3)
 {
     @if (userStats.Count == 0)
     {
-        <div class="panel text-center">
-            <p class="text-muted">@L["Msg_NoUsers"]</p>
-        </div>
+        <div class="card text-center"><p class="text-muted">@L["Msg_NoUsers"]</p></div>
     }
     else
     {
-        <table class="data-table">
+        <div class="data-table-wrap"><table class="data-table">
             <thead>
                 <tr>
-                    <th @onclick="@(() => SortUserBy("UserName"))">@L["Label_User"]</th>
-                    <th @onclick="@(() => SortUserBy("VoteCount"))">@L["Label_VoteCount"]</th>
-                    <th @onclick="@(() => SortUserBy("AverageGiven"))">@L["Label_AverageGiven"]</th>
-                    <th @onclick="@(() => SortUserBy("ParticipationRate"))">@L["Label_Participation"]</th>
-                    <th @onclick="@(() => SortUserBy("FavoriteTastingNote"))">@L["Label_FavoriteTaste"]</th>
-                    <th @onclick="@(() => SortUserBy("SuppliedBlendsCount"))">@L["Label_SuppliedBlends"]</th>
-                    <th @onclick="@(() => SortUserBy("SuppliedAvgPricePerStar"))">@L["Label_SuppliedPricePerStar"]</th>
-                    <th @onclick="@(() => SortUserBy("VotingConsistency"))">@L["Label_Consistency"]</th>
-                    <th @onclick="@(() => SortUserBy("CleanupCount"))">@L["Label_CleanupCount"]</th>
-                    <th @onclick="@(() => SortUserBy("CleanupReliability"))">@L["Label_CleanupReliability"]</th>
+                    <th class="sortable" @onclick='() => SortUsersBy("name")'>@L["Label_User"]@UserSortIndicator("name")</th>
+                    <th class="sortable" @onclick='() => SortUsersBy("votes")'>@L["Label_VoteCount"]@UserSortIndicator("votes")</th>
+                    <th class="sortable" @onclick='() => SortUsersBy("avg")'>@L["Label_AverageGiven"]@UserSortIndicator("avg")</th>
+                    <th class="sortable" @onclick='() => SortUsersBy("participation")'>@L["Label_Participation"]@UserSortIndicator("participation")</th>
+                    <th class="sortable" @onclick='() => SortUsersBy("favorite")'>@L["Label_FavoriteTaste"]@UserSortIndicator("favorite")</th>
+                    <th class="sortable" @onclick='() => SortUsersBy("supplied")'>@L["Label_SuppliedBlends"]@UserSortIndicator("supplied")</th>
+                    <th class="sortable" @onclick='() => SortUsersBy("pricePerStar")'>@L["Label_SuppliedPricePerStar"]@UserSortIndicator("pricePerStar")</th>
+                    <th class="sortable" @onclick='() => SortUsersBy("consistency")'>@L["Label_Consistency"]@UserSortIndicator("consistency")</th>
+                    <th class="sortable" @onclick='() => SortUsersBy("cleanup")'>@L["Label_CleanupCount"]@UserSortIndicator("cleanup")</th>
+                    <th class="sortable" @onclick='() => SortUsersBy("reliability")'>@L["Label_CleanupReliability"]@UserSortIndicator("reliability")</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var stat in userStats)
+                @foreach (var stat in SortedUserStats())
                 {
                     <tr>
                         <td><strong>@stat.UserName</strong></td>
                         <td>@stat.VoteCount</td>
-                        <td>
-                            @if (stat.VoteCount > 0)
-                            {
-                                <span style="color:var(--amber-gold);font-weight:600;">@stat.AverageGiven.ToString("F1") &#9733;</span>
-                            }
-                            else
-                            {
-                                <span>—</span>
-                            }
-                        </td>
+                        <td>@(stat.VoteCount > 0 ? $"{stat.AverageGiven:F1} ★" : "—")</td>
                         <td>@stat.ParticipationRate.ToString("F0") %</td>
                         <td>@(stat.FavoriteTastingNote ?? "—")</td>
                         <td>@stat.SuppliedBlendsCount</td>
@@ -232,37 +460,83 @@ else if (tab == 3)
                     </tr>
                 }
             </tbody>
-        </table>
+        </table></div>
     }
 }
 
-@code {
-    private const int MaxStars = 10;
+    </div>
+</div>
 
+@code {
     private int tab;
     private List<BlendStatistics> blendStats = new();
     private List<SessionWithRating> userSessions = new();
     private List<SupplierStatistics> supplierStats = new();
     private List<UserStatistics> userStats = new();
+    private List<Rating> userRatings = new();
+    private Dictionary<int, double[]> blendTrends = new();
+    private Dictionary<int, int> myStarsByBlend = new();
+    private Dictionary<int, List<Rating>> commentsByBlend = new();
+    private Dictionary<int, Dictionary<string, int>> noteCountsForBlend = new();
+    private List<string> supplierNames = new();
     private HashSet<int> expandedSessions = new();
     private HashSet<int> revealedSessions = new();
     private bool isLoading = true;
     private string? errorMessage;
 
+    private int selectedId;
+    private string? selectedSupplier;
+    private string search = "";
+    private string sortKey = "avg";
+    private char sortDir = 'd';
+    private int totalVotes;
+
+    private string userSortKey = "votes";
+    private char userSortDir = 'd';
+
+    private void SortUsersBy(string key)
+    {
+        if (userSortKey == key) userSortDir = userSortDir == 'd' ? 'a' : 'd';
+        else { userSortKey = key; userSortDir = 'd'; }
+    }
+
+    private string UserSortIndicator(string key) =>
+        userSortKey == key ? (userSortDir == 'd' ? " ↓" : " ↑") : "";
+
+    private IEnumerable<UserStatistics> SortedUserStats()
+    {
+        IEnumerable<UserStatistics> q = userSortKey switch
+        {
+            "name"          => userStats.OrderBy(s => s.UserName),
+            "votes"         => userStats.OrderBy(s => s.VoteCount),
+            "avg"           => userStats.OrderBy(s => s.AverageGiven),
+            "participation" => userStats.OrderBy(s => s.ParticipationRate),
+            "favorite"      => userStats.OrderBy(s => s.FavoriteTastingNote ?? ""),
+            "supplied"      => userStats.OrderBy(s => s.SuppliedBlendsCount),
+            "pricePerStar"  => userStats.OrderBy(s => s.SuppliedAvgPricePerStar.HasValue ? 0 : 1)
+                                        .ThenBy(s => s.SuppliedAvgPricePerStar),
+            "consistency"   => userStats.OrderBy(s => s.VotingConsistency.HasValue ? 0 : 1)
+                                        .ThenBy(s => s.VotingConsistency),
+            "cleanup"       => userStats.OrderBy(s => s.CleanupCount),
+            "reliability"   => userStats.OrderBy(s => s.CleanupReliability.HasValue ? 0 : 1)
+                                        .ThenBy(s => s.CleanupReliability),
+            _               => userStats.OrderBy(s => s.UserName)
+        };
+        return userSortDir == 'd' ? q.Reverse() : q;
+    }
+
+    private IEnumerable<string> NoteNames => AppState.CurrentTheme == Theme.Tea
+        ? Kavopici.Web.Components.Shared.TastingNoteHelpers.TeaNoteNames
+        : Kavopici.Web.Components.Shared.TastingNoteHelpers.CoffeeNoteNames;
+
     protected override async Task OnInitializedAsync()
     {
         if (!AppState.IsLoggedIn) return;
-
-        // Check for tab query parameter
         var uri = new Uri(Nav.Uri);
         var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
-        if (query["tab"] == "ratings")
-            tab = 1;
-        else if (query["tab"] == "suppliers")
-            tab = 2;
-        else if (query["tab"] == "users")
-            tab = 3;
-
+        if (query["tab"] == "ratings") tab = 1;
+        else if (query["tab"] == "suppliers") tab = 2;
+        else if (query["tab"] == "users") tab = 3;
         await LoadAsync();
     }
 
@@ -275,76 +549,81 @@ else if (tab == 3)
             blendStats = await StatisticsService.GetBlendStatisticsAsync();
             supplierStats = await StatisticsService.GetSupplierStatisticsAsync();
             userStats = await StatisticsService.GetUserStatisticsAsync();
+            totalVotes = blendStats.Sum(s => s.RatingCount);
+            supplierNames = blendStats.Select(b => b.SupplierName).Distinct().OrderBy(s => s).ToList();
 
             if (AppState.CurrentUser != null)
+            {
                 userSessions = await StatisticsService.GetUserSessionHistoryAsync(AppState.CurrentUser.Id);
+                userRatings = await StatisticsService.GetUserRatingHistoryAsync(AppState.CurrentUser.Id);
+                myStarsByBlend = userRatings.GroupBy(r => r.BlendId).ToDictionary(g => g.Key, g => g.Max(r => r.Stars));
+            }
+
+            // Load trends + comments for all blends
+            foreach (var b in blendStats)
+            {
+                blendTrends[b.BlendId] = (await StatisticsService.GetBlendTrendAsync(b.BlendId, 5)).ToArray();
+                var ratings = await RatingService.GetRatingsForBlendAsync(b.BlendId);
+                commentsByBlend[b.BlendId] = ratings.Where(r => !string.IsNullOrWhiteSpace(r.Comment)).ToList();
+                var counts = new Dictionary<string, int>();
+                foreach (var r in ratings)
+                {
+                    foreach (var rtn in r.RatingTastingNotes)
+                    {
+                        var name = rtn.TastingNote.Name;
+                        counts[name] = counts.GetValueOrDefault(name, 0) + 1;
+                    }
+                }
+                noteCountsForBlend[b.BlendId] = counts;
+            }
+
+            if (selectedId == 0 && blendStats.Count > 0) selectedId = blendStats[0].BlendId;
         }
         catch (Exception ex) { errorMessage = ex.Message; }
         finally { isLoading = false; }
     }
 
-    private void ExpandRatingForm(int sessionId)
+    private List<BlendStatistics> ApplyFilterAndSort()
     {
-        expandedSessions.Add(sessionId);
+        var list = blendStats.AsEnumerable();
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var s = search.Trim().ToLowerInvariant();
+            list = list.Where(r =>
+                (r.BlendName?.ToLowerInvariant().Contains(s) ?? false) ||
+                (r.Roaster?.ToLowerInvariant().Contains(s) ?? false) ||
+                (r.Origin?.ToLowerInvariant().Contains(s) ?? false) ||
+                (r.SupplierName?.ToLowerInvariant().Contains(s) ?? false));
+        }
+        if (!string.IsNullOrEmpty(selectedSupplier))
+        {
+            list = list.Where(r => r.SupplierName == selectedSupplier);
+        }
+        var key = sortKey;
+        list = key switch
+        {
+            "name" => list.OrderBy(r => r.BlendName),
+            "n"    => list.OrderByDescending(r => r.RatingCount),
+            "ppk"  => list.OrderByDescending(r => r.PricePerKg ?? 0),
+            "ctrl" => list.OrderByDescending(r => r.ControversyLevel ?? -1),
+            "my"   => list.OrderByDescending(r => myStarsByBlend.GetValueOrDefault(r.BlendId, 0)),
+            _      => list.OrderByDescending(r => r.AverageRating),
+        };
+        if (sortDir == 'a') list = list.Reverse();
+        return list.ToList();
     }
+
+    private void ExpandRatingForm(int sessionId) => expandedSessions.Add(sessionId);
 
     private async Task OnRetroRatingSubmitted(int sessionId)
     {
         revealedSessions.Add(sessionId);
         expandedSessions.Remove(sessionId);
-
-        // Reload to update the rated status
         if (AppState.CurrentUser != null)
             userSessions = await StatisticsService.GetUserSessionHistoryAsync(AppState.CurrentUser.Id);
     }
 
-    private void SortBy(string column)
-    {
-        blendStats = column switch
-        {
-            "BlendName" => blendStats.OrderBy(s => s.BlendName).ToList(),
-            "AverageRating" => blendStats.OrderByDescending(s => s.AverageRating).ToList(),
-            "RatingCount" => blendStats.OrderByDescending(s => s.RatingCount).ToList(),
-            "Roaster" => blendStats.OrderBy(s => s.Roaster).ToList(),
-            "SupplierName" => blendStats.OrderBy(s => s.SupplierName).ToList(),
-            "PricePerKg" => blendStats.OrderByDescending(s => s.PricePerKg ?? 0).ToList(),
-            "ControversyLevel" => blendStats.OrderByDescending(s => s.ControversyLevel ?? -1).ToList(),
-            "PricePerformance" => blendStats.OrderBy(s => s.PricePerformance ?? decimal.MaxValue).ToList(),
-            _ => blendStats
-        };
-    }
-
-    private void SortSupplierBy(string column)
-    {
-        supplierStats = column switch
-        {
-            "SupplierName" => supplierStats.OrderBy(s => s.SupplierName).ToList(),
-            "TotalSessionCount" => supplierStats.OrderByDescending(s => s.TotalSessionCount).ToList(),
-            "Last30DaysSessionCount" => supplierStats.OrderByDescending(s => s.Last30DaysSessionCount).ToList(),
-            _ => supplierStats
-        };
-    }
-
-    private void SortUserBy(string column)
-    {
-        userStats = column switch
-        {
-            "UserName" => userStats.OrderBy(s => s.UserName).ToList(),
-            "VoteCount" => userStats.OrderByDescending(s => s.VoteCount).ToList(),
-            "AverageGiven" => userStats.OrderByDescending(s => s.AverageGiven).ToList(),
-            "ParticipationRate" => userStats.OrderByDescending(s => s.ParticipationRate).ToList(),
-            "FavoriteTastingNote" => userStats.OrderBy(s => s.FavoriteTastingNote ?? "").ToList(),
-            "SuppliedBlendsCount" => userStats.OrderByDescending(s => s.SuppliedBlendsCount).ToList(),
-            "SuppliedAvgPricePerStar" => userStats.OrderBy(s => s.SuppliedAvgPricePerStar ?? decimal.MaxValue).ToList(),
-            "VotingConsistency" => userStats.OrderBy(s => s.VotingConsistency ?? double.MaxValue).ToList(),
-            "CleanupCount" => userStats.OrderByDescending(s => s.CleanupCount).ToList(),
-            "CleanupReliability" => userStats.OrderByDescending(s => s.CleanupReliability ?? -1).ToList(),
-            _ => userStats
-        };
-    }
-
-    private void GoToComparison() => Nav.NavigateTo("/comparison");
-    private void GoToBlendDetail(int blendId) => Nav.NavigateTo($"/blend/{blendId}");
+    private void SelectBlend(int id) => selectedId = id;
 
     private async Task ExportCsv()
     {
@@ -357,4 +636,8 @@ else if (tab == 3)
         }
         catch (Exception ex) { errorMessage = ex.Message; }
     }
+
+    private void GoToComparison() => Nav.NavigateTo("/comparison");
+    private void GoToCompare(int blendId) => Nav.NavigateTo($"/comparison?ids={blendId}");
+    private void GoToBlendDetail(int blendId) => Nav.NavigateTo($"/blend/{blendId}");
 }

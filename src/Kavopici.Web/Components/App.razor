@@ -49,6 +49,11 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         };
+        window.kavopici = window.kavopici || {};
+        window.kavopici.focusElement = function (id) {
+            var el = document.getElementById(id);
+            if (el && typeof el.focus === 'function') el.focus();
+        };
     </script>
 </body>
 </html>

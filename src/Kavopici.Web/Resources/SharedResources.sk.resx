@@ -280,4 +280,173 @@
   <data name="Label_LinkedBlend_Tea" xml:space="preserve"><value>Prepojiť s čajom</value></data>
   <data name="Label_SuppliedBlends_Tea" xml:space="preserve"><value>Dodané čaje</value></data>
   <data name="Placeholder_NoteForTasters_Tea" xml:space="preserve"><value>Poznámka pre degustátorov (napr. Vzorka A)...</value></data>
+  <data name="Nav_Comparison" xml:space="preserve"><value>Porovnanie</value></data>
+  <data name="Live_SessionRunning" xml:space="preserve"><value>Session beží</value></data>
+  <data name="Live_PeopleVotedToday" xml:space="preserve"><value>Dnes už hodnotilo {0} ľudí · session práve beží</value></data>
+  <data name="Live_NobodyVotedYet" xml:space="preserve"><value>Dnes ešte nikto nehodnotil · session zatiaľ čaká</value></data>
+  <data name="Badge_ControversyCalm" xml:space="preserve"><value>pokoj</value></data>
+  <data name="Badge_ControversyMild" xml:space="preserve"><value>sporné</value></data>
+  <data name="Badge_ControversyHigh" xml:space="preserve"><value>výbušné</value></data>
+  <data name="Label_AdminNote" xml:space="preserve"><value>Pozn. admina</value></data>
+  <data name="Msg_RevealAfterRating" xml:space="preserve"><value>odhalí sa po hodnotení</value></data>
+  <data name="Heading_TodaysTasting" xml:space="preserve"><value>Dnešná degustácia</value></data>
+  <data name="Label_TopAllTime" xml:space="preserve"><value>Top zmes (all-time)</value></data>
+  <data name="Label_YourRatingsCount" xml:space="preserve"><value>Tvojich hodnotení</value></data>
+  <data name="Label_TodaysSession" xml:space="preserve"><value>Dnešná session</value></data>
+  <data name="Label_VotedShort" xml:space="preserve"><value>{0}/{1} hlasovalo</value></data>
+  <data name="Label_HistoricalAvg" xml:space="preserve"><value>Ø historicky</value></data>
+  <data name="Label_VotesShort" xml:space="preserve"><value>hl.</value></data>
+  <data name="Label_StatsAfterVote" xml:space="preserve"><value>štatistiky po hlasovaní</value></data>
+  <data name="Label_LeaderboardTop4" xml:space="preserve"><value>Leaderboard · top 4</value></data>
+  <data name="Label_AllArrow" xml:space="preserve"><value>všetko →</value></data>
+  <data name="Label_FlavorWheelTitle" xml:space="preserve"><value>Coffee Flavor Wheel</value></data>
+  <data name="Label_FlavorWheelSub" xml:space="preserve"><value>Pomôže pomenovať chuťové tóny</value></data>
+  <data name="Label_FlavorWheelTitle_Tea" xml:space="preserve"><value>Tea Flavor Wheel</value></data>
+  <data name="Label_KbdHint" xml:space="preserve"><value>Klávesnica:</value></data>
+  <data name="Btn_SaveRating" xml:space="preserve"><value>Uložiť</value></data>
+  <data name="Btn_EditRating" xml:space="preserve"><value>Upraviť hodnotenie</value></data>
+  <data name="Btn_Done" xml:space="preserve"><value>HOTOVO</value></data>
+  <data name="Heading_Statistics" xml:space="preserve"><value>Štatistiky</value></data>
+  <data name="Stats_Subtitle" xml:space="preserve"><value>{0} káv · {1} hlasovaní · all-time</value></data>
+  <data name="Summary_BestRated" xml:space="preserve"><value>Najlepšie hodnotená</value></data>
+  <data name="Summary_WorstRated" xml:space="preserve"><value>Najhoršie hodnotená</value></data>
+  <data name="Summary_MostExpensive" xml:space="preserve"><value>Najdrahšia / kg</value></data>
+  <data name="Summary_YourBest" xml:space="preserve"><value>Vaše naj</value></data>
+  <data name="Filter_Search" xml:space="preserve"><value>Hľadať (názov, pražiareň, dodávateľ, pôvod)…</value></data>
+  <data name="Filter_SearchToday" xml:space="preserve"><value>Hľadať (názov, dodávateľ, pôvod)…</value></data>
+  <data name="Filter_Supplier" xml:space="preserve"><value>Dodávateľ:</value></data>
+  <data name="Filter_All" xml:space="preserve"><value>Všetci</value></data>
+  <data name="Filter_Sort" xml:space="preserve"><value>Triediť:</value></data>
+  <data name="Sort_Average" xml:space="preserve"><value>Ø hodnotenie</value></data>
+  <data name="Sort_MyRating" xml:space="preserve"><value>Moje hodnotenie</value></data>
+  <data name="Sort_VoteCount" xml:space="preserve"><value>Počet hlasov</value></data>
+  <data name="Sort_PricePerKg" xml:space="preserve"><value>Kč/kg</value></data>
+  <data name="Sort_Controversy" xml:space="preserve"><value>Kontroverzia</value></data>
+  <data name="Sort_Date" xml:space="preserve"><value>Dátum</value></data>
+  <data name="Col_Coffee" xml:space="preserve"><value>Káva · Pražiareň</value></data>
+  <data name="Col_Avg" xml:space="preserve"><value>Ø</value></data>
+  <data name="Col_Votes" xml:space="preserve"><value>Hlasov</value></data>
+  <data name="Col_Trend" xml:space="preserve"><value>Trend</value></data>
+  <data name="Col_YouVsAvg" xml:space="preserve"><value>Tvoje vs Ø</value></data>
+  <data name="Section_TrendInTime" xml:space="preserve"><value>Trend hodnotení v čase</value></data>
+  <data name="Section_Distribution" xml:space="preserve"><value>Distribúcia hodnotení</value></data>
+  <data name="Section_FlavorTones" xml:space="preserve"><value>Chuťové tóny</value></data>
+  <data name="Section_FlavorProfile" xml:space="preserve"><value>Chuťový profil</value></data>
+  <data name="Section_Comments" xml:space="preserve"><value>Komentáre</value></data>
+  <data name="Section_AllVotes" xml:space="preserve"><value>Všetky hlasy</value></data>
+  <data name="Section_RatingsAndTrends" xml:space="preserve"><value>Hodnotenia &amp; trendy</value></data>
+  <data name="Section_YourRating" xml:space="preserve"><value>Tvoje hodnotenie</value></data>
+  <data name="Section_Origin" xml:space="preserve"><value>Pôvod</value></data>
+  <data name="Hint_Last5" xml:space="preserve"><value>posledné hodnotenia po session</value></data>
+  <data name="Hint_YourVoteHighlighted" xml:space="preserve"><value>tvoj hlas zvýraznený</value></data>
+  <data name="Hint_FromAllVotes" xml:space="preserve"><value>podľa hlasov všetkých</value></data>
+  <data name="Hint_NoComments" xml:space="preserve"><value>Zatiaľ žiadne komentáre.</value></data>
+  <data name="Btn_OpenBlendDetail" xml:space="preserve"><value>Otvoriť detail kávy →</value></data>
+  <data name="Btn_OpenDetail" xml:space="preserve"><value>Otvoriť detail</value></data>
+  <data name="Stats_NavMyRatingsSub" xml:space="preserve"><value>{0} hodnotení</value></data>
+  <data name="Stats_NavSuppliersSub" xml:space="preserve"><value>{0} dodávateľov</value></data>
+  <data name="Btn_AddCompare" xml:space="preserve"><value>+ Porovnať</value></data>
+  <data name="Btn_EditMyRating" xml:space="preserve"><value>Upraviť moje hodnotenie</value></data>
+  <data name="Heading_BlendDetail" xml:space="preserve"><value>Detail kávy</value></data>
+  <data name="Detail_TocContents" xml:space="preserve"><value>Obsah</value></data>
+  <data name="Detail_GroupRating" xml:space="preserve"><value>Skupinové hodnotenie</value></data>
+  <data name="Detail_YourRating" xml:space="preserve"><value>Tvoje hodnotenie</value></data>
+  <data name="Detail_Price" xml:space="preserve"><value>Cena</value></data>
+  <data name="Detail_BroughtBy" xml:space="preserve"><value>Doniesol</value></data>
+  <data name="Detail_TastingDate" xml:space="preserve"><value>Dátum degust.</value></data>
+  <data name="Detail_CleanupAssigned" xml:space="preserve"><value>Upratovanie pridelené</value></data>
+  <data name="Detail_VotedTimes" xml:space="preserve"><value>{0}× hlasované</value></data>
+  <data name="Detail_TasterName" xml:space="preserve"><value>Degustátor</value></data>
+  <data name="Detail_RatingShort" xml:space="preserve"><value>Hodn.</value></data>
+  <data name="Detail_TonesShort" xml:space="preserve"><value>Tóny</value></data>
+  <data name="Detail_CommentColumn" xml:space="preserve"><value>Komentár</value></data>
+  <data name="Detail_When" xml:space="preserve"><value>Kedy</value></data>
+  <data name="Detail_NoComment" xml:space="preserve"><value>— bez komentára —</value></data>
+  <data name="Detail_ShowAll" xml:space="preserve"><value>Zobraziť všetkých {0}</value></data>
+  <data name="Detail_Collapse" xml:space="preserve"><value>Zbaliť</value></data>
+  <data name="Detail_TagCloud" xml:space="preserve"><value>Tag cloud</value></data>
+  <data name="Detail_NoTones" xml:space="preserve"><value>Zatiaľ žiadne chuťové tóny.</value></data>
+  <data name="Detail_TonesCount" xml:space="preserve"><value>{0} tónov</value></data>
+  <data name="Comp_Tip" xml:space="preserve"><value>Najlepšia metrika je zelená s ✓ NAJ. Lacnejšia Kč/kg = lepšia.</value></data>
+  <data name="Comp_TipLabel" xml:space="preserve"><value>Tip</value></data>
+  <data name="Comp_AddCoffee" xml:space="preserve"><value>Pridať kávu</value></data>
+  <data name="Comp_PickFromAll" xml:space="preserve"><value>vyberie zo všetkých káv</value></data>
+  <data name="Comp_Reset" xml:space="preserve"><value>Resetovať</value></data>
+  <data name="Comp_MaxN" xml:space="preserve"><value>{0} {1} · max 4</value></data>
+  <data name="Comp_Swap" xml:space="preserve"><value>⇆ Vymeniť</value></data>
+  <data name="Comp_GroupAvg" xml:space="preserve"><value>Skupinové Ø</value></data>
+  <data name="Comp_NotRated" xml:space="preserve"><value>nehodnotené</value></data>
+  <data name="Comp_VoteCount" xml:space="preserve"><value>Počet hlasov</value></data>
+  <data name="Comp_PricePerKg" xml:space="preserve"><value>Cena za kg</value></data>
+  <data name="Comp_TastingDate" xml:space="preserve"><value>Dátum degustácie</value></data>
+  <data name="Comp_Trend" xml:space="preserve"><value>Trend (5 degust.)</value></data>
+  <data name="Comp_DistributionVotes" xml:space="preserve"><value>Distribúcia hlasov</value></data>
+  <data name="Comp_Best" xml:space="preserve"><value>✓ NAJ</value></data>
+  <data name="Comp_PickCoffee" xml:space="preserve"><value>Vybrať kávu</value></data>
+  <data name="Comp_OverlayTrendTitle" xml:space="preserve"><value>Trend hodnotení — prekryté</value></data>
+  <data name="Comp_OverlayTrendHint" xml:space="preserve"><value>všetky vybrané kávy v jednom grafe</value></data>
+  <data name="Comp_NoResults" xml:space="preserve"><value>Žiadne výsledky.</value></data>
+  <data name="Comp_AddFirst" xml:space="preserve"><value>+ Pridať prvú kávu</value></data>
+  <data name="Comp_PickAtLeastOne" xml:space="preserve"><value>Vyber aspoň jednu kávu na porovnanie</value></data>
+  <data name="Comp_BroughtBy" xml:space="preserve"><value>doniesol: {0}</value></data>
+  <data name="Comp_OutOf" xml:space="preserve"><value>{0} z {1} degustátorov</value></data>
+  <data name="Word_Coffee_1" xml:space="preserve"><value>káva</value></data>
+  <data name="Word_Coffee_234" xml:space="preserve"><value>kávy</value></data>
+  <data name="Word_Coffee_5" xml:space="preserve"><value>káv</value></data>
+  <data name="Admin_PillTitle" xml:space="preserve"><value>Admin</value></data>
+  <data name="Admin_BackToApp" xml:space="preserve"><value>↩ späť do aplikácie</value></data>
+  <data name="Admin_Heading" xml:space="preserve"><value>Administrácia</value></data>
+  <data name="Admin_TodaySession" xml:space="preserve"><value>Dnešná session</value></data>
+  <data name="Admin_Library" xml:space="preserve"><value>Knižnica káv</value></data>
+  <data name="Admin_Users" xml:space="preserve"><value>Používatelia</value></data>
+  <data name="Admin_Library_Tea" xml:space="preserve"><value>Knižnica čajov</value></data>
+  <data name="Admin_BlendsCount" xml:space="preserve"><value>{0} káv</value></data>
+  <data name="Admin_BlendsCount_Tea" xml:space="preserve"><value>{0} čajov</value></data>
+  <data name="Admin_UsersCount" xml:space="preserve"><value>{0} členov</value></data>
+  <data name="Admin_DateRunning" xml:space="preserve"><value>{0} · beží</value></data>
+  <data name="Admin_Running" xml:space="preserve"><value>BEŽÍ</value></data>
+  <data name="Admin_SecretLabel" xml:space="preserve"><value>Tajná?</value></data>
+  <data name="Admin_Secret" xml:space="preserve"><value>Tajná</value></data>
+  <data name="Admin_Revealed" xml:space="preserve"><value>Odhalená</value></data>
+  <data name="Admin_AdminNote" xml:space="preserve"><value>Poznámka admina</value></data>
+  <data name="Admin_AdminNotePh" xml:space="preserve"><value>Poznámka admina pre túto kávu…</value></data>
+  <data name="Admin_AddFromLibrary" xml:space="preserve"><value>Pridať z knižnice</value></data>
+  <data name="Admin_AvailableCount" xml:space="preserve"><value>{0} dostupných</value></data>
+  <data name="Admin_AutoCleanupTitle" xml:space="preserve"><value>Auto-priradenie upratovania</value></data>
+  <data name="Admin_AutoCleanupDesc" xml:space="preserve"><value>Náhodne pridelíme upratovanie každej káve. Nikdy rovnakú osobu dvakrát po sebe. Môžeš ručne prepísať vyššie.</value></data>
+  <data name="Admin_RerollAll" xml:space="preserve"><value>🎲 Prerollovať</value></data>
+  <data name="Admin_RerollOne" xml:space="preserve"><value>Prerollovať upratovanie pre túto kávu</value></data>
+  <data name="Admin_AddBlendBtn" xml:space="preserve"><value>+ Nová káva</value></data>
+  <data name="Admin_AddBlendBtn_Tea" xml:space="preserve"><value>+ Nový čaj</value></data>
+  <data name="Admin_InviteBtn" xml:space="preserve"><value>+ Pozvať</value></data>
+  <data name="Admin_NoCoffeesYet" xml:space="preserve"><value>Zatiaľ žiadne kávy. Pridaj z knižnice vpravo.</value></data>
+  <data name="Admin_NoCoffeesYet_Tea" xml:space="preserve"><value>Zatiaľ žiadne čaje. Pridaj z knižnice vpravo.</value></data>
+  <data name="Admin_LibCount" xml:space="preserve"><value>{0} káv celkom · prechádza ručne schválenou knižnicou</value></data>
+  <data name="Admin_LibCount_Tea" xml:space="preserve"><value>{0} čajov celkom · prechádza ručne schválenou knižnicou</value></data>
+  <data name="Admin_UserStats" xml:space="preserve"><value>{0} členov · {1} adminov</value></data>
+  <data name="Admin_Used" xml:space="preserve"><value>Použité</value></data>
+  <data name="Admin_BroughtBy" xml:space="preserve"><value>Doniesol</value></data>
+  <data name="Admin_LastSeen" xml:space="preserve"><value>Naposledy</value></data>
+  <data name="Admin_RatedCount" xml:space="preserve"><value>Hodnotené</value></data>
+  <data name="Login_DbCount" xml:space="preserve"><value>{0} session · {1} káv ohodnotených</value></data>
+  <data name="Login_StatsBlends" xml:space="preserve"><value>káv ohodnotených</value></data>
+  <data name="Login_StatsBlends_Tea" xml:space="preserve"><value>čajov ohodnotených</value></data>
+  <data name="Login_StatsSessions" xml:space="preserve"><value>session celkom</value></data>
+  <data name="Login_StatsTasters" xml:space="preserve"><value>aktívnych degustátorov</value></data>
+  <data name="Login_StatsTopAvg" xml:space="preserve"><value>top priemer</value></data>
+  <data name="Login_DatabasesHeading" xml:space="preserve"><value>Databázy</value></data>
+  <data name="Login_DbActive" xml:space="preserve"><value>AKTÍVNA</value></data>
+  <data name="Login_DbOpenLink" xml:space="preserve"><value>otvoriť →</value></data>
+  <data name="Login_DbOpenOther" xml:space="preserve"><value>+ Otvoriť inú…</value></data>
+  <data name="Login_DbCreateNew" xml:space="preserve"><value>+ Vytvoriť novú…</value></data>
+  <data name="Login_LocalApp" xml:space="preserve"><value>Lokálna app, žiadny cloud</value></data>
+  <data name="Login_PickProfile" xml:space="preserve"><value>Vyber svoj profil</value></data>
+  <data name="Login_Quote" xml:space="preserve"><value>„Káva je ako ľudia — najlepšia v dobrej spoločnosti."</value></data>
+  <data name="Login_Quote_Tea" xml:space="preserve"><value>„Čaj je tichá pauza v hlasnom svete."</value></data>
+  <data name="Login_QuoteAuthor" xml:space="preserve"><value>— niekto z marketingu, asi</value></data>
+  <data name="Login_FlavorOfDay" xml:space="preserve"><value>Flavor note dňa</value></data>
+  <data name="Login_FlavorOfDayQuote" xml:space="preserve"><value>„Čučoriedka, horká čokoláda, finiš ako lieskový oriešok."</value></data>
+  <data name="Login_FlavorOfDayQuote_Tea" xml:space="preserve"><value>„Citrónová kôra, jazmín, finiš ako čerstvá tráva."</value></data>
+  <data name="Login_AppVersion" xml:space="preserve"><value>Kávopíči · interná degustácia</value></data>
+  <data name="Login_AppVersion_Tea" xml:space="preserve"><value>Čajopyjové · interná degustácia</value></data>
 </root>

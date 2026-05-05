@@ -1,0 +1,36 @@
+@{
+    var max = Counts.Length > 0 ? Math.Max(Counts.Max(), 1) : 1;
+    var total = Counts.Sum();
+    var maxHeight = Detailed ? 120 : 78;
+}
+<div class="histogram" style="height:@(Detailed ? "140px" : "90px");">
+    @for (int i = 0; i < Counts.Length; i++)
+    {
+        var v = Counts[i];
+        var h = (v / (double)max) * maxHeight;
+        var mine = My.HasValue && My.Value == i + 1;
+        var pct = total > 0 ? (int)Math.Round(v / (double)total * 100) : 0;
+        <div class="bar-col">
+            <div class="count-num @(mine ? "mine" : "")">
+                @if (v > 0)
+                {
+                    @(Detailed ? $"{v} ({pct}%)" : v.ToString())
+                }
+            </div>
+            <div class="bar @(mine ? "mine" : "") @(v == 0 ? "empty" : "")" style="height:@h.ToString("F0", System.Globalization.CultureInfo.InvariantCulture)px;">
+                @if (mine && Detailed)
+                {
+                    <div class="ty-flag">@TyLabel</div>
+                }
+            </div>
+            <div class="star-num @(mine ? "mine" : "")">@(i + 1)</div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public int[] Counts { get; set; } = Array.Empty<int>();
+    [Parameter] public int? My { get; set; }
+    [Parameter] public bool Detailed { get; set; }
+    [Parameter] public string TyLabel { get; set; } = "ty";
+}

@@ -15,9 +15,7 @@
                 <span class="update-banner-version">@string.Format(L["Msg_UpdateAvailable"], UpdateState.AvailableUpdate!.Version)</span>
                 @if (!string.IsNullOrWhiteSpace(UpdateState.AvailableUpdate!.ReleaseNotes))
                 {
-                    <div class="update-banner-notes">
-                        @UpdateState.AvailableUpdate.ReleaseNotes
-                    </div>
+                    <div class="update-banner-notes">@UpdateState.AvailableUpdate.ReleaseNotes</div>
                 }
             </div>
             @if (isDownloading)
@@ -26,7 +24,8 @@
             }
             else
             {
-                <button class="btn btn-sm" style="background:var(--amber-gold);color:var(--coffee-dark);margin-left:12px;" @onclick="InstallUpdate">
+                <button class="btn btn-sm" style="background:var(--amber-gold);color:var(--coffee-dark);border-color:var(--amber-gold);"
+                        @onclick="InstallUpdate">
                     @L["Btn_Update"]
                 </button>
             }
@@ -36,40 +35,52 @@
     @if (AppState.IsLoggedIn)
     {
         <header class="app-header">
-            <div class="header-brand" @onclick="GoToDashboard">
-                <img src="icon-32.png" alt="" class="header-icon" />
-                @L["Brand_AppName"]
-            </div>
+            <button class="header-brand" @onclick="GoToDashboard">
+                <span class="header-logo-circle">
+                    @if (AppState.CurrentTheme == Theme.Tea)
+                    {
+                        <img src="icon-tea.png" alt="" />
+                    }
+                    else
+                    {
+                        <img src="icon-80.png" alt="" />
+                    }
+                </span>
+                <span class="header-title">@L["Brand_AppName"]</span>
+            </button>
             <nav class="header-nav">
-                <button class="nav-btn" @onclick="GoToDashboard">@L["Nav_Dashboard"]</button>
-                <button class="nav-btn" @onclick="GoToStatistics">@L["Nav_Statistics"]</button>
+                <button class="nav-btn @(IsRoute("/dashboard") ? "active" : "")" @onclick="GoToDashboard">@L["Nav_Dashboard"]</button>
+                <button class="nav-btn @(IsRoute("/statistics") || IsRoute("/blend") ? "active" : "")" @onclick="GoToStatistics">@L["Nav_Statistics"]</button>
+                <button class="nav-btn @(IsRoute("/comparison") ? "active" : "")" @onclick="GoToComparison">@L["Nav_Comparison"]</button>
                 @if (AppState.IsAdmin)
                 {
-                    <button class="nav-btn" @onclick="GoToAdmin">@L["Nav_Admin"]</button>
+                    <button class="nav-btn @(IsRoute("/admin") ? "active" : "")" @onclick="GoToAdmin">@L["Nav_Admin"]</button>
                 }
             </nav>
+            <div class="header-spacer"></div>
             <div class="header-user">
-                <UserInitials Name="@AppState.CurrentUser!.Name" />
+                <UserInitials Name="@AppState.CurrentUser!.Name" Size="28" />
                 <span class="user-name">@AppState.CurrentUser!.Name</span>
-                <select class="lang-select"
-                        value="@currentCulture"
-                        @onchange="OnLanguageChanged">
-                    <option value="cs">cs</option>
-                    <option value="sk">sk</option>
-                    <option value="en">en</option>
-                    <option value="de">de</option>
+                <select class="lang-select" value="@currentCulture" @onchange="OnLanguageChanged">
+                    <option value="cs">CS</option>
+                    <option value="sk">SK</option>
+                    <option value="en">EN</option>
+                    <option value="de">DE</option>
                 </select>
                 <a href="@BugReportUrl" target="_blank" rel="noopener noreferrer"
-                   class="btn btn-sm" title="@L["Tooltip_ReportBug"]"
-                   style="text-decoration:none;font-size:16px;line-height:1;">
+                   class="btn btn-ghost btn-sm" title="@L["Tooltip_ReportBug"]"
+                   style="text-decoration:none;font-size:14px;line-height:1;padding:6px 10px;color:var(--cream);border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.1);">
                     🪲
                 </a>
-                <button class="btn btn-sm" @onclick="Logout">@L["Nav_Logout"]</button>
+                <button class="btn btn-ghost btn-sm" @onclick="Logout"
+                        style="color:var(--cream);border-color:rgba(255,255,255,0.25);background:rgba(255,255,255,0.1);">
+                    @L["Nav_Logout"]
+                </button>
             </div>
         </header>
     }
 
-    <main class="app-main">
+    <main class="app-main wide">
         @Body
     </main>
 </div>
@@ -80,9 +91,20 @@
 
     protected override void OnInitialized()
     {
-        AppState.OnChange += StateHasChanged;
+        AppState.OnChange += OnAppStateChanged;
         AppState.OnThemeChange += OnThemeChanged;
         UpdateState.OnChange += OnUpdateStateChanged;
+        Nav.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnAppStateChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        InvokeAsync(StateHasChanged);
     }
 
     private void OnUpdateStateChanged()
@@ -128,8 +150,16 @@
         }
     }
 
+    private bool IsRoute(string prefix)
+    {
+        var path = new Uri(Nav.Uri).AbsolutePath;
+        return path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+    }
+
+
     private void GoToDashboard() => Nav.NavigateTo("/dashboard");
     private void GoToStatistics() => Nav.NavigateTo("/statistics");
+    private void GoToComparison() => Nav.NavigateTo("/comparison");
     private void GoToAdmin() => Nav.NavigateTo("/admin");
 
     private async Task Logout()
@@ -157,8 +187,9 @@
 
     public void Dispose()
     {
-        AppState.OnChange -= StateHasChanged;
+        AppState.OnChange -= OnAppStateChanged;
         AppState.OnThemeChange -= OnThemeChanged;
         UpdateState.OnChange -= OnUpdateStateChanged;
+        Nav.LocationChanged -= OnLocationChanged;
     }
 }

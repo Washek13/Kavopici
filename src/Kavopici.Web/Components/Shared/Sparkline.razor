@@ -1,0 +1,46 @@
+@if (Data.Length >= 2)
+{
+    <svg width="@W" height="@H" style="display:block;">
+        <polyline points="@Points" fill="none" stroke="@Color" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+        <circle cx="@LastX" cy="@LastY" r="2.4" fill="@(Highlight ?? Color)" />
+    </svg>
+}
+else
+{
+    <span style="color:var(--silver);font-size:11px;font-style:italic;">—</span>
+}
+
+@code {
+    [Parameter, EditorRequired] public double[] Data { get; set; } = Array.Empty<double>();
+    [Parameter] public int W { get; set; } = 70;
+    [Parameter] public int H { get; set; } = 22;
+    [Parameter] public string Color { get; set; } = "var(--coffee-brown)";
+    [Parameter] public string? Highlight { get; set; }
+
+    private string Points => GetPoints();
+    private double LastX => W;
+    private double LastY => GetPointY(Data.Length - 1);
+
+    private string GetPoints()
+    {
+        if (Data.Length < 2) return "";
+        var sb = new System.Text.StringBuilder();
+        for (var i = 0; i < Data.Length; i++)
+        {
+            var x = (i / (double)(Data.Length - 1)) * W;
+            var y = GetPointY(i);
+            if (i > 0) sb.Append(' ');
+            sb.Append($"{x.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)},{y.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}");
+        }
+        return sb.ToString();
+    }
+
+    private double GetPointY(int i)
+    {
+        var min = Data.Min();
+        var max = Data.Max();
+        var range = max - min;
+        if (range < 0.0001) range = 1;
+        return H - ((Data[i] - min) / range) * (H - 2) - 1;
+    }
+}

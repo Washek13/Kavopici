@@ -1,0 +1,41 @@
+@inherits LayoutComponentBase
+@implements IDisposable
+@inject AppState AppState
+@inject IJSRuntime JS
+
+<div style="min-height:100vh;background:var(--off-white);">
+    @Body
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        AppState.OnThemeChange += OnThemeChanged;
+    }
+
+    private async void OnThemeChanged()
+    {
+        await InvokeAsync(async () =>
+        {
+            await ApplyThemeToBodyAsync();
+            StateHasChanged();
+        });
+    }
+
+    private async Task ApplyThemeToBodyAsync()
+    {
+        await JS.InvokeVoidAsync("setThemeClass",
+            AppState.CurrentTheme == Kavopici.Models.Enums.Theme.Tea ? "Tea" : "Coffee");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await ApplyThemeToBodyAsync();
+    }
+
+    public void Dispose()
+    {
+        AppState.OnThemeChange -= OnThemeChanged;
+    }
+}

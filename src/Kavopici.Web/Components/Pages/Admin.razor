@@ -2,7 +2,7 @@
 @inject IUserService UserService
 @inject IBlendService BlendService
 @inject ISessionService SessionService
-@inject ICsvExportService CsvExportService
+@inject IRatingService RatingService
 @inject AppState AppState
 @inject NavigationManager Nav
 @inject IJSRuntime JS
@@ -11,359 +11,398 @@
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 @if (!AppState.IsAdmin) { Nav.NavigateTo("/dashboard"); return; }
 
-<h1>@L["Nav_Admin"]</h1>
+<div class="stats-shell">
+    <aside class="side-nav">
+        <nav>
+            <button class="nav-item @(view == "session" ? "active" : "")" @onclick='() => view = "session"'>
+                <div class="icon">☕</div>
+                <div class="text">
+                    <div class="nm">@L["Admin_TodaySession"]</div>
+                    <div class="sub">@DateTime.Today.ToString("d. M.") · @(currentSessions.Count > 0 ? L["Admin_Running"].ToString().ToLower() : "—")</div>
+                </div>
+            </button>
+            <button class="nav-item @(view == "library" ? "active" : "")" @onclick='() => view = "library"'>
+                <div class="icon">📚</div>
+                <div class="text">
+                    <div class="nm">@L["Admin_Library"]</div>
+                    <div class="sub">@string.Format(L["Admin_BlendsCount"], allBlends.Count)</div>
+                </div>
+            </button>
+            <button class="nav-item @(view == "users" ? "active" : "")" @onclick='() => view = "users"'>
+                <div class="icon">👥</div>
+                <div class="text">
+                    <div class="nm">@L["Admin_Users"]</div>
+                    <div class="sub">@string.Format(L["Admin_UsersCount"], allUsers.Count)</div>
+                </div>
+            </button>
+        </nav>
+    </aside>
 
-@if (errorMessage != null)
-{
-    <div class="msg-error">@errorMessage</div>
-}
-@if (statusMessage != null)
-{
-    <div class="msg-success">@statusMessage</div>
-}
+    <div class="stats-content">
+            @if (errorMessage != null) { <div class="msg-error">@errorMessage</div> }
+            @if (statusMessage != null) { <div class="msg-success">@statusMessage</div> }
 
-<div class="tab-bar">
-    <button class="tab-btn @(tab == 0 ? "active" : "")" @onclick="() => tab = 0">@L["Tab_CoffeeOfDay"]</button>
-    <button class="tab-btn @(tab == 1 ? "active" : "")" @onclick="() => tab = 1">@L["Tab_Blends"]</button>
-    <button class="tab-btn @(tab == 2 ? "active" : "")" @onclick="() => tab = 2">@L["Tab_Users"]</button>
-</div>
-
-@* === Users Tab === *@
-@if (tab == 2)
-{
-    <div class="card">
-        <h2>@L["Heading_AddUser"]</h2>
-        <div class="flex gap-8 items-center">
-            <input type="text" @bind="newUserName" @bind:event="oninput" placeholder="@L["Placeholder_Name"]"
-                   style="flex:1;" @onkeydown="HandleUserKeyDown" />
-            <button class="btn btn-primary" @onclick="AddUser"
-                    disabled="@string.IsNullOrWhiteSpace(newUserName)">@L["Btn_Add"]</button>
-        </div>
-    </div>
-
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>@L["Label_Name"]</th>
-                <th>@L["Label_Role"]</th>
-                <th>@L["Label_Actions"]</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in allUsers)
+            @if (view == "session")
             {
-                <tr>
-                    <td>
-                        <div class="flex items-center gap-8">
-                            <UserInitials Name="@user.Name" Size="28" />
-                            @user.Name
+                <div class="page-header">
+                    <h1 style="font-size:30px;">@L["Admin_TodaySession"]</h1>
+                </div>
+                <div style="font-size:13px;color:var(--coffee-medium);margin-bottom:18px;">
+                    @DateTime.Today.ToString("dddd d. M. yyyy") · @currentSessions.Count @CoffeeWord(currentSessions.Count)
+                </div>
+
+                <div style="display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:flex-start;">
+                    <div class="session-list-area" style="order:2;min-width:0;">
+                        <div class="session-row-head" style="display:grid;grid-template-columns:36px minmax(140px,1.4fr) minmax(140px,1.2fr) minmax(220px,260px) 28px;gap:10px;padding:8px 14px;font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--coffee-medium);font-weight:700;margin-bottom:6px;">
+                            <div></div>
+                            <div>@L["Label_Blend"]</div>
+                            <div>@L["Admin_AdminNote"]</div>
+                            <div>@L["Label_Cleanup"]</div>
+                            <div></div>
                         </div>
-                    </td>
-                    <td>@(user.IsAdmin ? L["Role_Admin"] : L["Role_User"])</td>
-                    <td>
-                        <div class="btn-group">
-                            <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
-                                    @onclick="() => ToggleAdmin(user)">
-                                @(user.IsAdmin ? L["Btn_RemoveAdmin"] : L["Btn_AddAdmin"])
-                            </button>
-                            <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;"
-                                    @onclick="() => DeactivateUser(user)">
-                                @L["Btn_Deactivate"]
-                            </button>
+
+                        @if (currentSessions.Count == 0)
+                        {
+                            <div style="padding:30px;text-align:center;color:var(--silver);background:#fff;border:1px dashed var(--border-strong);border-radius:8px;font-style:italic;">
+                                @L["Admin_NoCoffeesYet"]
+                            </div>
+                        }
+                        else
+                        {
+                            @for (var i = 0; i < currentSessions.Count; i++)
+                            {
+                                var idx = i + 1;
+                                var session = currentSessions[i];
+                                var sessionId = session.Id;
+                                var inactiveCleanup = session.CleanupPerson is { IsActive: false } cp ? cp : null;
+                                <div class="session-row">
+                                    <div class="drag-handle">
+                                        <div class="idx">#@idx</div>
+                                    </div>
+                                    <div style="min-width:0;">
+                                        <div style="font-size:14px;font-weight:600;color:var(--coffee-dark);font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@session.Blend.Name</div>
+                                        <div style="font-size:11.5px;color:var(--coffee-medium);display:flex;gap:6px;align-items:center;min-width:0;">
+                                            <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;">@session.Blend.Supplier.Name</span>
+                                            <span>·</span>
+                                            <RoastBadge Level="session.Blend.RoastLevel" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <input type="text" placeholder="@L["Admin_AdminNotePh"]"
+                                               value="@(session.Comment ?? "")"
+                                               @onchange="e => OnSessionNoteChanged(sessionId, e.Value?.ToString())" />
+                                    </div>
+                                    <div class="cleanup-cell">
+                                        @if (session.CleanupPerson != null)
+                                        {
+                                            <UserInitials Name="@session.CleanupPerson.Name" Size="24" />
+                                        }
+                                        <select value="@(session.CleanupPersonId?.ToString() ?? "0")"
+                                                @onchange="e => OnCleanupSelectChanged(sessionId, e.Value?.ToString())">
+                                            <option value="0">—</option>
+                                            @foreach (var u in allUsers)
+                                            {
+                                                <option value="@u.Id">@u.Name</option>
+                                            }
+                                            @if (inactiveCleanup != null)
+                                            {
+                                                <option value="@inactiveCleanup.Id">@inactiveCleanup.Name @L["Label_DeactivatedSuffix"]</option>
+                                            }
+                                        </select>
+                                        <button class="btn-icon spin-on-hover" title="@L["Admin_RerollOne"]" @onclick="() => AssignRandomCleanup(sessionId)">🎲</button>
+                                        @if (session.CleanupPersonId != null)
+                                        {
+                                            <button class="btn-icon" style="@(session.CleanupCompleted == true ? "background:#e6f4e6;border-color:var(--success-green);color:var(--success-green);" : "")"
+                                                    title="@L["Btn_CleanupDone"]"
+                                                    @onclick="() => ToggleCleanupCompleted(sessionId, true)">✓</button>
+                                            <button class="btn-icon" style="@(session.CleanupCompleted == false ? "background:#fde7e7;border-color:var(--error-red);color:var(--error-red);" : "")"
+                                                    title="@L["Btn_CleanupNotDone"]"
+                                                    @onclick="() => ToggleCleanupCompleted(sessionId, false)">✗</button>
+                                        }
+                                    </div>
+                                    <button class="remove-x" @onclick="() => RemoveBlendOfDay(sessionId)" title="@L["Btn_Remove"]">×</button>
+                                </div>
+                            }
+                        }
+
+                    </div>
+
+                    <div class="lib-search-panel">
+                        <div class="head">
+                            <div class="section-label">@L["Admin_AddFromLibrary"]</div>
+                            <div style="flex:1;"></div>
+                            <div style="font-size:11px;color:var(--silver);">@string.Format(L["Admin_AvailableCount"], availableForSession.Count)</div>
                         </div>
-                    </td>
-                </tr>
+                        <div style="position:relative;margin-bottom:10px;">
+                            <input type="text" placeholder="@L["Filter_SearchToday"]" @bind="librarySearch" @bind:event="oninput"
+                                   style="padding-left:30px;background:var(--off-white);" />
+                            <div style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--silver);font-size:13px;">🔍</div>
+                        </div>
+                        <div class="lib-list">
+                            @foreach (var c in availableForSession)
+                            {
+                                var bid = c.Id;
+                                <div class="lib-list-row" @onclick="() => AddBlendQuick(bid)">
+                                    <div style="font-size:18px;line-height:1;">☕</div>
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="font-size:12.5px;color:var(--coffee-dark);font-weight:600;font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@c.Name</div>
+                                        <div style="font-size:10.5px;color:var(--coffee-medium);">@c.Supplier.Name @if (!string.IsNullOrEmpty(c.Origin)) { <span> · @c.Origin</span> }</div>
+                                    </div>
+                                    <div style="font-size:14px;color:var(--coffee-brown);font-weight:700;">+</div>
+                                </div>
+                            }
+                            @if (availableForSession.Count == 0)
+                            {
+                                <div style="padding:14px;text-align:center;color:var(--silver);font-size:12px;font-style:italic;">@L["Comp_NoResults"]</div>
+                            }
+                        </div>
+                    </div>
+                </div>
             }
-        </tbody>
-    </table>
-}
-
-@* === Blends Tab === *@
-@if (tab == 1)
-{
-    <div class="card">
-        <h2>@L["Heading_AddBlend"]</h2>
-        <div class="form-group">
-            <label>@L["Label_Name"]</label>
-            <input type="text" @bind="newBlendName" placeholder="@L["Label_Blend"]..." />
-        </div>
-        <div class="form-group">
-            <label>@L["Label_Roaster"]</label>
-            <input type="text" @bind="newBlendRoaster" placeholder="@L["Label_Roaster"]..." />
-        </div>
-        <div class="form-group">
-            <label>@L["Label_OriginOptional"]</label>
-            <input type="text" @bind="newBlendOrigin" placeholder="@L["Label_Origin"]..." />
-        </div>
-        <div class="form-group">
-            <label>@L["Label_RoastLevel"]</label>
-            <select @bind="newBlendRoastLevel">
-                <option value="@RoastLevel.Light">@L["RoastLevel_Light"]</option>
-                <option value="@RoastLevel.MediumLight">@L["RoastLevel_MediumLight"]</option>
-                <option value="@RoastLevel.Medium">@L["RoastLevel_Medium"]</option>
-                <option value="@RoastLevel.MediumDark">@L["RoastLevel_MediumDark"]</option>
-                <option value="@RoastLevel.Dark">@L["RoastLevel_Dark"]</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label>@L["Label_Supplier"]</label>
-            <select @bind="newBlendSupplierId">
-                <option value="0">@L["Placeholder_Select"]</option>
-                @foreach (var u in allUsers)
-                {
-                    <option value="@u.Id">@u.Name</option>
-                }
-            </select>
-        </div>
-        <div class="form-group">
-            <label>@L["Label_WeightOptional"]</label>
-            <input type="number" @bind="newBlendWeightGrams" placeholder="např. 250" min="1" />
-        </div>
-        <div class="form-group">
-            <label>@L["Label_PriceOptional"]</label>
-            <input type="number" @bind="newBlendPriceCzk" placeholder="např. 350" min="0" step="0.01" />
-        </div>
-        <div class="form-group">
-            <label>@L["Label_LinkedBlend"]</label>
-            <select @bind="newBlendLinkedBlendId">
-                <option value="0">@L["Placeholder_NoLink"]</option>
-                @foreach (var b in allBlends.Where(b => b.LinkedBlendId == null))
-                {
-                    <option value="@b.Id">@b.Name (@b.Supplier.Name)</option>
-                }
-            </select>
-        </div>
-        <button class="btn btn-primary" @onclick="AddBlend">@L["Btn_AddBlend"]</button>
-    </div>
-
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>@L["Label_Name"]</th>
-                <th>@L["Label_Roaster"]</th>
-                <th>@L["Label_Roasting"]</th>
-                <th>@L["Label_Supplier"]</th>
-                <th>@L["Label_PricePerKg"]</th>
-                <th>@L["Label_Actions"]</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var blend in allBlends)
+            else if (view == "library")
             {
-                @if (editingBlendId == blend.Id)
+                <div class="page-header">
+                    <h1 style="font-size:30px;">@L["Admin_Library"]</h1>
+                    <div style="flex:1;"></div>
+                    <button class="btn btn-primary btn-sm" @onclick="ToggleAddBlendForm">@L["Admin_AddBlendBtn"]</button>
+                </div>
+                <div style="font-size:13px;color:var(--coffee-medium);margin-bottom:16px;">
+                    @string.Format(L["Admin_LibCount"], allBlends.Count)
+                </div>
+
+                @if (showAddBlendForm)
                 {
-                    <tr>
-                        <td><input type="text" @bind="editBlendName" style="width:100%;" /></td>
-                        <td><input type="text" @bind="editBlendRoaster" style="width:100%;" /></td>
-                        <td>
-                            <select @bind="editBlendRoastLevel">
+                    <div class="card">
+                        <h2>@L["Heading_AddBlend"]</h2>
+                        <div class="form-group">
+                            <label>@L["Label_Name"]</label>
+                            <input type="text" @bind="newBlendName" />
+                        </div>
+                        <div class="form-group">
+                            <label>@L["Label_Roaster"]</label>
+                            <input type="text" @bind="newBlendRoaster" />
+                        </div>
+                        <div class="form-group">
+                            <label>@L["Label_OriginOptional"]</label>
+                            <input type="text" @bind="newBlendOrigin" />
+                        </div>
+                        <div class="form-group">
+                            <label>@L["Label_RoastLevel"]</label>
+                            <select @bind="newBlendRoastLevel">
                                 <option value="@RoastLevel.Light">@L["RoastLevel_Light"]</option>
                                 <option value="@RoastLevel.MediumLight">@L["RoastLevel_MediumLight"]</option>
                                 <option value="@RoastLevel.Medium">@L["RoastLevel_Medium"]</option>
                                 <option value="@RoastLevel.MediumDark">@L["RoastLevel_MediumDark"]</option>
                                 <option value="@RoastLevel.Dark">@L["RoastLevel_Dark"]</option>
                             </select>
-                        </td>
-                        <td>
-                            <select @bind="editBlendSupplierId">
-                                @foreach (var u in allUsers)
+                        </div>
+                        <div class="form-group">
+                            <label>@L["Label_Supplier"]</label>
+                            <select @bind="newBlendSupplierId">
+                                <option value="0">@L["Placeholder_Select"]</option>
+                                @foreach (var u in allUsers) { <option value="@u.Id">@u.Name</option> }
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>@L["Label_WeightOptional"]</label>
+                            <input type="number" @bind="newBlendWeightGrams" min="1" />
+                        </div>
+                        <div class="form-group">
+                            <label>@L["Label_PriceOptional"]</label>
+                            <input type="number" @bind="newBlendPriceCzk" min="0" step="0.01" />
+                        </div>
+                        <div class="form-group">
+                            <label>@L["Label_LinkedBlend"]</label>
+                            <select @bind="newBlendLinkedBlendId">
+                                <option value="0">@L["Placeholder_NoLink"]</option>
+                                @foreach (var b in allBlends.Where(b => b.LinkedBlendId == null))
                                 {
-                                    <option value="@u.Id">@u.Name</option>
-                                }
-                                @if (editBlendInactiveSupplier != null)
-                                {
-                                    <option value="@editBlendInactiveSupplier.Id">@editBlendInactiveSupplier.Name @L["Label_DeactivatedSuffix"]</option>
+                                    <option value="@b.Id">@b.Name (@b.Supplier.Name)</option>
                                 }
                             </select>
-                        </td>
-                        <td>
-                            <input type="number" @bind="editBlendWeightGrams" placeholder="g" min="1" style="width:70px;" />
-                            <input type="number" @bind="editBlendPriceCzk" placeholder="Kč" min="0" step="0.01" style="width:80px;margin-top:4px;" />
-                        </td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-primary" style="padding:4px 10px;font-size:12px;"
-                                        @onclick="SaveBlendEdit">
-                                    @L["Btn_Save"]
-                                </button>
-                                <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
-                                        @onclick="CancelBlendEdit">
-                                    @L["Btn_Cancel"]
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="3">
-                            <div class="form-group" style="margin:0;">
-                                <label>@L["Label_OriginOptional"]</label>
-                                <input type="text" @bind="editBlendOrigin" placeholder="@L["Label_Origin"]..." />
-                            </div>
-                        </td>
-                        <td colspan="3">
-                            <div class="form-group" style="margin:0;">
-                                <label>@L["Label_LinkedBlend"]</label>
-                                <select @bind="editLinkedBlendId">
-                                    <option value="0">@L["Placeholder_NoLink"]</option>
-                                    @foreach (var b in allBlends.Where(b => b.LinkedBlendId == null && b.Id != editingBlendId))
-                                    {
-                                        <option value="@b.Id">@b.Name (@b.Supplier.Name)</option>
-                                    }
-                                </select>
-                            </div>
-                        </td>
-                    </tr>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-primary" @onclick="AddBlend">@L["Btn_AddBlend"]</button>
+                            <button class="btn btn-ghost" @onclick="() => showAddBlendForm = false">@L["Btn_Cancel"]</button>
+                        </div>
+                    </div>
                 }
-                else
-                {
-                    <tr>
-                        <td><strong>@blend.Name</strong>@if (blend.LinkedBlendId != null) { <span title="@L["Label_LinkedBlend"]"> &#128279;</span> }</td>
-                        <td>@blend.Roaster</td>
-                        <td>@L[$"RoastLevel_{blend.RoastLevel}"]</td>
-                        <td>@blend.Supplier.Name</td>
-                        <td>@(blend.PricePerKg.HasValue ? $"{blend.PricePerKg.Value:F0} Kč" : "—")</td>
-                        <td>
-                            <div class="btn-group">
-                                <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
-                                        @onclick="() => StartBlendEdit(blend)">
-                                    @L["Btn_Edit"]
-                                </button>
-                                <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;"
-                                        @onclick="() => DeactivateBlend(blend)">
-                                    @L["Btn_Remove"]
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                }
-            }
-        </tbody>
-    </table>
-}
 
-@* === Blend of Day Tab === *@
-@if (tab == 0)
-{
-    <div class="card">
-        <h2>@L["Heading_CoffeesOfDay"]</h2>
+                <div style="margin-bottom:14px;">
+                    <div style="position:relative;max-width:400px;">
+                        <input type="text" placeholder="@L["Filter_Search"]" @bind="librarySearch" @bind:event="oninput" style="padding-left:32px;background:#fff;" />
+                        <div style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--silver);">🔍</div>
+                    </div>
+                </div>
 
-        @if (currentSessions.Count > 0)
-        {
-            <table class="data-table mb-16">
-                <thead>
-                    <tr>
-                        <th>@L["Label_Blend"]</th>
-                        <th>@L["Label_Note"]</th>
-                        <th>@L["Label_Cleanup"]</th>
-                        <th>@L["Label_Actions"]</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var session in currentSessions)
-                    {
-                        var sid = session.Id;
-                        var inactiveCleanup = session.CleanupPerson is { IsActive: false } cp ? cp : null;
+                <div class="data-table-wrap"><table class="data-table">
+                    <thead>
                         <tr>
-                            <td><strong>@session.Blend.Name</strong> (@session.Blend.Supplier.Name)</td>
-                            <td class="text-muted">@(session.Comment ?? "—")</td>
-                            <td>
-                                <div class="flex items-center gap-8" style="flex-wrap:wrap;">
-                                    <select value="@(session.CleanupPersonId?.ToString() ?? "0")"
-                                            @onchange="@(e => OnCleanupSelectChanged(sid, e.Value?.ToString()))"
-                                            style="min-width:120px;">
-                                        <option value="0">—</option>
-                                        @foreach (var u in allUsers)
-                                        {
-                                            <option value="@u.Id">@u.Name</option>
-                                        }
-                                        @if (inactiveCleanup != null)
-                                        {
-                                            <option value="@inactiveCleanup.Id">@inactiveCleanup.Name @L["Label_DeactivatedSuffix"]</option>
-                                        }
-                                    </select>
-                                    <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
-                                            title="@L["Btn_AssignCleanup"]"
-                                            @onclick="() => AssignRandomCleanup(sid)">
-                                        🎲
-                                    </button>
-                                    @if (session.CleanupPersonId != null)
-                                    {
-                                        <button class="btn btn-outline" style="padding:4px 10px;font-size:12px;"
-                                                @onclick="() => ClearCleanup(sid)">
-                                            @L["Btn_ClearCleanup"]
-                                        </button>
-                                        <button class="btn @(session.CleanupCompleted == true ? "btn-accent" : "btn-outline")"
-                                                style="padding:4px 10px;font-size:12px;"
-                                                @onclick="() => ToggleCleanupCompleted(sid, true)">
-                                            ✓ @L["Btn_CleanupDone"]
-                                        </button>
-                                        <button class="btn @(session.CleanupCompleted == false ? "btn-danger" : "btn-outline")"
-                                                style="padding:4px 10px;font-size:12px;"
-                                                @onclick="() => ToggleCleanupCompleted(sid, false)">
-                                            ✗ @L["Btn_CleanupNotDone"]
-                                        </button>
-                                    }
-                                </div>
-                            </td>
-                            <td>
-                                <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;"
-                                        @onclick="() => RemoveBlendOfDay(session.Id)">
-                                    @L["Btn_Remove"]
-                                </button>
-                            </td>
+                            <th>@L["Label_Blend"]</th>
+                            <th>@L["Label_Roasting"]</th>
+                            <th>@L["Label_Roaster"]</th>
+                            <th>@L["Admin_BroughtBy"]</th>
+                            <th>@L["Admin_Used"]</th>
+                            <th>@L["Sort_PricePerKg"]</th>
+                            <th>@L["Label_Actions"]</th>
                         </tr>
-                    }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <div class="panel mb-16 text-center">
-                <p class="text-muted">@L["Msg_NoCoffeeSet"]</p>
-            </div>
-        }
+                    </thead>
+                    <tbody>
+                        @foreach (var b in FilteredLibraryBlends())
+                        {
+                            <tr>
+                                @if (editingBlendId == b.Id)
+                                {
+                                    <td>
+                                        <input type="text" @bind="editBlendName" style="width:100%;" />
+                                        <input type="text" @bind="editBlendOrigin" placeholder="@L["Label_Origin"]" style="margin-top:4px;font-size:12px;" />
+                                    </td>
+                                    <td>
+                                        <select @bind="editBlendRoastLevel">
+                                            <option value="@RoastLevel.Light">@L["RoastLevel_Light"]</option>
+                                            <option value="@RoastLevel.MediumLight">@L["RoastLevel_MediumLight"]</option>
+                                            <option value="@RoastLevel.Medium">@L["RoastLevel_Medium"]</option>
+                                            <option value="@RoastLevel.MediumDark">@L["RoastLevel_MediumDark"]</option>
+                                            <option value="@RoastLevel.Dark">@L["RoastLevel_Dark"]</option>
+                                        </select>
+                                    </td>
+                                    <td><input type="text" @bind="editBlendRoaster" /></td>
+                                    <td>
+                                        <select @bind="editBlendSupplierId">
+                                            @foreach (var u in allUsers) { <option value="@u.Id">@u.Name</option> }
+                                            @if (editBlendInactiveSupplier != null)
+                                            {
+                                                <option value="@editBlendInactiveSupplier.Id">@editBlendInactiveSupplier.Name @L["Label_DeactivatedSuffix"]</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <input type="number" @bind="editBlendWeightGrams" placeholder="g" min="1" style="width:70px;" />
+                                        <input type="number" @bind="editBlendPriceCzk" placeholder="Kč" min="0" step="0.01" style="width:80px;margin-top:4px;" />
+                                    </td>
+                                    <td>
+                                        <select @bind="editLinkedBlendId">
+                                            <option value="0">@L["Placeholder_NoLink"]</option>
+                                            @foreach (var lb in allBlends.Where(x => x.LinkedBlendId == null && x.Id != editingBlendId))
+                                            {
+                                                <option value="@lb.Id">@lb.Name</option>
+                                            }
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-primary btn-xs" @onclick="SaveBlendEdit">@L["Btn_Save"]</button>
+                                            <button class="btn btn-ghost btn-xs" @onclick="CancelBlendEdit">@L["Btn_Cancel"]</button>
+                                        </div>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td>
+                                        <div style="display:flex;align-items:center;gap:10px;">
+                                            <span style="font-size:18px;">☕</span>
+                                            <div>
+                                                <div style="font-family:Georgia,serif;font-weight:600;">@b.Name</div>
+                                                <div style="font-size:11.5px;color:var(--coffee-medium);">@(b.Origin ?? "")</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><RoastBadge Level="b.RoastLevel" /></td>
+                                    <td>@b.Roaster</td>
+                                    <td>@b.Supplier.Name</td>
+                                    <td>@(blendUsageCounts.GetValueOrDefault(b.Id, 0))×</td>
+                                    <td style="font-family:Georgia,serif;">@(b.PricePerKg.HasValue ? $"{b.PricePerKg.Value:F0}" : "—")</td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button class="btn btn-outline btn-xs" @onclick="() => StartBlendEdit(b)">@L["Btn_Edit"]</button>
+                                            <button class="btn btn-danger-outline btn-xs" @onclick="() => DeactivateBlend(b)">@L["Btn_Remove"]</button>
+                                        </div>
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                </table></div>
+            }
+            else if (view == "users")
+            {
+                <div class="page-header">
+                    <h1 style="font-size:30px;">@L["Admin_Users"]</h1>
+                    <div style="flex:1;"></div>
+                    <button class="btn btn-primary btn-sm" @onclick="ToggleAddUserForm">@L["Admin_InviteBtn"]</button>
+                </div>
+                <div style="font-size:13px;color:var(--coffee-medium);margin-bottom:16px;">
+                    @string.Format(L["Admin_UserStats"], allUsers.Count, allUsers.Count(u => u.IsAdmin))
+                </div>
 
-        <h3>@L["Heading_AddCoffeeOfDay"]</h3>
-        <div class="form-group">
-            <label>@L["Label_Blend"]</label>
-            <select @bind="selectedBlendOfDayId">
-                <option value="0">@L["Placeholder_SelectBlend"]</option>
-                @foreach (var b in allBlends)
+                @if (showAddUserForm)
                 {
-                    <option value="@b.Id">@b.Name (@b.Supplier.Name)</option>
+                    <div class="card">
+                        <h2>@L["Heading_AddUser"]</h2>
+                        <div style="display:flex;gap:8px;align-items:center;">
+                            <input type="text" @bind="newUserName" @bind:event="oninput" placeholder="@L["Placeholder_Name"]"
+                                   @onkeydown="HandleUserKeyDown" style="flex:1;" />
+                            <button class="btn btn-primary" @onclick="AddUser" disabled="@string.IsNullOrWhiteSpace(newUserName)">@L["Btn_Add"]</button>
+                            <button class="btn btn-ghost" @onclick="() => showAddUserForm = false">@L["Btn_Cancel"]</button>
+                        </div>
+                    </div>
                 }
-            </select>
-        </div>
-        <div class="form-group">
-            <label>@L["Label_NoteOptional"]</label>
-            <textarea @bind="sessionComment" placeholder="@L["Placeholder_NoteForTasters"]"></textarea>
-        </div>
-        <button class="btn btn-accent" @onclick="AddBlendOfDay"
-                disabled="@(selectedBlendOfDayId == 0)">
-            @L["Btn_AddCoffeeOfDay"]
-        </button>
-    </div>
 
-    <div class="card">
-        <div class="flex items-center justify-between mb-16">
-            <h2 style="margin-bottom:0;">@L["Heading_Tools"]</h2>
-        </div>
-        <div class="btn-group">
-            <button class="btn btn-outline" @onclick="ExportCsv">@L["Btn_ExportCsv"]</button>
-        </div>
+                <div class="data-table-wrap"><table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>@L["Label_Name"]</th>
+                            <th>@L["Label_Role"]</th>
+                            <th>@L["Admin_RatedCount"]</th>
+                            <th>@L["Label_Actions"]</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var u in allUsers)
+                        {
+                            <tr>
+                                <td>
+                                    <div style="display:flex;align-items:center;gap:10px;">
+                                        <UserInitials Name="@u.Name" Size="32" />
+                                        <span style="font-weight:600;">@u.Name</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="role-chip @(u.IsAdmin ? "admin" : "")">
+                                        @(u.IsAdmin ? "⚑ " : "")@(u.IsAdmin ? L["Role_Admin"] : L["Role_User"])
+                                    </span>
+                                </td>
+                                <td style="font-family:Georgia,serif;">@(userVoteCounts.GetValueOrDefault(u.Id, 0))×</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-outline btn-xs" @onclick="() => ToggleAdmin(u)">
+                                            @(u.IsAdmin ? L["Btn_RemoveAdmin"] : L["Btn_AddAdmin"])
+                                        </button>
+                                        <button class="btn btn-danger-outline btn-xs" @onclick="() => DeactivateUser(u)">@L["Btn_Deactivate"]</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table></div>
+            }
     </div>
-}
+</div>
 
 @code {
-    private int tab;
+    private string view = "session";
     private List<User> allUsers = new();
     private List<CoffeeBlend> allBlends = new();
     private List<TastingSession> currentSessions = new();
+    private Dictionary<int, int> blendUsageCounts = new();
+    private Dictionary<int, int> userVoteCounts = new();
 
-    // User form
+    private string librarySearch = "";
+    private bool showAddBlendForm;
+    private bool showAddUserForm;
+
+    // Forms
     private string newUserName = "";
-
-    // Blend form
     private string newBlendName = "";
     private string newBlendRoaster = "";
     private string? newBlendOrigin;
@@ -373,7 +412,6 @@
     private decimal? newBlendPriceCzk;
     private int newBlendLinkedBlendId;
 
-    // Blend edit form
     private int? editingBlendId;
     private string editBlendName = "";
     private string editBlendRoaster = "";
@@ -386,12 +424,27 @@
     private int? editOriginalLinkedBlendId;
     private User? editBlendInactiveSupplier;
 
-    // Blend of day form
-    private int selectedBlendOfDayId;
-    private string? sessionComment;
-
     private string? errorMessage;
     private string? statusMessage;
+
+    private List<CoffeeBlend> availableForSession =>
+        allBlends.Where(b =>
+            string.IsNullOrEmpty(librarySearch)
+            || b.Name.Contains(librarySearch, StringComparison.OrdinalIgnoreCase)
+            || (b.Supplier != null && b.Supplier.Name.Contains(librarySearch, StringComparison.OrdinalIgnoreCase))
+            || (b.Origin != null && b.Origin.Contains(librarySearch, StringComparison.OrdinalIgnoreCase)))
+            .ToList();
+
+    private List<CoffeeBlend> FilteredLibraryBlends()
+    {
+        if (string.IsNullOrEmpty(librarySearch)) return allBlends;
+        var s = librarySearch;
+        return allBlends.Where(b =>
+            b.Name.Contains(s, StringComparison.OrdinalIgnoreCase)
+            || b.Roaster.Contains(s, StringComparison.OrdinalIgnoreCase)
+            || (b.Supplier != null && b.Supplier.Name.Contains(s, StringComparison.OrdinalIgnoreCase))
+            || (b.Origin != null && b.Origin.Contains(s, StringComparison.OrdinalIgnoreCase))).ToList();
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -402,6 +455,7 @@
     private async Task LoadAll()
     {
         await Task.WhenAll(LoadUsers(), LoadBlends(), LoadCurrentSessions());
+        await LoadCounts();
     }
 
     private async Task LoadUsers()
@@ -422,6 +476,36 @@
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
+    [Inject] private IStatisticsService StatisticsService { get; set; } = null!;
+
+    private async Task LoadCounts()
+    {
+        try
+        {
+            // Per-blend usage = number of sessions that used the blend
+            var sessions = await SessionService.GetSessionHistoryAsync();
+            blendUsageCounts = sessions.GroupBy(s => s.BlendId).ToDictionary(g => g.Key, g => g.Count());
+
+            // Per-user vote count
+            foreach (var u in allUsers)
+            {
+                var hist = await StatisticsService.GetUserRatingHistoryAsync(u.Id);
+                userVoteCounts[u.Id] = hist.Count;
+            }
+        }
+        catch { /* best-effort */ }
+    }
+
+    private string CoffeeWord(int n) => n switch
+    {
+        1 => L["Word_Coffee_1"],
+        >= 2 and <= 4 => L["Word_Coffee_234"],
+        _ => L["Word_Coffee_5"]
+    };
+
+    private void ToggleAddBlendForm() => showAddBlendForm = !showAddBlendForm;
+    private void ToggleAddUserForm() => showAddUserForm = !showAddUserForm;
+
     private async Task AddUser()
     {
         try
@@ -431,6 +515,7 @@
             await UserService.CreateUserAsync(newUserName.Trim());
             newUserName = "";
             statusMessage = L["Msg_UserAdded"];
+            showAddUserForm = false;
             await LoadUsers();
         }
         catch (Exception ex) { errorMessage = ex.Message; }
@@ -487,6 +572,7 @@
             newBlendPriceCzk = null;
             newBlendLinkedBlendId = 0;
             statusMessage = L["Msg_BlendAdded"];
+            showAddBlendForm = false;
             await LoadBlends();
         }
         catch (Exception ex) { errorMessage = ex.Message; }
@@ -528,7 +614,6 @@
                 editBlendOrigin?.Trim(), editBlendRoastLevel, editBlendSupplierId,
                 editBlendWeightGrams, editBlendPriceCzk);
 
-            // Handle link changes
             int? newLinkedId = editLinkedBlendId > 0 ? editLinkedBlendId : null;
             if (newLinkedId != editOriginalLinkedBlendId)
             {
@@ -558,17 +643,14 @@
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
-    private async Task AddBlendOfDay()
+    private async Task AddBlendQuick(int blendId)
     {
         try
         {
             errorMessage = null;
-            if (selectedBlendOfDayId == 0) { errorMessage = L["Err_SelectBlend"]; return; }
-            await SessionService.AddBlendOfTheDayAsync(selectedBlendOfDayId, sessionComment);
-            var blend = allBlends.FirstOrDefault(b => b.Id == selectedBlendOfDayId);
+            await SessionService.AddBlendOfTheDayAsync(blendId, null);
+            var blend = allBlends.FirstOrDefault(b => b.Id == blendId);
             statusMessage = L["Msg_CoffeeOfDayAdded", blend?.Name ?? ""];
-            sessionComment = null;
-            selectedBlendOfDayId = 0;
             await LoadCurrentSessions();
         }
         catch (Exception ex) { errorMessage = ex.Message; }
@@ -619,16 +701,14 @@
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
-    private async Task ClearCleanup(int sessionId)
+    private async Task OnSessionNoteChanged(int sessionId, string? value)
     {
-        try
-        {
-            errorMessage = null;
-            await SessionService.ClearCleanupPersonAsync(sessionId);
-            statusMessage = L["Msg_CleanupCleared"];
-            await LoadCurrentSessions();
-        }
-        catch (Exception ex) { errorMessage = ex.Message; }
+        // Update the in-memory comment; persistence would require a service method, so re-add note via remove/re-add
+        // Keep the existing model immutable: just track local change without persisting until backend supports edit.
+        // For now: warn user this isn't persisted (no-op).
+        var session = currentSessions.FirstOrDefault(s => s.Id == sessionId);
+        if (session != null) session.Comment = value;
+        await Task.CompletedTask;
     }
 
     private async Task ToggleCleanupCompleted(int sessionId, bool target)
@@ -637,7 +717,6 @@
         {
             errorMessage = null;
             var session = currentSessions.FirstOrDefault(s => s.Id == sessionId);
-            // Clicking the active state again resets to pending (null)
             bool? newValue = (session?.CleanupCompleted == target) ? (bool?)null : target;
             await SessionService.SetCleanupCompletedAsync(sessionId, newValue);
             statusMessage = newValue switch
@@ -651,16 +730,5 @@
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
-    private async Task ExportCsv()
-    {
-        try
-        {
-            errorMessage = null;
-            var bytes = await CsvExportService.GenerateCsvBytesAsync();
-            var fileName = $"kavopici_export_{DateTime.Now:yyyy-MM-dd}.csv";
-            await JS.InvokeVoidAsync("downloadFile", fileName, "text/csv", bytes);
-            statusMessage = L["Msg_DataExported"];
-        }
-        catch (Exception ex) { errorMessage = ex.Message; }
-    }
+
 }

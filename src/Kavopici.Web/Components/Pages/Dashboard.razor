@@ -2,124 +2,222 @@
 @inject ISessionService SessionService
 @inject IRatingService RatingService
 @inject IStatisticsService StatisticsService
+@inject IUserService UserService
 @inject AppState AppState
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 @inject IThemedLocalizer L
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 
-<h1>@L["Nav_Dashboard"]</h1>
+<div class="page-header">
+    <h1>@L["Heading_TodaysTasting"]</h1>
+    <span class="subtitle">@DateTime.Today.ToString("dddd d. M.") · @todaySessions.Count @CoffeeWord(todaySessions.Count)</span>
+</div>
 
-@if (errorMessage != null)
-{
-    <div class="msg-error">@errorMessage</div>
-}
+@if (errorMessage != null) { <div class="msg-error">@errorMessage</div> }
 
-@* Highlights *@
-@if (hasHighlights)
-{
-    <div class="highlights">
-        <div class="highlight-card clickable" @onclick="GoToTopBlend">
-            <div class="highlight-label">@L["Label_TopRated"]</div>
-            <div class="highlight-value">@topBlendName</div>
-            <div class="highlight-sub">@topBlendRating.ToString("F1") &#9733;</div>
-        </div>
-        <div class="highlight-card clickable" @onclick="GoToStatistics">
-            <div class="highlight-label">@L["Label_YourRatings"]</div>
-            <div class="highlight-value">@userRatingCount</div>
-            <div class="highlight-sub">@L["Label_TotalRatingsDesc"]</div>
-        </div>
-    </div>
-}
-
-@* Blends of the Day *@
 @if (isLoading)
 {
     <div class="loading">@L["Msg_Loading"]</div>
 }
-else if (todaySessions.Count > 0)
+else
 {
-    @foreach (var session in todaySessions)
-    {
-        var sessionId = session.Id;
-        var isRevealed = revealedSessionIds.Contains(sessionId);
-        var existing = existingRatings.GetValueOrDefault(sessionId);
-
-        <div class="card">
-            <h2>@L["Label_CoffeeOfDay"] — @session.Date.ToString("d. M. yyyy")</h2>
-
-            @if (session.CleanupPerson != null)
-            {
-                <p class="text-muted" style="margin:4px 0 12px 0;">
-                    🧽 @L["Label_CleanupPerson"]: <strong>@session.CleanupPerson.Name</strong>
-                    @if (session.CleanupCompleted == true)
-                    {
-                        <span style="color:var(--success-green, #2e7d32);"> ✓</span>
-                    }
-                    else if (session.CleanupCompleted == false)
-                    {
-                        <span style="color:var(--warning-orange, #c62828);"> ✗</span>
-                    }
-                </p>
-            }
-
-            @if (!isRevealed)
-            {
-                <div class="secret-overlay">
-                    <h3>@L["Label_SecretVoting"]</h3>
-                    @if (!string.IsNullOrEmpty(session.Comment))
-                    {
-                        <p style="font-size:1.1em;font-weight:600;margin:8px 0;">@session.Comment</p>
-                    }
-                    <p>@L["Msg_RateBeforeReveal"]</p>
-                </div>
-            }
-            else
-            {
-                <div class="blend-card-wrapper clickable" @onclick="() => GoToBlend(session.BlendId)">
-                    <BlendCard Blend="session.Blend" SessionComment="@session.Comment" />
-                </div>
-            }
-
-            <div class="mt-16">
-                <RatingForm SessionId="@sessionId"
-                            BlendId="@session.BlendId"
-                            ExistingRating="@existing"
-                            OnRatingSubmitted="() => OnTodayRatingSubmitted(sessionId)" />
+    <!-- Highlights strip -->
+    <div class="highlights">
+        <div class="highlight-card clickable" @onclick="GoToTopBlend">
+            <div class="highlight-label">@L["Label_TopAllTime"]</div>
+            <div class="highlight-value">@(topBlendName ?? "—")</div>
+            <div class="highlight-sub">
+                @if (topBlendCount > 0)
+                { <span>Ø @topBlendRating.ToString("F1") · @topBlendCount @L["Label_VotesShort"]</span> }
             </div>
+        </div>
+        <div class="highlight-card clickable" @onclick="GoToMyRatings">
+            <div class="highlight-label">@L["Label_YourRatingsCount"]</div>
+            <div class="highlight-value">@userRatingCount</div>
+            <div class="highlight-sub">@L["Label_TotalRatingsDesc"]</div>
+        </div>
+        <div class="highlight-card">
+            <div class="highlight-label">@L["Label_TodaysSession"]</div>
+            <div class="highlight-value">@string.Format(L["Label_VotedShort"], todaySessionVoters, activeUserCount)</div>
+            <div class="highlight-sub">@todaySessions.Count @CoffeeWord(todaySessions.Count)</div>
+        </div>
+    </div>
+
+    @if (todaySessions.Count == 0)
+    {
+        <div class="card text-center">
+            <h2>@L["Heading_NoCoffeeToday"]</h2>
+            <p class="text-muted">@L["Msg_NoCoffeeSetByAdmin"]</p>
+        </div>
+    }
+    else
+    {
+        var n = todaySessions.Count;
+        var colsClass = n == 1 ? "cols-1" : (n == 2 ? "cols-2" : "cols-3");
+
+        <div class="dashboard-grid with-aside">
+            <div class="coffee-card-grid @colsClass">
+                @for (var i = 0; i < todaySessions.Count; i++)
+                {
+                    var idx = i + 1;
+                    var session = todaySessions[i];
+                    var sessionId = session.Id;
+                    var existing = existingRatings.GetValueOrDefault(sessionId);
+                    var voted = existing != null;
+                    var locked = !voted && !string.IsNullOrEmpty(session.Comment);
+                    var trend = blendTrends.GetValueOrDefault(session.BlendId, Array.Empty<double>());
+                    var statsRow = blendStatsByBlendId.GetValueOrDefault(session.BlendId);
+
+                    <div class="coffee-card @(focusedSessionId == sessionId ? "focused" : "")"
+                         id="@($"card-{sessionId}")"
+                         tabindex="0"
+                         @onclick="() => SetFocus(sessionId)"
+                         @onkeydown="e => OnCardKeyDown(e, sessionId)">
+                        <div class="coffee-card-top">
+                            <div class="coffee-card-num">@idx</div>
+                            <div class="section-label">@L["Label_CoffeeOfDay"] #@idx</div>
+                            <div style="flex:1;"></div>
+                            @if (voted)
+                            {
+                                <div class="done-pill"><span>✓</span> @L["Btn_Done"]</div>
+                            }
+                            else if (focusedSessionId == sessionId)
+                            {
+                                <div style="font-size:10.5px;color:var(--coffee-medium);display:flex;gap:3px;">
+                                    <kbd>1</kbd>–<kbd>0</kbd>
+                                </div>
+                            }
+                            <button class="btn-icon" style="border:none;background:none;font-size:14px;color:var(--coffee-medium);"
+                                    title="@L["Btn_OpenDetail"]"
+                                    @onclick="() => GoToBlend(session.BlendId)"
+                                    @onclick:stopPropagation="true">↗</button>
+                        </div>
+
+                        <BlendCard Blend="session.Blend" SessionComment="@session.Comment" Locked="!voted" />
+
+                        <div>
+                            <div class="section-block">
+                                <div class="label-row">
+                                    <div class="section-label">@L["Detail_YourRating"]</div>
+                                </div>
+                                <RatingForm SessionId="@sessionId"
+                                            BlendId="@session.BlendId"
+                                            ExistingRating="@existing"
+                                            OnRatingSubmitted="() => OnTodayRatingSubmitted(sessionId)"
+                                            OnRegister="rf => RegisterRatingForm(sessionId, rf)" />
+                            </div>
+                        </div>
+
+                        @if (voted && trend.Length >= 2)
+                        {
+                            <div style="display:flex;align-items:center;gap:10px;font-size:12px;color:var(--coffee-medium);">
+                                <Sparkline Data="trend" W="56" H="20" />
+                                @if (statsRow != null)
+                                {
+                                    <span>
+                                        <b style="font-family:Georgia,serif;font-size:14px;color:var(--coffee-dark);font-weight:400;">Ø @statsRow.AverageRating.ToString("F1")</b>
+                                        · @statsRow.RatingCount @L["Label_VotesShort"]
+                                    </span>
+                                }
+                            </div>
+                        }
+                        else if (!voted)
+                        {
+                            <div style="font-size:11.5px;color:var(--silver);font-style:italic;">@L["Label_StatsAfterVote"]</div>
+                        }
+
+                        @if (session.CleanupPerson != null)
+                        {
+                            <div class="cleanup-footer">
+                                <div style="font-size:14px;line-height:1;">🧽</div>
+                                <div class="label-uppercase">@L["Label_Cleanup"]</div>
+                                <UserInitials Name="@session.CleanupPerson.Name" Size="22" />
+                                <div class="person">@session.CleanupPerson.Name</div>
+                                @if (session.CleanupCompleted == true)
+                                {
+                                    <span style="color:var(--success-green);">✓</span>
+                                }
+                                else if (session.CleanupCompleted == false)
+                                {
+                                    <span style="color:var(--error-red);">✗</span>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+
+            <aside class="aside-stack">
+                <!-- Mini leaderboard -->
+                <div class="mini-leaderboard">
+                    <div class="head">
+                        <div class="section-label">@L["Label_LeaderboardTop4"]</div>
+                        <div style="flex:1;"></div>
+                        <button class="btn-icon" style="border:none;background:none;color:var(--coffee-brown);font-size:11.5px;width:auto;padding:0 4px;"
+                                @onclick="GoToStatistics">@L["Label_AllArrow"]</button>
+                    </div>
+                    @if (leaderboard.Count == 0)
+                    {
+                        <div class="text-muted" style="font-size:12px;font-style:italic;">@L["Msg_NoStatistics"]</div>
+                    }
+                    else
+                    {
+                        @for (var i = 0; i < leaderboard.Count; i++)
+                        {
+                            var lb = leaderboard[i];
+                            var rank = i + 1;
+                            var blendId = lb.BlendId;
+                            <div class="row @(i == 0 ? "first" : "")" @onclick="() => GoToBlend(blendId)">
+                                <div class="rank">@rank</div>
+                                <div class="name">@lb.BlendName</div>
+                                <div class="avg">@lb.AverageRating.ToString("F1")</div>
+                                <div class="count">@lb.RatingCount×</div>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <a href="@L["Url_FlavorWheel"]" target="_blank" rel="noopener noreferrer" class="flavor-wheel-banner">
+                    <div class="banner-content">
+                        <span class="banner-icon">🎯</span>
+                        <div>
+                            <div class="banner-text">@L["Label_FlavorWheelTitle"]</div>
+                            <div style="font-size:11.5px;color:var(--coffee-medium);margin-top:2px;">@L["Label_FlavorWheelSub"]</div>
+                        </div>
+                    </div>
+                </a>
+            </aside>
+        </div>
+
+        <div class="kbd-tip-strip">
+            <span>💡</span>
+            <span>
+                @L["Label_KbdHint"]
+                <kbd>1</kbd>–<kbd>9</kbd>, <kbd>0</kbd> = 10 ★ ·
+                <kbd>Tab</kbd> · <kbd>Enter</kbd>
+            </span>
         </div>
     }
 }
-else
-{
-    <div class="panel text-center">
-        <h2>@L["Heading_NoCoffeeToday"]</h2>
-        <p class="text-muted">@L["Msg_NoCoffeeSetByAdmin"]</p>
-    </div>
-}
-
-@* Flavor Wheel Banner *@
-<a href="@L["Url_FlavorWheel"]"
-   target="_blank"
-   rel="noopener noreferrer"
-   class="flavor-wheel-banner">
-    <div class="banner-content">
-        <span class="banner-icon">@(AppState.CurrentTheme == Theme.Tea ? "🍵" : "☕")</span>
-        <span class="banner-text">@L["Msg_FlavorWheel"]</span>
-    </div>
-</a>
 
 @code {
     private List<TastingSession> todaySessions = new();
     private Dictionary<int, Rating?> existingRatings = new();
-    private HashSet<int> revealedSessionIds = new();
+    private Dictionary<int, double[]> blendTrends = new();
+    private Dictionary<int, BlendStatistics> blendStatsByBlendId = new();
+    private List<BlendStatistics> leaderboard = new();
     private bool isLoading = true;
+    private int focusedSessionId;
 
     private string? topBlendName;
     private double topBlendRating;
+    private int topBlendCount;
     private int topBlendId;
     private int userRatingCount;
-    private bool hasHighlights;
+    private int todaySessionVoters;
+    private int activeUserCount;
 
     private string? errorMessage;
 
@@ -137,6 +235,7 @@ else
             errorMessage = null;
 
             todaySessions = await SessionService.GetTodaySessionsAsync();
+            if (todaySessions.Count > 0) focusedSessionId = todaySessions[0].Id;
 
             if (todaySessions.Count > 0 && AppState.CurrentUser != null)
             {
@@ -144,25 +243,38 @@ else
                 {
                     var rating = await RatingService.GetUserRatingForSessionAsync(
                         AppState.CurrentUser.Id, session.Id);
-
                     existingRatings[session.Id] = rating;
-
                     if (rating != null)
                     {
-                        revealedSessionIds.Add(session.Id);
                         var noteIds = await RatingService.GetRatingNoteIdsAsync(rating.Id);
                         rating.RatingTastingNotes = noteIds.Select(id =>
                             new RatingTastingNote { RatingId = rating.Id, TastingNoteId = id }).ToList();
                     }
+                    blendTrends[session.BlendId] = (await StatisticsService.GetBlendTrendAsync(session.BlendId, 5)).ToArray();
                 }
+
+                var voters = new HashSet<int>();
+                foreach (var s in todaySessions)
+                {
+                    var rs = await RatingService.GetRatingsForSessionAsync(s.Id);
+                    foreach (var r in rs) voters.Add(r.UserId);
+                }
+                todaySessionVoters = voters.Count;
             }
-            // Highlights
+
+            var users = await UserService.GetActiveUsersAsync();
+            activeUserCount = users.Count;
+
             var stats = await StatisticsService.GetBlendStatisticsAsync();
+            blendStatsByBlendId = stats.ToDictionary(s => s.BlendId);
+            leaderboard = stats.OrderByDescending(s => s.AverageRating).Take(4).ToList();
+
             if (stats.Count > 0)
             {
                 var top = stats.OrderByDescending(s => s.AverageRating).First();
                 topBlendName = top.BlendName;
                 topBlendRating = top.AverageRating;
+                topBlendCount = top.RatingCount;
                 topBlendId = top.BlendId;
 
                 if (AppState.CurrentUser != null)
@@ -170,7 +282,6 @@ else
                     var history = await StatisticsService.GetUserRatingHistoryAsync(AppState.CurrentUser.Id);
                     userRatingCount = history.Count;
                 }
-                hasHighlights = true;
             }
         }
         catch (Exception ex)
@@ -185,10 +296,58 @@ else
 
     private void OnTodayRatingSubmitted(int sessionId)
     {
-        revealedSessionIds.Add(sessionId);
+        // Trigger reload to refresh trend & stats
+        InvokeAsync(LoadAsync);
     }
+
+    private Dictionary<int, RatingForm> ratingFormRefs = new();
+    private bool firstFocusDone;
+
+    private void RegisterRatingForm(int sessionId, RatingForm? form)
+    {
+        if (form == null) ratingFormRefs.Remove(sessionId);
+        else ratingFormRefs[sessionId] = form;
+    }
+
+    private async Task SetFocus(int sessionId)
+    {
+        focusedSessionId = sessionId;
+        try { await JS.InvokeVoidAsync("kavopici.focusElement", $"card-{sessionId}"); } catch { }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstFocusDone && todaySessions.Count > 0)
+        {
+            firstFocusDone = true;
+            try { await JS.InvokeVoidAsync("kavopici.focusElement", $"card-{focusedSessionId}"); } catch { }
+        }
+    }
+
+    private async Task OnCardKeyDown(KeyboardEventArgs e, int sessionId)
+    {
+        if (!ratingFormRefs.TryGetValue(sessionId, out var rf)) return;
+
+        if (e.Key.Length == 1 && e.Key[0] >= '0' && e.Key[0] <= '9')
+        {
+            var stars = e.Key[0] == '0' ? 10 : (e.Key[0] - '0');
+            await rf.SetStarsAsync(stars);
+        }
+        else if (e.Key == "Enter")
+        {
+            await rf.SubmitFromShortcutAsync();
+        }
+    }
+
+    private string CoffeeWord(int n) => n switch
+    {
+        1 => L["Word_Coffee_1"],
+        >= 2 and <= 4 => L["Word_Coffee_234"],
+        _ => L["Word_Coffee_5"]
+    };
 
     private void GoToTopBlend() => Nav.NavigateTo($"/blend/{topBlendId}");
     private void GoToBlend(int blendId) => Nav.NavigateTo($"/blend/{blendId}");
-    private void GoToStatistics() => Nav.NavigateTo("/statistics?tab=ratings");
+    private void GoToMyRatings() => Nav.NavigateTo("/statistics?tab=ratings");
+    private void GoToStatistics() => Nav.NavigateTo("/statistics");
 }

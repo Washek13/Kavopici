@@ -6,12 +6,14 @@
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 
-<h1>@L["Heading_Comparison"]</h1>
+<div class="page-header">
+    <h1>@L["Heading_Comparison"]</h1>
+    <span class="subtitle">@string.Format(L["Comp_MaxN"], filledCount, CoffeeWord(filledCount))</span>
+    <div style="flex:1;"></div>
+    <button class="btn btn-ghost btn-sm" @onclick="Reset" disabled="@(filledCount == 0)">@L["Comp_Reset"]</button>
+</div>
 
-@if (errorMessage != null)
-{
-    <div class="msg-error">@errorMessage</div>
-}
+@if (errorMessage != null) { <div class="msg-error">@errorMessage</div> }
 
 @if (isLoading)
 {
@@ -19,102 +21,217 @@
 }
 else
 {
-    <div class="comparison-grid">
-        @* Blend A *@
-        <div>
-            <div class="form-group">
-                <label>@L["Label_BlendA"]</label>
-                <select @bind="blendAId">
-                    <option value="0">@L["Placeholder_Select"]</option>
-                    @foreach (var b in allBlends)
-                    {
-                        <option value="@b.BlendId">@b.BlendName (@b.Roaster)</option>
-                    }
-                </select>
-            </div>
-
-            @if (BlendA != null)
-            {
-                <div class="card">
-                    <h3>@BlendA.BlendName</h3>
-                    <div class="blend-details mb-8">
-                        <div class="blend-detail"><span class="label">@L["Label_Roaster"]:</span> @BlendA.Roaster</div>
-                        <div class="blend-detail"><span class="label">@L["Label_Supplier"]:</span> @BlendA.SupplierName</div>
-                        @if (BlendA.PricePerKg.HasValue)
-                        {
-                            <div class="blend-detail"><span class="label">@L["Label_PricePerKg"]:</span> @BlendA.PricePerKg.Value.ToString("F0") Kč</div>
-                        }
-                        @if (BlendA.PricePerformance.HasValue)
-                        {
-                            <div class="blend-detail"><span class="label">@L["Label_PricePerStar"]:</span> @BlendA.PricePerformance.Value.ToString("F0") Kč</div>
-                        }
-                    </div>
-                    <div class="flex items-center gap-8 mb-8">
-                        <span style="font-size:28px;color:var(--amber-gold);font-family:Georgia,serif;">
-                            @(BlendA.RatingCount > 0 ? BlendA.AverageRating.ToString("F1") : "—")
-                        </span>
-                        @if (BlendA.RatingCount > 0) { <span style="color:var(--amber-gold);">&#9733;</span> }
-                        <span class="text-muted">(@BlendA.RatingCount)</span>
-                        <ControversyBadge Level="BlendA.ControversyLevel" FontSize="13" />
-                    </div>
-                    @RenderDistribution(BlendA)
-                </div>
-            }
-        </div>
-
-        @* Blend B *@
-        <div>
-            <div class="form-group">
-                <label>@L["Label_BlendB"]</label>
-                <select @bind="blendBId">
-                    <option value="0">@L["Placeholder_Select"]</option>
-                    @foreach (var b in allBlends)
-                    {
-                        <option value="@b.BlendId">@b.BlendName (@b.Roaster)</option>
-                    }
-                </select>
-            </div>
-
-            @if (BlendB != null)
-            {
-                <div class="card">
-                    <h3>@BlendB.BlendName</h3>
-                    <div class="blend-details mb-8">
-                        <div class="blend-detail"><span class="label">@L["Label_Roaster"]:</span> @BlendB.Roaster</div>
-                        <div class="blend-detail"><span class="label">@L["Label_Supplier"]:</span> @BlendB.SupplierName</div>
-                        @if (BlendB.PricePerKg.HasValue)
-                        {
-                            <div class="blend-detail"><span class="label">@L["Label_PricePerKg"]:</span> @BlendB.PricePerKg.Value.ToString("F0") Kč</div>
-                        }
-                        @if (BlendB.PricePerformance.HasValue)
-                        {
-                            <div class="blend-detail"><span class="label">@L["Label_PricePerStar"]:</span> @BlendB.PricePerformance.Value.ToString("F0") Kč</div>
-                        }
-                    </div>
-                    <div class="flex items-center gap-8 mb-8">
-                        <span style="font-size:28px;color:var(--amber-gold);font-family:Georgia,serif;">
-                            @(BlendB.RatingCount > 0 ? BlendB.AverageRating.ToString("F1") : "—")
-                        </span>
-                        @if (BlendB.RatingCount > 0) { <span style="color:var(--amber-gold);">&#9733;</span> }
-                        <span class="text-muted">(@BlendB.RatingCount)</span>
-                        <ControversyBadge Level="BlendB.ControversyLevel" FontSize="13" />
-                    </div>
-                    @RenderDistribution(BlendB)
-                </div>
-            }
-        </div>
+    <div style="font-size:12.5px;color:var(--coffee-medium);margin-bottom:12px;padding:8px 12px;background:#fff;border:1px solid var(--border);border-radius:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+        <span style="text-transform:uppercase;letter-spacing:1.3px;font-weight:700;font-size:11px;">@L["Comp_TipLabel"]</span>
+        <span>@L["Comp_Tip"]</span>
     </div>
+
+    @if (filledCount == 0)
+    {
+        <div style="padding:60px;text-align:center;color:var(--coffee-medium);background:#fff;border:1px dashed var(--border-strong);border-radius:12px;">
+            <div style="font-size:48px;margin-bottom:10px;">☕☕</div>
+            <div style="font-size:15px;margin-bottom:14px;">@L["Comp_PickAtLeastOne"]</div>
+            <button class="btn btn-primary" @onclick="() => OpenPicker(0)">@L["Comp_AddFirst"]</button>
+        </div>
+    }
+    else
+    {
+        var visible = filledCount + (filledCount < 4 ? 1 : 0);
+        var template = $"repeat({visible}, minmax(220px, 1fr))";
+        <div class="comparison-grid-cols" style="grid-template-columns:@template;">
+            @for (var i = 0; i < slots.Count && slots[i] != null; i++)
+            {
+                var idx = i;
+                var c = slots[i]!;
+                var color = COLORS[i % COLORS.Length];
+                var trend = trends.GetValueOrDefault(c.BlendId, Array.Empty<double>());
+                var canRemove = filledCount > 1;
+                <div class="comparison-col">
+                    <div class="col-hero">
+                        <div class="col-accent" style="background:@color;"></div>
+                        <div style="display:flex;align-items:flex-start;gap:10px;">
+                            <div style="font-size:38px;line-height:1;">☕</div>
+                            <div style="flex:1;min-width:0;">
+                                <div class="col-origin">@c.Origin</div>
+                                <div style="font-family:Georgia,serif;font-size:18px;color:var(--coffee-dark);font-weight:700;line-height:1.15;margin-top:1px;">@c.BlendName</div>
+                                <div style="font-size:11.5px;color:var(--coffee-medium);margin-top:3px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+                                    <span>@c.Roaster</span>•<RoastBadge Level="c.RoastLevel" />
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:6px;margin-top:10px;">
+                            <button class="btn-icon" style="flex:1;width:auto;padding:6px 10px;font-size:11.5px;font-weight:600;" @onclick="() => OpenPicker(idx)">@L["Comp_Swap"]</button>
+                            @if (canRemove)
+                            {
+                                <button class="btn-icon" style="color:var(--error-red);" @onclick="() => Remove(idx)">×</button>
+                            }
+                        </div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="lbl">@L["Comp_GroupAvg"]</div>
+                        <div class="big-num @(IsWin(idx, "avg") ? "win" : "")">@c.AverageRating.ToString("F1")<span style="font-size:13px;color:var(--silver);font-weight:400;">/10</span>
+                            @if (IsWin(idx, "avg")) { <span class="win-tag">@L["Comp_Best"]</span> }
+                        </div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="lbl">@L["Detail_YourRating"]</div>
+                        @{
+                            var my = myStarsByBlend.GetValueOrDefault(c.BlendId, 0);
+                        }
+                        @if (my > 0)
+                        {
+                            <div class="big-num @(IsWin(idx, "my") ? "win" : "")">@my<span style="font-size:13px;color:var(--silver);font-weight:400;">/10</span>
+                                @if (IsWin(idx, "my")) { <span class="win-tag">@L["Comp_Best"]</span> }
+                            </div>
+                        }
+                        else { <div style="font-size:13px;color:var(--silver);font-style:italic;">@L["Comp_NotRated"]</div> }
+                    </div>
+                    <div class="metric-row">
+                        <div class="lbl">@L["Comp_VoteCount"]</div>
+                        <div class="big-num @(IsWin(idx, "n") ? "win" : "")">@c.RatingCount×
+                            @if (IsWin(idx, "n")) { <span class="win-tag">@L["Comp_Best"]</span> }
+                        </div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="lbl">@L["Comp_PricePerKg"]</div>
+                        <div class="big-num @(IsWin(idx, "ppk_low") ? "win" : "")">
+                            @(c.PricePerKg.HasValue ? c.PricePerKg.Value.ToString("F0") + " Kč" : "—")
+                            @if (IsWin(idx, "ppk_low")) { <span class="win-tag">@L["Comp_Best"]</span> }
+                        </div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="lbl">@L["Comp_Trend"]</div>
+                        <div style="min-height:42px;display:flex;align-items:center;">
+                            <Sparkline Data="trend" W="180" H="42" Color="@color" />
+                        </div>
+                    </div>
+                    <div class="metric-row">
+                        <div class="lbl">@L["Comp_DistributionVotes"]</div>
+                        <div class="mini-histogram">
+                            @{
+                                var maxCount = Math.Max(1, c.Distribution.Max());
+                            }
+                            @for (var k = 0; k < c.Distribution.Length; k++)
+                            {
+                                var v = c.Distribution[k];
+                                var h = (v / (double)maxCount) * 46;
+                                <div class="col">
+                                    <div class="b @(v == 0 ? "empty" : "")" style="@($"background:{color};height:{h.ToString("F0", System.Globalization.CultureInfo.InvariantCulture)}px;")"></div>
+                                    <div class="n">@(k + 1)</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (filledCount < 4)
+            {
+                var nextIdx = filledCount;
+                <div class="empty-slot" @onclick="() => OpenPicker(nextIdx)">
+                    <div class="plus-circle">+</div>
+                    <div style="font-size:14px;font-weight:600;color:var(--coffee-dark);">@L["Comp_AddCoffee"]</div>
+                    <div style="font-size:11.5px;color:var(--coffee-medium);">@L["Comp_PickFromAll"]</div>
+                </div>
+            }
+        </div>
+
+        @if (filledCount >= 2)
+        {
+            <div class="overlay-chart-card">
+                <div class="head">
+                    <h2>@L["Comp_OverlayTrendTitle"]</h2>
+                    <span class="section-hint">@L["Comp_OverlayTrendHint"]</span>
+                </div>
+                @{
+                    var allTrendVals = slots.Where(s => s != null).SelectMany(s => trends.GetValueOrDefault(s!.BlendId, Array.Empty<double>())).ToArray();
+                }
+                @if (allTrendVals.Length > 0)
+                {
+                    var minV = allTrendVals.Min() - 0.3;
+                    var maxV = allTrendVals.Max() + 0.3;
+                    var range = Math.Max(0.001, maxV - minV);
+                    int W = 860; int H = 200; int pad = 36;
+                    var len = slots.Where(s => s != null).Max(s => trends.GetValueOrDefault(s!.BlendId, Array.Empty<double>()).Length);
+                    <svg viewBox="@($"0 0 {W} {H}")" style="width:100%;height:220px;">
+                        @for (var i = 1; i < 5; i++)
+                        {
+                            var y = pad + i * (H - pad * 2.0) / 5.0;
+                            <line x1="@pad" x2="@(W - pad)" y1="@y" y2="@y" stroke="var(--border)" stroke-dasharray="2 3" />
+                        }
+                        @for (var k = 0; k < slots.Count && slots[k] != null; k++)
+                        {
+                            var c = slots[k]!;
+                            var color = COLORS[k % COLORS.Length];
+                            var t = trends.GetValueOrDefault(c.BlendId, Array.Empty<double>());
+                            if (t.Length < 2) continue;
+                            var pts = string.Join(" ", t.Select((v, i) =>
+                            {
+                                var x = pad + (i * (W - pad * 2.0)) / (t.Length - 1);
+                                var y = H - pad - ((v - minV) / range) * (H - pad * 2.0);
+                                return $"{x.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)},{y.ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}";
+                            }));
+                            <polyline points="@pts" fill="none" stroke="@color" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                        }
+                    </svg>
+                    <div class="overlay-legend">
+                        @for (var k = 0; k < slots.Count && slots[k] != null; k++)
+                        {
+                            var c = slots[k]!;
+                            var color = COLORS[k % COLORS.Length];
+                            <div class="item">
+                                <span class="swatch" style="background:@color;"></span>
+                                <span style="font-weight:600;">☕ @c.BlendName</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        }
+    }
+
+    @if (pickerOpenForIdx.HasValue)
+    {
+        <div class="modal-backdrop" @onclick="ClosePicker">
+            <div class="modal-card" @onclick:stopPropagation="true">
+                <div class="head">
+                    <h2 style="font-family:Georgia,serif;">@L["Comp_PickCoffee"]</h2>
+                    <button class="close" @onclick="ClosePicker">×</button>
+                </div>
+                <input type="text" placeholder="@L["Filter_Search"]" @bind="pickerQuery" @bind:event="oninput" autofocus />
+                <div class="modal-list" style="margin-top:12px;">
+                    @foreach (var c in PickerOptions())
+                    {
+                        var bid = c.BlendId;
+                        <div class="modal-list-row" @onclick="() => Pick(bid)">
+                            <div style="font-size:24px;">☕</div>
+                            <div style="flex:1;min-width:0;">
+                                <div style="font-size:14px;font-weight:600;color:var(--coffee-dark);font-family:Georgia,serif;">@c.BlendName</div>
+                                <div style="font-size:11.5px;color:var(--coffee-medium);">@c.Roaster @if (!string.IsNullOrEmpty(c.Origin)) { <span> · @c.Origin</span> }</div>
+                            </div>
+                            <div style="font-family:Georgia,serif;font-size:18px;color:var(--coffee-dark);font-weight:700;">Ø @c.AverageRating.ToString("F1")</div>
+                        </div>
+                    }
+                    @if (!PickerOptions().Any()) { <div style="text-align:center;padding:30px;color:var(--silver);font-style:italic;">@L["Comp_NoResults"]</div> }
+                </div>
+            </div>
+        </div>
+    }
 }
 
 @code {
+    private static readonly string[] COLORS = new [] { "#6F4E37", "#D4A017", "#2E7D32", "#A50F14" };
+
     private List<BlendStatistics> allBlends = new();
-    private int blendAId;
-    private int blendBId;
+    private List<BlendStatistics?> slots = new() { null, null, null, null };
+    private Dictionary<int, double[]> trends = new();
+    private Dictionary<int, int> myStarsByBlend = new();
+    private int? pickerOpenForIdx;
+    private string pickerQuery = "";
     private bool isLoading = true;
     private string? errorMessage;
 
-    private BlendStatistics? BlendA => allBlends.FirstOrDefault(b => b.BlendId == blendAId);
-    private BlendStatistics? BlendB => allBlends.FirstOrDefault(b => b.BlendId == blendBId);
+    private int filledCount => slots.Count(s => s != null);
 
     protected override async Task OnInitializedAsync()
     {
@@ -122,26 +239,123 @@ else
         try
         {
             allBlends = await StatisticsService.GetBlendStatisticsAsync();
+            foreach (var b in allBlends)
+                trends[b.BlendId] = (await StatisticsService.GetBlendTrendAsync(b.BlendId, 5)).ToArray();
+
+            if (AppState.CurrentUser != null)
+            {
+                var myRatings = await StatisticsService.GetUserRatingHistoryAsync(AppState.CurrentUser.Id);
+                myStarsByBlend = myRatings.GroupBy(r => r.BlendId).ToDictionary(g => g.Key, g => g.Max(r => r.Stars));
+            }
+
+            // Parse ?ids=1,2,3
+            var uri = new Uri(Nav.Uri);
+            var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+            var ids = query["ids"];
+            if (!string.IsNullOrEmpty(ids))
+            {
+                var parsed = ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(s => int.TryParse(s.Trim(), out var v) ? v : -1)
+                    .Where(v => v > 0)
+                    .Take(4)
+                    .ToList();
+                for (var i = 0; i < parsed.Count && i < 4; i++)
+                {
+                    slots[i] = allBlends.FirstOrDefault(b => b.BlendId == parsed[i]);
+                }
+            }
+
+            if (filledCount == 0 && allBlends.Count > 0)
+            {
+                slots[0] = allBlends[0];
+                if (allBlends.Count > 1) slots[1] = allBlends[1];
+            }
+
+            Pack();
         }
         catch (Exception ex) { errorMessage = ex.Message; }
         finally { isLoading = false; }
     }
 
-    private RenderFragment RenderDistribution(BlendStatistics stats) => __builder =>
+    private bool IsWin(int idx, string metric)
     {
-        if (stats.RatingCount == 0) return;
-        var maxCount = stats.Distribution.Max();
-        for (int i = 9; i >= 0; i--)
+        var c = slots[idx];
+        if (c == null) return false;
+        var filled = slots.Where(s => s != null).Cast<BlendStatistics>().ToList();
+        if (filled.Count < 2) return false;
+        return metric switch
         {
-            var count = stats.Distribution[i];
-            var widthPct = maxCount > 0 ? (count / (double)maxCount) * 100 : 0;
-            <div class="distribution-row">
-                <span class="distribution-label">@(i + 1) &#9733;</span>
-                <div class="distribution-bar-bg">
-                    <div class="distribution-bar" style="@($"width:{widthPct:F0}%")"></div>
-                </div>
-                <span class="distribution-count">@count</span>
-            </div>
-        }
+            "avg"     => c.AverageRating == filled.Max(x => x.AverageRating) && c.AverageRating > 0,
+            "my"      => myStarsByBlend.GetValueOrDefault(c.BlendId, 0) > 0
+                          && myStarsByBlend.GetValueOrDefault(c.BlendId, 0) == filled.Max(x => myStarsByBlend.GetValueOrDefault(x.BlendId, 0)),
+            "n"       => c.RatingCount == filled.Max(x => x.RatingCount) && c.RatingCount > 0,
+            "ppk_low" => c.PricePerKg.HasValue && c.PricePerKg == filled.Where(x => x.PricePerKg.HasValue).Min(x => x.PricePerKg!.Value),
+            _         => false
+        };
+    }
+
+    private void OpenPicker(int idx)
+    {
+        pickerOpenForIdx = idx;
+        pickerQuery = "";
+    }
+    private void ClosePicker() => pickerOpenForIdx = null;
+
+    private IEnumerable<BlendStatistics> PickerOptions()
+    {
+        var existing = slots.Where(s => s != null).Select(s => s!.BlendId).ToHashSet();
+        var q = pickerQuery.Trim().ToLowerInvariant();
+        return allBlends.Where(b => !existing.Contains(b.BlendId)
+            && (string.IsNullOrEmpty(q)
+                || (b.BlendName?.ToLowerInvariant().Contains(q) ?? false)
+                || (b.Roaster?.ToLowerInvariant().Contains(q) ?? false)
+                || (b.Origin?.ToLowerInvariant().Contains(q) ?? false)));
+    }
+
+    private void Pick(int blendId)
+    {
+        if (pickerOpenForIdx == null) return;
+        var i = pickerOpenForIdx.Value;
+        var pick = allBlends.FirstOrDefault(b => b.BlendId == blendId);
+        if (pick == null) return;
+        if (i >= slots.Count) return;
+        slots[i] = pick;
+        pickerOpenForIdx = null;
+        Pack();
+        UpdateUrl();
+    }
+
+    private void Remove(int idx)
+    {
+        slots[idx] = null;
+        Pack();
+        UpdateUrl();
+    }
+
+    private void Pack()
+    {
+        var packed = slots.Where(s => s != null).ToList();
+        while (packed.Count < 4) packed.Add(null);
+        slots = packed;
+    }
+
+    private void Reset()
+    {
+        slots = new() { null, null, null, null };
+        UpdateUrl();
+    }
+
+    private void UpdateUrl()
+    {
+        var ids = string.Join(",", slots.Where(s => s != null).Select(s => s!.BlendId));
+        var url = string.IsNullOrEmpty(ids) ? "/comparison" : $"/comparison?ids={ids}";
+        Nav.NavigateTo(url, replace: true);
+    }
+
+    private string CoffeeWord(int n) => n switch
+    {
+        1 => L["Word_Coffee_1"],
+        >= 2 and <= 4 => L["Word_Coffee_234"],
+        _ => L["Word_Coffee_5"]
     };
 }

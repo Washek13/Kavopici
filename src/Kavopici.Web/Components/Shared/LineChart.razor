@@ -1,0 +1,59 @@
+@if (Data.Length >= 2)
+{
+    <svg viewBox="0 0 @W @H" style="width:100%;height:@(Height)px;display:block;">
+        @for (int i = 1; i <= 4; i++)
+        {
+            var y = Pad + i * (H - Pad * 2) / 5;
+            <line x1="@Pad" x2="@(W - Pad)" y1="@y" y2="@y" stroke="var(--border)" stroke-dasharray="2 3" />
+        }
+        <polygon points="@AreaPoints" fill="var(--amber-gold)" fill-opacity="0.18" />
+        <polyline points="@LinePoints" fill="none" stroke="var(--coffee-brown)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+        @for (int i = 0; i < Data.Length; i++)
+        {
+            var x = X(i);
+            var y = Y(i);
+            var isLast = i == Data.Length - 1;
+            <g>
+                <circle cx="@x" cy="@y" r="@(isLast ? 6 : 4.5)" fill="@(isLast ? "var(--amber-gold)" : "#fff")" stroke="var(--coffee-brown)" stroke-width="1.8" />
+                <text x="@x" y="@(y - 12)" text-anchor="middle" font-size="12" font-weight="700" fill="var(--coffee-dark)" font-family="Georgia, serif">@Data[i].ToString("F1", System.Globalization.CultureInfo.InvariantCulture)</text>
+                @if (Labels != null && i < Labels.Length)
+                {
+                    <g><text x="@x" y="@(H - 8)" text-anchor="middle" font-size="10" fill="var(--coffee-medium)">@Labels[i]</text></g>
+                }
+            </g>
+        }
+    </svg>
+}
+else
+{
+    <div style="text-align:center;padding:20px;color:var(--silver);font-style:italic;font-size:12px;">— @NoDataText —</div>
+}
+
+@code {
+    [Parameter, EditorRequired] public double[] Data { get; set; } = Array.Empty<double>();
+    [Parameter] public string[]? Labels { get; set; }
+    [Parameter] public int Height { get; set; } = 200;
+    [Parameter] public string NoDataText { get; set; } = "";
+
+    private const int W = 560;
+    private const int H = 180;
+    private const int Pad = 30;
+
+    private string LinePoints => string.Join(" ", Enumerable.Range(0, Data.Length).Select(i => $"{X(i).ToString("F1", System.Globalization.CultureInfo.InvariantCulture)},{Y(i).ToString("F1", System.Globalization.CultureInfo.InvariantCulture)}"));
+    private string AreaPoints => $"{Pad},{H - Pad} {LinePoints} {W - Pad},{H - Pad}";
+
+    private double X(int i)
+    {
+        if (Data.Length <= 1) return Pad;
+        return Pad + (i * (W - Pad * 2.0)) / (Data.Length - 1);
+    }
+
+    private double Y(int i)
+    {
+        var min = Data.Min() - 0.4;
+        var max = Data.Max() + 0.4;
+        var range = max - min;
+        if (range < 0.0001) range = 1;
+        return H - Pad - ((Data[i] - min) / range) * (H - Pad * 2);
+    }
+}
