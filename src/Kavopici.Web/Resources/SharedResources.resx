@@ -208,6 +208,7 @@
   <data name="Summary_MostExpensive" xml:space="preserve"><value>Nejdražší / kg</value></data>
   <data name="Summary_YourBest" xml:space="preserve"><value>Vaše nej</value></data>
   <data name="Filter_Search" xml:space="preserve"><value>Hledat (název, pražírna, původ)…</value></data>
+  <data name="Filter_SearchToday" xml:space="preserve"><value>Hledat (název, dodavatel, původ)…</value></data>
   <data name="Filter_Supplier" xml:space="preserve"><value>Dodávající:</value></data>
   <data name="Filter_All" xml:space="preserve"><value>Všichni</value></data>
   <data name="Filter_Sort" xml:space="preserve"><value>Třídit:</value></data>
@@ -236,6 +237,9 @@
   <data name="Hint_FromAllVotes" xml:space="preserve"><value>dle hlasování všech</value></data>
   <data name="Hint_NoComments" xml:space="preserve"><value>Zatím žádné komentáře.</value></data>
   <data name="Btn_OpenBlendDetail" xml:space="preserve"><value>Otevřít detail kávy →</value></data>
+  <data name="Btn_OpenDetail" xml:space="preserve"><value>Otevřít detail</value></data>
+  <data name="Stats_NavMyRatingsSub" xml:space="preserve"><value>{0} hodnocení</value></data>
+  <data name="Stats_NavSuppliersSub" xml:space="preserve"><value>{0} dodavatelů</value></data>
   <data name="Btn_AddCompare" xml:space="preserve"><value>+ Porovnat</value></data>
   <data name="Btn_EditMyRating" xml:space="preserve"><value>Upravit moje hodnocení</value></data>
   <data name="Heading_BlendDetail" xml:space="preserve"><value>Detail kávy</value></data>

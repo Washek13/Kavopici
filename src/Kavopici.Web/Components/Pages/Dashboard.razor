@@ -5,6 +5,7 @@
 @inject IUserService UserService
 @inject AppState AppState
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 @inject IThemedLocalizer L
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
@@ -70,6 +71,7 @@ else
                     var statsRow = blendStatsByBlendId.GetValueOrDefault(session.BlendId);
 
                     <div class="coffee-card @(focusedSessionId == sessionId ? "focused" : "")"
+                         id="@($"card-{sessionId}")"
                          tabindex="0"
                          @onclick="() => SetFocus(sessionId)"
                          @onkeydown="e => OnCardKeyDown(e, sessionId)">
@@ -87,6 +89,10 @@ else
                                     <kbd>1</kbd>–<kbd>0</kbd>
                                 </div>
                             }
+                            <button class="btn-icon" style="border:none;background:none;font-size:14px;color:var(--coffee-medium);"
+                                    title="@L["Btn_OpenDetail"]"
+                                    @onclick="() => GoToBlend(session.BlendId)"
+                                    @onclick:stopPropagation="true">↗</button>
                         </div>
 
                         <BlendCard Blend="session.Blend" SessionComment="@session.Comment" Locked="!voted" />
@@ -99,7 +105,8 @@ else
                                 <RatingForm SessionId="@sessionId"
                                             BlendId="@session.BlendId"
                                             ExistingRating="@existing"
-                                            OnRatingSubmitted="() => OnTodayRatingSubmitted(sessionId)" />
+                                            OnRatingSubmitted="() => OnTodayRatingSubmitted(sessionId)"
+                                            OnRegister="rf => RegisterRatingForm(sessionId, rf)" />
                             </div>
                         </div>
 
@@ -293,14 +300,42 @@ else
         InvokeAsync(LoadAsync);
     }
 
-    private void SetFocus(int sessionId) => focusedSessionId = sessionId;
+    private Dictionary<int, RatingForm> ratingFormRefs = new();
+    private bool firstFocusDone;
 
-    private void OnCardKeyDown(KeyboardEventArgs e, int sessionId)
+    private void RegisterRatingForm(int sessionId, RatingForm? form)
     {
-        // Tab between cards - implemented via card tabindex; arrow keys not used to avoid clobbering native scroll.
-        if (e.Key == "Tab")
+        if (form == null) ratingFormRefs.Remove(sessionId);
+        else ratingFormRefs[sessionId] = form;
+    }
+
+    private async Task SetFocus(int sessionId)
+    {
+        focusedSessionId = sessionId;
+        try { await JS.InvokeVoidAsync("kavopici.focusElement", $"card-{sessionId}"); } catch { }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstFocusDone && todaySessions.Count > 0)
         {
-            // Let browser handle natural Tab order
+            firstFocusDone = true;
+            try { await JS.InvokeVoidAsync("kavopici.focusElement", $"card-{focusedSessionId}"); } catch { }
+        }
+    }
+
+    private async Task OnCardKeyDown(KeyboardEventArgs e, int sessionId)
+    {
+        if (!ratingFormRefs.TryGetValue(sessionId, out var rf)) return;
+
+        if (e.Key.Length == 1 && e.Key[0] >= '0' && e.Key[0] <= '9')
+        {
+            var stars = e.Key[0] == '0' ? 10 : (e.Key[0] - '0');
+            await rf.SetStarsAsync(stars);
+        }
+        else if (e.Key == "Enter")
+        {
+            await rf.SubmitFromShortcutAsync();
         }
     }
 

@@ -62,7 +62,7 @@
             {
                 var lx = cx + Math.Cos(am) * (r - 12);
                 var ly = cy + Math.Sin(am) * (r - 12);
-                <text x="@Fmt(lx)" y="@Fmt(ly)" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="@(isActive ? "#fff" : "var(--coffee-medium)")">@cnt</text>
+                <g><text x="@Fmt(lx)" y="@Fmt(ly)" text-anchor="middle" dominant-baseline="middle" font-size="11" font-weight="700" fill="@(isActive ? "#fff" : "var(--coffee-medium)")">@cnt</text></g>
             }
         </g>
     }

@@ -46,30 +46,31 @@ public static class TastingNoteHelpers
 
     private static readonly Dictionary<string, string> _byCzech = new()
     {
-        { "Ovocné", "#C2185B" },
-        { "Oříškové", "#8D6E63" },
-        { "Čokoláda", "#5D4037" },
-        { "Karamel", "#D4A017" },
-        { "Květinové", "#9C27B0" },
-        { "Kořeněné", "#BF360C" },
-        { "Citrusové", "#F9A825" },
-        { "Med", "#FF8F00" },
-        // Tea
-        { "Trávové", "#7CB342" },
-        { "Zemité", "#6D4C41" },
-        { "Dřevité", "#5D4037" },
-        { "Sladké", "#FF8F00" }
+        // Coffee seed names (KavopiciDbContext)
+        { "Ovocná", "#C2185B" },
+        { "Ořechová", "#8D6E63" },
+        { "Čokoládová", "#5D4037" },
+        { "Karamelová", "#D4A017" },
+        { "Květinová", "#9C27B0" },
+        { "Kořeněná", "#BF360C" },
+        { "Citrusová", "#F9A825" },
+        { "Medová", "#FF8F00" },
+        // Tea seed names (AppConfigService)
+        { "Travnatá", "#7CB342" },
+        { "Zemitá", "#6D4C41" },
+        { "Dřevitá", "#5D4037" },
+        { "Sladká", "#FF8F00" }
     };
 
     public static IReadOnlyList<string> CoffeeNoteNames { get; } = new[]
     {
-        "Ovocné", "Oříškové", "Čokoláda", "Karamel",
-        "Květinové", "Kořeněné", "Citrusové", "Med"
+        "Ovocná", "Ořechová", "Čokoládová", "Karamelová",
+        "Květinová", "Kořeněná", "Citrusová", "Medová"
     };
 
     public static IReadOnlyList<string> TeaNoteNames { get; } = new[]
     {
-        "Květinové", "Ovocné", "Trávové", "Oříškové",
-        "Zemité", "Dřevité", "Kořeněné", "Sladké"
+        "Květinová", "Ovocná", "Travnatá", "Ořechová",
+        "Zemitá", "Dřevitá", "Kořeněná", "Sladká"
     };
 }

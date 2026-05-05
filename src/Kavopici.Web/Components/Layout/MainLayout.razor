@@ -3,9 +3,6 @@
 @inject AppState AppState
 @inject UpdateState UpdateState
 @inject IUpdateService UpdateService
-@inject ISessionService SessionService
-@inject IRatingService RatingService
-@inject IUserService UserService
 @inject NavigationManager Nav
 @inject IJSRuntime JS
 @inject IThemedLocalizer L
@@ -46,7 +43,7 @@
                     }
                     else
                     {
-                        <span>☕</span>
+                        <img src="icon-32.png" alt="" />
                     }
                 </span>
                 <span class="header-title">@L["Brand_AppName"]</span>
@@ -61,14 +58,6 @@
                 }
             </nav>
             <div class="header-spacer"></div>
-            @if (sessionRunning)
-            {
-                <div class="header-pill" title="@L["Live_SessionRunning"]">
-                    <span class="pulse-dot"></span>
-                    <span>@L["Live_SessionRunning"]</span>
-                    <span class="pill-count">@votedCount/@activeUserCount</span>
-                </div>
-            }
             <div class="header-user">
                 <UserInitials Name="@AppState.CurrentUser!.Name" Size="28" />
                 <span class="user-name">@AppState.CurrentUser!.Name</span>
@@ -91,7 +80,7 @@
         </header>
     }
 
-    <main class="app-main wide" style="padding:@(IsAdminRoute() ? "0" : "22px 28px");max-width:@(IsAdminRoute() ? "none" : "1620px");">
+    <main class="app-main wide">
         @Body
     </main>
 </div>
@@ -99,9 +88,6 @@
 @code {
     private bool isDownloading;
     private string currentCulture = System.Globalization.CultureInfo.CurrentUICulture.Name;
-    private bool sessionRunning;
-    private int votedCount;
-    private int activeUserCount;
 
     protected override void OnInitialized()
     {
@@ -111,47 +97,14 @@
         Nav.LocationChanged += OnLocationChanged;
     }
 
-    protected override async Task OnParametersSetAsync()
+    private void OnAppStateChanged()
     {
-        await RefreshLiveSessionAsync();
+        InvokeAsync(StateHasChanged);
     }
 
-    private async void OnAppStateChanged()
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
-        await RefreshLiveSessionAsync();
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private async void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
-    {
-        await RefreshLiveSessionAsync();
-        await InvokeAsync(StateHasChanged);
-    }
-
-    private async Task RefreshLiveSessionAsync()
-    {
-        if (!AppState.IsLoggedIn) { sessionRunning = false; return; }
-        try
-        {
-            var sessions = await SessionService.GetTodaySessionsAsync();
-            sessionRunning = sessions.Count > 0;
-            if (!sessionRunning) return;
-
-            var users = await UserService.GetActiveUsersAsync();
-            activeUserCount = users.Count;
-
-            var voters = new HashSet<int>();
-            foreach (var s in sessions)
-            {
-                var ratings = await RatingService.GetRatingsForSessionAsync(s.Id);
-                foreach (var r in ratings) voters.Add(r.UserId);
-            }
-            votedCount = voters.Count;
-        }
-        catch
-        {
-            sessionRunning = false;
-        }
+        InvokeAsync(StateHasChanged);
     }
 
     private void OnUpdateStateChanged()
@@ -203,7 +156,6 @@
         return path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
     }
 
-    private bool IsAdminRoute() => IsRoute("/admin");
 
     private void GoToDashboard() => Nav.NavigateTo("/dashboard");
     private void GoToStatistics() => Nav.NavigateTo("/statistics");

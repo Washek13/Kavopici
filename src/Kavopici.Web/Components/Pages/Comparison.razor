@@ -36,10 +36,8 @@ else
     }
     else
     {
-        @{
-            var visible = filledCount + (filledCount < 4 ? 1 : 0);
-            var template = $"repeat({visible}, minmax(220px, 1fr))";
-        }
+        var visible = filledCount + (filledCount < 4 ? 1 : 0);
+        var template = $"repeat({visible}, minmax(220px, 1fr))";
         <div class="comparison-grid-cols" style="grid-template-columns:@template;">
             @for (var i = 0; i < slots.Count && slots[i] != null; i++)
             {
@@ -54,10 +52,7 @@ else
                         <div style="display:flex;align-items:flex-start;gap:10px;">
                             <div style="font-size:38px;line-height:1;">☕</div>
                             <div style="flex:1;min-width:0;">
-                                @if (!string.IsNullOrEmpty(c.Origin))
-                                {
-                                    <div style="font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:var(--coffee-medium);font-weight:700;">@c.Origin</div>
-                                }
+                                <div class="col-origin">@c.Origin</div>
                                 <div style="font-family:Georgia,serif;font-size:18px;color:var(--coffee-dark);font-weight:700;line-height:1.15;margin-top:1px;">@c.BlendName</div>
                                 <div style="font-size:11.5px;color:var(--coffee-medium);margin-top:3px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
                                     <span>@c.Roaster</span>•<RoastBadge Level="c.RoastLevel" />
@@ -106,7 +101,9 @@ else
                     </div>
                     <div class="metric-row">
                         <div class="lbl">@L["Comp_Trend"]</div>
-                        <Sparkline Data="trend" W="180" H="42" Color="@color" />
+                        <div style="min-height:42px;display:flex;align-items:center;">
+                            <Sparkline Data="trend" W="180" H="42" Color="@color" />
+                        </div>
                     </div>
                     <div class="metric-row">
                         <div class="lbl">@L["Comp_DistributionVotes"]</div>

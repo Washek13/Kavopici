@@ -50,24 +50,22 @@
 else
 {
     <div class="panel">
-        <div class="flex items-center justify-between">
-            <div>
-                <StarRating Value="@selectedStars" ReadOnly="true" />
-                @if (!string.IsNullOrEmpty(comment))
+        <StarRating Value="@selectedStars" ReadOnly="true" />
+        @if (!string.IsNullOrEmpty(comment))
+        {
+            <p class="mt-8" style="font-style:italic;color:var(--coffee-medium);">@comment</p>
+        }
+        @if (selectedNoteIds.Count > 0)
+        {
+            <div class="tasting-notes mt-8">
+                @foreach (var note in availableNotes.Where(n => selectedNoteIds.Contains(n.Id)))
                 {
-                    <p class="mt-8" style="font-style:italic;color:var(--coffee-medium);">@comment</p>
-                }
-                @if (selectedNoteIds.Count > 0)
-                {
-                    <div class="tasting-notes mt-8">
-                        @foreach (var note in availableNotes.Where(n => selectedNoteIds.Contains(n.Id)))
-                        {
-                            <span class="note-tag selected readonly">@L[$"TastingNote_{note.Id}"]</span>
-                        }
-                    </div>
+                    <span class="note-tag selected readonly">@L[$"TastingNote_{note.Id}"]</span>
                 }
             </div>
-            <button class="btn btn-outline" @onclick="StartEdit">@L["Btn_Edit"]</button>
+        }
+        <div class="mt-8">
+            <button class="btn btn-outline btn-sm" @onclick="StartEdit">@L["Btn_Edit"]</button>
         </div>
     </div>
 }
@@ -77,6 +75,7 @@ else
     [Parameter, EditorRequired] public int BlendId { get; set; }
     [Parameter] public Rating? ExistingRating { get; set; }
     [Parameter] public EventCallback OnRatingSubmitted { get; set; }
+    [Parameter] public EventCallback<RatingForm> OnRegister { get; set; }
 
     private List<TastingNote> availableNotes = new();
     private HashSet<int> selectedNoteIds = new();
@@ -93,6 +92,8 @@ else
     {
         availableNotes = await RatingService.GetAllTastingNotesAsync(AppState.CurrentTheme);
         PopulateFromRating(ExistingRating);
+        if (OnRegister.HasDelegate)
+            await OnRegister.InvokeAsync(this);
     }
 
     private void PopulateFromRating(Rating? rating)
@@ -178,5 +179,21 @@ else
         }
         isEditing = false;
         hasRated = true;
+    }
+
+    public Task SetStarsAsync(int stars)
+    {
+        if (stars < 1 || stars > 10) return Task.CompletedTask;
+        if (hasRated && !isEditing) return Task.CompletedTask;
+        selectedStars = stars;
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    public Task SubmitFromShortcutAsync()
+    {
+        if (hasRated && !isEditing) return Task.CompletedTask;
+        if (selectedStars < 1) return Task.CompletedTask;
+        return SubmitRating();
     }
 }

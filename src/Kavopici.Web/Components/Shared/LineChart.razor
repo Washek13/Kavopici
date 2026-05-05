@@ -18,7 +18,7 @@
                 <text x="@x" y="@(y - 12)" text-anchor="middle" font-size="12" font-weight="700" fill="var(--coffee-dark)" font-family="Georgia, serif">@Data[i].ToString("F1", System.Globalization.CultureInfo.InvariantCulture)</text>
                 @if (Labels != null && i < Labels.Length)
                 {
-                    <text x="@x" y="@(H - 8)" text-anchor="middle" font-size="10" fill="var(--coffee-medium)">@Labels[i]</text>
+                    <g><text x="@x" y="@(H - 8)" text-anchor="middle" font-size="10" fill="var(--coffee-medium)">@Labels[i]</text></g>
                 }
             </g>
         }

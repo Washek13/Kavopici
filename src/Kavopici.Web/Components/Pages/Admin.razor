@@ -3,7 +3,6 @@
 @inject IBlendService BlendService
 @inject ISessionService SessionService
 @inject IRatingService RatingService
-@inject ICsvExportService CsvExportService
 @inject AppState AppState
 @inject NavigationManager Nav
 @inject IJSRuntime JS
@@ -12,61 +11,34 @@
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 @if (!AppState.IsAdmin) { Nav.NavigateTo("/dashboard"); return; }
 
-<div class="admin-shell">
-    <div class="admin-topbar">
-        <div style="display:flex;align-items:center;gap:8px;font-family:Georgia,serif;font-size:18px;font-weight:bold;letter-spacing:2px;color:var(--amber-gold);">
-            <div class="header-logo-circle" style="width:24px;height:24px;font-size:14px;">
-                @if (AppState.CurrentTheme == Theme.Tea) { <img src="icon-tea.svg" alt="" style="width:18px;height:18px;" /> }
-                else { <span>☕</span> }
-            </div>
-            @L["Brand_AppName"]
-        </div>
-        <div class="pill">@L["Admin_PillTitle"]</div>
-        <div style="flex:1;"></div>
-        <button class="back-link" @onclick="GoBackToApp">@L["Admin_BackToApp"]</button>
-    </div>
-    <div class="admin-body">
-        <aside class="admin-side">
-            <div class="head">
-                <div class="lbl">@L["Admin_Heading"]</div>
-                <div class="title">@L["Brand_AppName"]</div>
-            </div>
-            <nav style="padding:10px 0;flex:1;">
-                <button class="nav-item @(view == "session" ? "active" : "")" @onclick='() => view = "session"'>
-                    <div class="icon">☕</div>
-                    <div style="min-width:0;flex:1;">
-                        <div class="nm">@L["Admin_TodaySession"]</div>
-                        <div class="sub">@DateTime.Today.ToString("d. M.") · @(currentSessions.Count > 0 ? L["Admin_Running"].ToString().ToLower() : "—")</div>
-                    </div>
-                </button>
-                <button class="nav-item @(view == "library" ? "active" : "")" @onclick='() => view = "library"'>
-                    <div class="icon">📚</div>
-                    <div style="min-width:0;flex:1;">
-                        <div class="nm">@L["Admin_Library"]</div>
-                        <div class="sub">@string.Format(L["Admin_BlendsCount"], allBlends.Count)</div>
-                    </div>
-                </button>
-                <button class="nav-item @(view == "users" ? "active" : "")" @onclick='() => view = "users"'>
-                    <div class="icon">👥</div>
-                    <div style="min-width:0;flex:1;">
-                        <div class="nm">@L["Admin_Users"]</div>
-                        <div class="sub">@string.Format(L["Admin_UsersCount"], allUsers.Count)</div>
-                    </div>
-                </button>
-            </nav>
-            @if (AppState.CurrentUser != null)
-            {
-                <div class="footer">
-                    <UserInitials Name="@AppState.CurrentUser.Name" Size="32" />
-                    <div style="flex:1;min-width:0;">
-                        <div class="nm" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@AppState.CurrentUser.Name</div>
-                        <div class="role">@L["Role_Admin"]</div>
-                    </div>
+<div class="stats-shell">
+    <aside class="side-nav">
+        <nav>
+            <button class="nav-item @(view == "session" ? "active" : "")" @onclick='() => view = "session"'>
+                <div class="icon">☕</div>
+                <div class="text">
+                    <div class="nm">@L["Admin_TodaySession"]</div>
+                    <div class="sub">@DateTime.Today.ToString("d. M.") · @(currentSessions.Count > 0 ? L["Admin_Running"].ToString().ToLower() : "—")</div>
                 </div>
-            }
-        </aside>
+            </button>
+            <button class="nav-item @(view == "library" ? "active" : "")" @onclick='() => view = "library"'>
+                <div class="icon">📚</div>
+                <div class="text">
+                    <div class="nm">@L["Admin_Library"]</div>
+                    <div class="sub">@string.Format(L["Admin_BlendsCount"], allBlends.Count)</div>
+                </div>
+            </button>
+            <button class="nav-item @(view == "users" ? "active" : "")" @onclick='() => view = "users"'>
+                <div class="icon">👥</div>
+                <div class="text">
+                    <div class="nm">@L["Admin_Users"]</div>
+                    <div class="sub">@string.Format(L["Admin_UsersCount"], allUsers.Count)</div>
+                </div>
+            </button>
+        </nav>
+    </aside>
 
-        <main class="admin-content">
+    <div class="stats-content">
             @if (errorMessage != null) { <div class="msg-error">@errorMessage</div> }
             @if (statusMessage != null) { <div class="msg-success">@statusMessage</div> }
 
@@ -83,12 +55,11 @@
                     @DateTime.Today.ToString("dddd d. M. yyyy") · @currentSessions.Count @CoffeeWord(currentSessions.Count)
                 </div>
 
-                <div style="display:grid;grid-template-columns:1fr 320px;gap:18px;align-items:flex-start;">
-                    <div>
-                        <div style="display:grid;grid-template-columns:42px minmax(180px,1.4fr) 100px minmax(180px,1.3fr) 290px 32px;gap:12px;padding:8px 14px;font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--coffee-medium);font-weight:700;margin-bottom:6px;">
+                <div style="display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:flex-start;">
+                    <div class="session-list-area" style="order:2;min-width:0;">
+                        <div class="session-row-head" style="display:grid;grid-template-columns:36px minmax(140px,1.4fr) minmax(140px,1.2fr) minmax(220px,260px) 28px;gap:10px;padding:8px 14px;font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--coffee-medium);font-weight:700;margin-bottom:6px;">
                             <div></div>
                             <div>@L["Label_Blend"]</div>
-                            <div>@L["Admin_SecretLabel"]</div>
                             <div>@L["Admin_AdminNote"]</div>
                             <div>@L["Label_Cleanup"]</div>
                             <div></div>
@@ -110,26 +81,15 @@
                                 var inactiveCleanup = session.CleanupPerson is { IsActive: false } cp ? cp : null;
                                 <div class="session-row">
                                     <div class="drag-handle">
-                                        <div class="grip">⋮⋮</div>
                                         <div class="idx">#@idx</div>
                                     </div>
-                                    <div style="display:flex;align-items:center;gap:10px;min-width:0;">
-                                        <div style="font-size:24px;line-height:1;">☕</div>
-                                        <div style="min-width:0;">
-                                            <div style="font-size:14px;font-weight:600;color:var(--coffee-dark);font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@session.Blend.Name</div>
-                                            <div style="font-size:11.5px;color:var(--coffee-medium);display:flex;gap:6px;align-items:center;">
-                                                @session.Blend.Roaster · <RoastBadge Level="session.Blend.RoastLevel" />
-                                            </div>
+                                    <div style="min-width:0;">
+                                        <div style="font-size:14px;font-weight:600;color:var(--coffee-dark);font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@session.Blend.Name</div>
+                                        <div style="font-size:11.5px;color:var(--coffee-medium);display:flex;gap:6px;align-items:center;min-width:0;">
+                                            <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;">@session.Blend.Supplier.Name</span>
+                                            <span>·</span>
+                                            <RoastBadge Level="session.Blend.RoastLevel" />
                                         </div>
-                                    </div>
-                                    <div>
-                                        @{
-                                            var hasNote = !string.IsNullOrWhiteSpace(session.Comment);
-                                        }
-                                        <button class="toggle @(hasNote ? "" : "on")" @onclick="() => ToggleSecret(sessionId)" disabled>
-                                            <span class="track"><span class="knob"></span></span>
-                                            <span class="lbl">@(hasNote ? L["Admin_Secret"] : L["Admin_Revealed"])</span>
-                                        </button>
                                     </div>
                                     <div>
                                         <input type="text" placeholder="@L["Admin_AdminNotePh"]"
@@ -169,30 +129,6 @@
                             }
                         }
 
-                        <div class="cleanup-auto-bar">
-                            <div style="font-size:20px;line-height:1;">🧽</div>
-                            <div class="text-block">
-                                <div class="lbl">@L["Admin_AutoCleanupTitle"]</div>
-                                <div class="sub">@L["Admin_AutoCleanupDesc"]</div>
-                            </div>
-                            <button class="btn btn-outline btn-sm" @onclick="RerollAll" disabled="@(currentSessions.Count == 0)">@L["Admin_RerollAll"]</button>
-                        </div>
-
-                        <div style="margin-top:14px;display:flex;align-items:center;gap:10px;padding:12px 16px;background:#fff;border:1px solid var(--border);border-radius:8px;">
-                            <div style="font-size:12.5px;color:var(--coffee-medium);">
-                                @L["Heading_AddCoffeeOfDay"]
-                            </div>
-                            <div style="flex:1;"></div>
-                            <select @bind="selectedBlendOfDayId" style="width:auto;flex:1;">
-                                <option value="0">@L["Placeholder_SelectBlend"]</option>
-                                @foreach (var b in allBlends.Where(b => !currentSessions.Any(s => s.BlendId == b.Id || (s.Blend.LinkedBlendId.HasValue && s.Blend.LinkedBlendId.Value == b.Id))))
-                                {
-                                    <option value="@b.Id">@b.Name (@b.Supplier.Name)</option>
-                                }
-                            </select>
-                            <button class="btn btn-accent btn-sm" @onclick="AddBlendOfDay" disabled="@(selectedBlendOfDayId == 0)">@L["Btn_AddCoffeeOfDay"]</button>
-                            <button class="btn btn-outline btn-sm" @onclick="ExportCsv">@L["Btn_ExportCsv"]</button>
-                        </div>
                     </div>
 
                     <div class="lib-search-panel">
@@ -202,7 +138,7 @@
                             <div style="font-size:11px;color:var(--silver);">@string.Format(L["Admin_AvailableCount"], availableForSession.Count)</div>
                         </div>
                         <div style="position:relative;margin-bottom:10px;">
-                            <input type="text" placeholder="@L["Filter_Search"]" @bind="librarySearch" @bind:event="oninput"
+                            <input type="text" placeholder="@L["Filter_SearchToday"]" @bind="librarySearch" @bind:event="oninput"
                                    style="padding-left:30px;background:var(--off-white);" />
                             <div style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--silver);font-size:13px;">🔍</div>
                         </div>
@@ -214,7 +150,7 @@
                                     <div style="font-size:18px;line-height:1;">☕</div>
                                     <div style="flex:1;min-width:0;">
                                         <div style="font-size:12.5px;color:var(--coffee-dark);font-weight:600;font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@c.Name</div>
-                                        <div style="font-size:10.5px;color:var(--coffee-medium);">@c.Roaster @if (!string.IsNullOrEmpty(c.Origin)) { <span> · @c.Origin</span> }</div>
+                                        <div style="font-size:10.5px;color:var(--coffee-medium);">@c.Supplier.Name @if (!string.IsNullOrEmpty(c.Origin)) { <span> · @c.Origin</span> }</div>
                                     </div>
                                     <div style="font-size:14px;color:var(--coffee-brown);font-weight:700;">+</div>
                                 </div>
@@ -303,7 +239,7 @@
                     </div>
                 </div>
 
-                <table class="data-table">
+                <div class="data-table-wrap"><table class="data-table">
                     <thead>
                         <tr>
                             <th>@L["Label_Blend"]</th>
@@ -390,7 +326,7 @@
                             </tr>
                         }
                     </tbody>
-                </table>
+                </table></div>
             }
             else if (view == "users")
             {
@@ -416,7 +352,7 @@
                     </div>
                 }
 
-                <table class="data-table">
+                <div class="data-table-wrap"><table class="data-table">
                     <thead>
                         <tr>
                             <th>@L["Label_Name"]</th>
@@ -452,9 +388,8 @@
                             </tr>
                         }
                     </tbody>
-                </table>
+                </table></div>
             }
-        </main>
     </div>
 </div>
 
@@ -493,18 +428,15 @@
     private int? editOriginalLinkedBlendId;
     private User? editBlendInactiveSupplier;
 
-    private int selectedBlendOfDayId;
-
     private string? errorMessage;
     private string? statusMessage;
 
     private List<CoffeeBlend> availableForSession =>
         allBlends.Where(b =>
-            !currentSessions.Any(s => s.BlendId == b.Id) &&
-            (string.IsNullOrEmpty(librarySearch)
-             || b.Name.Contains(librarySearch, StringComparison.OrdinalIgnoreCase)
-             || b.Roaster.Contains(librarySearch, StringComparison.OrdinalIgnoreCase)
-             || (b.Origin != null && b.Origin.Contains(librarySearch, StringComparison.OrdinalIgnoreCase))))
+            string.IsNullOrEmpty(librarySearch)
+            || b.Name.Contains(librarySearch, StringComparison.OrdinalIgnoreCase)
+            || (b.Supplier != null && b.Supplier.Name.Contains(librarySearch, StringComparison.OrdinalIgnoreCase))
+            || (b.Origin != null && b.Origin.Contains(librarySearch, StringComparison.OrdinalIgnoreCase)))
             .ToList();
 
     private List<CoffeeBlend> FilteredLibraryBlends()
@@ -714,21 +646,6 @@
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
-    private async Task AddBlendOfDay()
-    {
-        try
-        {
-            errorMessage = null;
-            if (selectedBlendOfDayId == 0) { errorMessage = L["Err_SelectBlend"]; return; }
-            await SessionService.AddBlendOfTheDayAsync(selectedBlendOfDayId, null);
-            var blend = allBlends.FirstOrDefault(b => b.Id == selectedBlendOfDayId);
-            statusMessage = L["Msg_CoffeeOfDayAdded", blend?.Name ?? ""];
-            selectedBlendOfDayId = 0;
-            await LoadCurrentSessions();
-        }
-        catch (Exception ex) { errorMessage = ex.Message; }
-    }
-
     private async Task AddBlendQuick(int blendId)
     {
         try
@@ -766,19 +683,6 @@
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
-    private async Task RerollAll()
-    {
-        try
-        {
-            errorMessage = null;
-            foreach (var s in currentSessions)
-                await SessionService.AssignRandomCleanupPersonAsync(s.Id);
-            statusMessage = L["Msg_CleanupAssigned", "·"];
-            await LoadCurrentSessions();
-        }
-        catch (Exception ex) { errorMessage = ex.Message; }
-    }
-
     private async Task OnCleanupSelectChanged(int sessionId, string? value)
     {
         if (!int.TryParse(value, out var userId)) return;
@@ -810,12 +714,6 @@
         await Task.CompletedTask;
     }
 
-    private void ToggleSecret(int sessionId)
-    {
-        // Placeholder — secret state in this app is implicit: blends with admin notes are "secret" until rated.
-        // No backend toggle exists; UI is read-only.
-    }
-
     private async Task ToggleCleanupCompleted(int sessionId, bool target)
     {
         try
@@ -835,18 +733,5 @@
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
-    private async Task ExportCsv()
-    {
-        try
-        {
-            errorMessage = null;
-            var bytes = await CsvExportService.GenerateCsvBytesAsync();
-            var fileName = $"kavopici_export_{DateTime.Now:yyyy-MM-dd}.csv";
-            await JS.InvokeVoidAsync("downloadFile", fileName, "text/csv", bytes);
-            statusMessage = L["Msg_DataExported"];
-        }
-        catch (Exception ex) { errorMessage = ex.Message; }
-    }
 
-    private void GoBackToApp() => Nav.NavigateTo("/dashboard");
 }
