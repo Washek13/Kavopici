@@ -20,7 +20,7 @@
 
     <div class="form-group">
         <label>@L["Label_CommentOptional"]</label>
-        <textarea @bind="comment" placeholder="@L["Placeholder_HowDidItTaste"]"></textarea>
+        <textarea @bind="comment" @onkeydown:stopPropagation="true" placeholder="@L["Placeholder_HowDidItTaste"]"></textarea>
     </div>
 
     <div class="form-group">
