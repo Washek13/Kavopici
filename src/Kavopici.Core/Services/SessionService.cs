@@ -66,6 +66,20 @@ public class SessionService : ISessionService
         await context.SaveChangesAsync();
     }
 
+    public async Task<TastingSession> SetSessionCommentAsync(int sessionId, string? comment)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var session = await context.TastingSessions.FindAsync(sessionId);
+        if (session == null || !session.IsActive)
+            throw new InvalidOperationException("Sezení nebylo nalezeno.");
+
+        session.Comment = TrimComment(comment);
+        await context.SaveChangesAsync();
+
+        return session;
+    }
+
     public async Task<List<TastingSession>> GetSessionHistoryAsync()
     {
         await using var context = await _contextFactory.CreateDbContextAsync();

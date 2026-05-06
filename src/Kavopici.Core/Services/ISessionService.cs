@@ -7,6 +7,7 @@ public interface ISessionService
     Task<List<TastingSession>> GetTodaySessionsAsync();
     Task<TastingSession> AddBlendOfTheDayAsync(int blendId, string? comment = null);
     Task RemoveBlendOfTheDayAsync(int sessionId);
+    Task<TastingSession> SetSessionCommentAsync(int sessionId, string? comment);
     Task<List<TastingSession>> GetSessionHistoryAsync();
     Task<TastingSession> AssignRandomCleanupPersonAsync(int sessionId);
     Task<TastingSession> SetCleanupPersonAsync(int sessionId, int userId);

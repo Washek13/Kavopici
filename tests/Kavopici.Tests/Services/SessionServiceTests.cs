@@ -162,6 +162,51 @@ public class SessionServiceTests : IDisposable
         Assert.Equal("Dobrá káva", session.Comment);
     }
 
+    // --- SetSessionCommentAsync tests ---
+
+    [Fact]
+    public async Task SetSessionCommentAsync_PersistsComment()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await _sessionService.SetSessionCommentAsync(session.Id, "Admin note");
+
+        await using var ctx = _factory.CreateDbContext();
+        var stored = await ctx.TastingSessions.FindAsync(session.Id);
+        Assert.Equal("Admin note", stored!.Comment);
+    }
+
+    [Fact]
+    public async Task SetSessionCommentAsync_TrimsAndNormalizesEmpty()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id, "Existing");
+
+        await _sessionService.SetSessionCommentAsync(session.Id, "  Edited  ");
+        await using (var ctx = _factory.CreateDbContext())
+        {
+            var stored = await ctx.TastingSessions.FindAsync(session.Id);
+            Assert.Equal("Edited", stored!.Comment);
+        }
+
+        await _sessionService.SetSessionCommentAsync(session.Id, "   ");
+        await using (var ctx = _factory.CreateDbContext())
+        {
+            var stored = await ctx.TastingSessions.FindAsync(session.Id);
+            Assert.Null(stored!.Comment);
+        }
+    }
+
+    [Fact]
+    public async Task SetSessionCommentAsync_UnknownSession_Throws()
+    {
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.SetSessionCommentAsync(9999, "x"));
+    }
+
     // --- RemoveBlendOfTheDayAsync tests ---
 
     [Fact]

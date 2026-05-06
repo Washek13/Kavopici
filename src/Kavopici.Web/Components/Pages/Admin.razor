@@ -703,12 +703,14 @@
 
     private async Task OnSessionNoteChanged(int sessionId, string? value)
     {
-        // Update the in-memory comment; persistence would require a service method, so re-add note via remove/re-add
-        // Keep the existing model immutable: just track local change without persisting until backend supports edit.
-        // For now: warn user this isn't persisted (no-op).
-        var session = currentSessions.FirstOrDefault(s => s.Id == sessionId);
-        if (session != null) session.Comment = value;
-        await Task.CompletedTask;
+        try
+        {
+            errorMessage = null;
+            var updated = await SessionService.SetSessionCommentAsync(sessionId, value);
+            var session = currentSessions.FirstOrDefault(s => s.Id == sessionId);
+            if (session != null) session.Comment = updated.Comment;
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
     }
 
     private async Task ToggleCleanupCompleted(int sessionId, bool target)
