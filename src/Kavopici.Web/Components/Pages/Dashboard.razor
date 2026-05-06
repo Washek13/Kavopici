@@ -89,10 +89,13 @@ else
                                     <kbd>1</kbd>–<kbd>0</kbd>
                                 </div>
                             }
-                            <button class="btn-icon" style="border:none;background:none;font-size:14px;color:var(--coffee-medium);"
-                                    title="@L["Btn_OpenDetail"]"
-                                    @onclick="() => GoToBlend(session.BlendId)"
-                                    @onclick:stopPropagation="true">↗</button>
+                            @if (voted)
+                            {
+                                <button class="btn-icon" style="border:none;background:none;font-size:14px;color:var(--coffee-medium);"
+                                        title="@L["Btn_OpenDetail"]"
+                                        @onclick="() => GoToBlend(session.BlendId)"
+                                        @onclick:stopPropagation="true">↗</button>
+                            }
                         </div>
 
                         <BlendCard Blend="session.Blend" SessionComment="@session.Comment" Locked="!voted" />
