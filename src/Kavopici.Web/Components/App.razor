@@ -52,7 +52,9 @@
         window.kavopici = window.kavopici || {};
         window.kavopici.focusElement = function (id) {
             var el = document.getElementById(id);
-            if (el && typeof el.focus === 'function') el.focus();
+            if (!el || typeof el.focus !== 'function') return;
+            if (document.activeElement && el.contains(document.activeElement)) return;
+            el.focus();
         };
     </script>
 </body>
