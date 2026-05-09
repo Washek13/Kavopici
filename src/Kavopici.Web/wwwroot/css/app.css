@@ -716,7 +716,7 @@ textarea { resize: vertical; min-height: 60px; }
 }
 .stats-table-head, .stats-row {
     display: grid;
-    grid-template-columns: minmax(180px, 1.6fr) 84px 64px 90px 150px 100px;
+    grid-template-columns: minmax(180px, 1.6fr) 84px 64px 90px 90px 150px 100px;
     padding: 10px 14px;
     gap: 10px;
     align-items: center;

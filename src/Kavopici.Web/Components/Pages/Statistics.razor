@@ -157,6 +157,7 @@ else if (tab == 0)
                     <option value="my">@L["Sort_MyRating"]</option>
                     <option value="n">@L["Sort_VoteCount"]</option>
                     <option value="ppk">@L["Sort_PricePerKg"]</option>
+                    <option value="pps">@L["Label_PricePerStar"]</option>
                     <option value="ctrl">@L["Sort_Controversy"]</option>
                     <option value="name">@L["Label_Blend"]</option>
                 </select>
@@ -172,6 +173,7 @@ else if (tab == 0)
                     <div class="text-center">@L["Col_Avg"]</div>
                     <div class="text-right">@L["Col_Votes"]</div>
                     <div class="text-right">@L["Sort_PricePerKg"]</div>
+                    <div class="text-right">@L["Label_PricePerStar"]</div>
                     <div>@L["Label_Controversy"]</div>
                     <div>@L["Col_YouVsAvg"]</div>
                 </div>
@@ -203,6 +205,9 @@ else if (tab == 0)
                         <div class="text-right text-medium">@r.RatingCount×</div>
                         <div class="text-right" style="font-family:Georgia,serif;font-size:14px;color:var(--coffee-dark);">
                             @(r.PricePerKg.HasValue ? r.PricePerKg.Value.ToString("F0") : "—")
+                        </div>
+                        <div class="text-right" style="font-family:Georgia,serif;font-size:14px;color:var(--coffee-dark);">
+                            @(r.PricePerformance.HasValue ? r.PricePerformance.Value.ToString("F0") : "—")
                         </div>
                         <div>
                             <ControversyBadge Level="r.ControversyLevel" Gauge="true" />
@@ -605,6 +610,7 @@ else if (tab == 3)
             "name" => list.OrderBy(r => r.BlendName),
             "n"    => list.OrderByDescending(r => r.RatingCount),
             "ppk"  => list.OrderByDescending(r => r.PricePerKg ?? 0),
+            "pps"  => list.OrderByDescending(r => r.PricePerformance ?? 0),
             "ctrl" => list.OrderByDescending(r => r.ControversyLevel ?? -1),
             "my"   => list.OrderByDescending(r => myStarsByBlend.GetValueOrDefault(r.BlendId, 0)),
             _      => list.OrderByDescending(r => r.AverageRating),
