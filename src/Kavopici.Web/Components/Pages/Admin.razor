@@ -142,6 +142,7 @@
                     <div class="lib-search-panel">
                         <div class="head">
                             <div class="section-label">@L["Admin_AddFromLibrary"]</div>
+                            <button class="btn-icon spin-on-hover" title="@L["Admin_RandomBlend"]" @onclick="AddRandomBlend">🎲</button>
                             <div style="flex:1;"></div>
                             <div style="font-size:11px;color:var(--silver);">@string.Format(L["Admin_AvailableCount"], availableForSession.Count)</div>
                         </div>
@@ -680,6 +681,18 @@
             await SessionService.AddBlendOfTheDayAsync(blendId, null, pendingDoseMultiplier);
             var blend = allBlends.FirstOrDefault(b => b.Id == blendId);
             statusMessage = L["Msg_CoffeeOfDayAdded", blend?.Name ?? ""];
+            await LoadCurrentSessions();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task AddRandomBlend()
+    {
+        try
+        {
+            errorMessage = null;
+            var added = await SessionService.AddRandomBlendOfTheDayAsync(pendingDoseMultiplier);
+            statusMessage = L["Msg_RandomBlendAdded", added.Blend?.Name ?? ""];
             await LoadCurrentSessions();
         }
         catch (Exception ex) { errorMessage = ex.Message; }

@@ -624,6 +624,192 @@ public class SessionServiceTests : IDisposable
         Assert.InRange(carolCount, 60, 140);
     }
 
+    // --- AddRandomBlendOfTheDayAsync tests ---
+
+    private async Task<int> SeedHistoricalSessionWithDoseAsync(int blendId, decimal doseMultiplier, DateOnly date, DateTime createdAt)
+    {
+        using var context = _factory.CreateDbContext();
+        var session = new TastingSession
+        {
+            BlendId = blendId,
+            Date = date,
+            IsActive = true,
+            DoseMultiplier = doseMultiplier,
+            CreatedAt = createdAt
+        };
+        context.TastingSessions.Add(session);
+        await context.SaveChangesAsync();
+        return session.Id;
+    }
+
+    [Fact]
+    public async Task AddRandomBlendOfTheDayAsync_AddsSessionToToday()
+    {
+        var supplier = await _userService.CreateUserAsync("Supplier", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, supplier.Id);
+
+        var session = await _sessionService.AddRandomBlendOfTheDayAsync();
+
+        Assert.Equal(blend.Id, session.BlendId);
+        Assert.Equal(DateOnly.FromDateTime(DateTime.Today), session.Date);
+        Assert.True(session.IsActive);
+        Assert.Equal(1.0m, session.DoseMultiplier);
+        Assert.NotNull(session.Blend);
+        Assert.NotNull(session.Blend.Supplier);
+
+        var todaySessions = await _sessionService.GetTodaySessionsAsync();
+        Assert.Single(todaySessions);
+    }
+
+    [Fact]
+    public async Task AddRandomBlendOfTheDayAsync_UsesProvidedDoseMultiplier()
+    {
+        var supplier = await _userService.CreateUserAsync("Supplier", isAdmin: true);
+        await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, supplier.Id);
+
+        var session = await _sessionService.AddRandomBlendOfTheDayAsync(2m);
+
+        Assert.Equal(2m, session.DoseMultiplier);
+    }
+
+    [Fact]
+    public async Task AddRandomBlendOfTheDayAsync_RejectsInvalidDoseMultiplier()
+    {
+        var supplier = await _userService.CreateUserAsync("Supplier", isAdmin: true);
+        await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, supplier.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.AddRandomBlendOfTheDayAsync(1.5m));
+    }
+
+    [Fact]
+    public async Task AddRandomBlendOfTheDayAsync_ThrowsWhenNoActiveBlends()
+    {
+        await _userService.CreateUserAsync("Supplier", isAdmin: true);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.AddRandomBlendOfTheDayAsync());
+    }
+
+    [Fact]
+    public async Task AddRandomBlendOfTheDayAsync_ExcludesBlendsAlreadyAddedToday()
+    {
+        var supplier = await _userService.CreateUserAsync("Supplier", isAdmin: true);
+        var blendA = await _blendService.CreateBlendAsync("A", "Roaster", null, RoastLevel.Medium, supplier.Id);
+        var blendB = await _blendService.CreateBlendAsync("B", "Roaster", null, RoastLevel.Medium, supplier.Id);
+
+        // A is already on today's list — picker should always choose B.
+        await _sessionService.AddBlendOfTheDayAsync(blendA.Id);
+
+        for (int i = 0; i < 30; i++)
+        {
+            var session = await _sessionService.AddRandomBlendOfTheDayAsync();
+            Assert.Equal(blendB.Id, session.BlendId);
+            // Clean up so the next iteration sees the same starting state.
+            await _sessionService.RemoveBlendOfTheDayAsync(session.Id);
+        }
+    }
+
+    [Fact]
+    public async Task AddRandomBlendOfTheDayAsync_FallsBackWhenAllBlendsAlreadyOnToday()
+    {
+        var supplier = await _userService.CreateUserAsync("Supplier", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Only", "Roaster", null, RoastLevel.Medium, supplier.Id);
+
+        await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        // The only blend is already used today — should still succeed and pick that blend.
+        var session = await _sessionService.AddRandomBlendOfTheDayAsync();
+        Assert.Equal(blend.Id, session.BlendId);
+    }
+
+    [Fact]
+    public async Task AddRandomBlendOfTheDayAsync_BiasesAwayFromHighDoseSuppliers()
+    {
+        var supplierHigh = await _userService.CreateUserAsync("SupplierHigh", isAdmin: true);
+        var supplierLow = await _userService.CreateUserAsync("SupplierLow");
+        var blendHigh = await _blendService.CreateBlendAsync("HighBlend", "Roaster", null, RoastLevel.Medium, supplierHigh.Id);
+        var blendLow = await _blendService.CreateBlendAsync("LowBlend", "Roaster", null, RoastLevel.Medium, supplierLow.Id);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        // SupplierHigh has accumulated 20 dose-equivalents in the window (5 sessions × 4× dose).
+        for (int i = 0; i < 5; i++)
+            await SeedHistoricalSessionWithDoseAsync(blendHigh.Id, 4m, today.AddDays(-10), DateTime.UtcNow.AddDays(-10).AddSeconds(i));
+
+        // Roll many times and tally picks. Weights: high = 1/(1+20) ≈ 0.048, low = 1/(1+0) = 1.0.
+        // Expected P(low) ≈ 0.954. Loose lower bound to avoid flakiness.
+        int highCount = 0, lowCount = 0;
+        for (int i = 0; i < 200; i++)
+        {
+            var session = await _sessionService.AddRandomBlendOfTheDayAsync();
+            if (session.BlendId == blendHigh.Id) highCount++;
+            else if (session.BlendId == blendLow.Id) lowCount++;
+            await _sessionService.RemoveBlendOfTheDayAsync(session.Id); // reset today-exclusion
+        }
+
+        Assert.True(lowCount > 170, $"Low-dose supplier's blend should be picked >85% of the time, got {lowCount}/200.");
+        Assert.True(highCount < 30, $"High-dose supplier's blend should be picked <15% of the time, got {highCount}/200.");
+    }
+
+    [Fact]
+    public async Task AddRandomBlendOfTheDayAsync_SingleHighDoseOutweighsMultipleLowDoses()
+    {
+        // Demonstrates the dose-vs-count distinction: one 4× session contributes more
+        // to the supplier's weight than four 1× sessions from a different supplier.
+        var supplierA = await _userService.CreateUserAsync("SupplierA", isAdmin: true);
+        var supplierB = await _userService.CreateUserAsync("SupplierB");
+        var blendA = await _blendService.CreateBlendAsync("A", "Roaster", null, RoastLevel.Medium, supplierA.Id);
+        var blendB = await _blendService.CreateBlendAsync("B", "Roaster", null, RoastLevel.Medium, supplierB.Id);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        // SupplierA: one 4× session → total dose = 4.
+        await SeedHistoricalSessionWithDoseAsync(blendA.Id, 4m, today.AddDays(-5), DateTime.UtcNow.AddDays(-5));
+        // SupplierB: three 1× sessions → total dose = 3.
+        for (int i = 0; i < 3; i++)
+            await SeedHistoricalSessionWithDoseAsync(blendB.Id, 1m, today.AddDays(-3), DateTime.UtcNow.AddDays(-3).AddSeconds(i));
+
+        // A's weight = 1/5 = 0.2. B's weight = 1/4 = 0.25. P(A) ≈ 44.4%, P(B) ≈ 55.6%.
+        // Even though A has fewer sessions (1 vs 3), A's higher total dose makes it less likely.
+        int aCount = 0, bCount = 0;
+        for (int i = 0; i < 400; i++)
+        {
+            var session = await _sessionService.AddRandomBlendOfTheDayAsync();
+            if (session.BlendId == blendA.Id) aCount++;
+            else if (session.BlendId == blendB.Id) bCount++;
+            await _sessionService.RemoveBlendOfTheDayAsync(session.Id);
+        }
+
+        Assert.True(bCount > aCount,
+            $"B (lower total dose, more sessions) should still be picked more than A (higher total dose, fewer sessions). Got A={aCount}, B={bCount}.");
+    }
+
+    [Fact]
+    public async Task AddRandomBlendOfTheDayAsync_IgnoresDosesOutside30DayWindow()
+    {
+        var supplierOld = await _userService.CreateUserAsync("SupplierOld", isAdmin: true);
+        var supplierNew = await _userService.CreateUserAsync("SupplierNew");
+        var blendOld = await _blendService.CreateBlendAsync("Old", "Roaster", null, RoastLevel.Medium, supplierOld.Id);
+        var blendNew = await _blendService.CreateBlendAsync("New", "Roaster", null, RoastLevel.Medium, supplierNew.Id);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        // SupplierOld accumulated 100 dose-units, but 60 days ago — outside the window, so weight should be equal.
+        for (int i = 0; i < 25; i++)
+            await SeedHistoricalSessionWithDoseAsync(blendOld.Id, 4m, today.AddDays(-60), DateTime.UtcNow.AddDays(-60).AddSeconds(i));
+
+        int oldCount = 0, newCount = 0;
+        for (int i = 0; i < 200; i++)
+        {
+            var session = await _sessionService.AddRandomBlendOfTheDayAsync();
+            if (session.BlendId == blendOld.Id) oldCount++;
+            else if (session.BlendId == blendNew.Id) newCount++;
+            await _sessionService.RemoveBlendOfTheDayAsync(session.Id);
+        }
+
+        // Each ~50%; loose bound 30-70% to avoid flakiness.
+        Assert.InRange(oldCount, 60, 140);
+        Assert.InRange(newCount, 60, 140);
+    }
+
     // --- DoseMultiplier tests ---
 
     [Fact]
