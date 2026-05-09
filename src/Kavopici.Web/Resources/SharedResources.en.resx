@@ -216,6 +216,8 @@
   <data name="Msg_CleanupMarkedDone" xml:space="preserve"><value>Marked as done.</value></data>
   <data name="Msg_CleanupMarkedNotDone" xml:space="preserve"><value>Marked as not done.</value></data>
   <data name="Err_NoActiveUsersForCleanup" xml:space="preserve"><value>No active users.</value></data>
+  <data name="Msg_RandomBlendAdded" xml:space="preserve"><value>Randomly added: {0}</value></data>
+  <data name="Err_NoBlendsAvailable" xml:space="preserve"><value>No active blends are available.</value></data>
 
   <!-- Brand & flavor wheel URL (theme-aware via _Tea suffix) -->
   <data name="Brand_AppName" xml:space="preserve"><value>KÁVOPÍČI</value></data>
@@ -419,6 +421,8 @@
   <data name="Admin_AutoCleanupDesc" xml:space="preserve"><value>We randomly assign cleanup to each coffee. Never the same person twice in a row. You can override above.</value></data>
   <data name="Admin_RerollAll" xml:space="preserve"><value>🎲 Reroll</value></data>
   <data name="Admin_RerollOne" xml:space="preserve"><value>Reroll cleanup for this coffee</value></data>
+  <data name="Admin_RandomBlend" xml:space="preserve"><value>Add a random coffee (balances supplier doses over the last 30 days)</value></data>
+  <data name="Admin_RandomBlend_Tea" xml:space="preserve"><value>Add a random tea (balances supplier doses over the last 30 days)</value></data>
   <data name="Admin_AddBlendBtn" xml:space="preserve"><value>+ New coffee</value></data>
   <data name="Admin_AddBlendBtn_Tea" xml:space="preserve"><value>+ New tea</value></data>
   <data name="Admin_InviteBtn" xml:space="preserve"><value>+ Invite</value></data>

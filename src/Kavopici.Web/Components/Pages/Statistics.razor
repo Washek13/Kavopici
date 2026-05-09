@@ -157,6 +157,7 @@ else if (tab == 0)
                     <option value="my">@L["Sort_MyRating"]</option>
                     <option value="n">@L["Sort_VoteCount"]</option>
                     <option value="ppk">@L["Sort_PricePerKg"]</option>
+                    <option value="pps">@L["Label_PricePerStar"]</option>
                     <option value="ctrl">@L["Sort_Controversy"]</option>
                     <option value="name">@L["Label_Blend"]</option>
                 </select>
@@ -172,6 +173,7 @@ else if (tab == 0)
                     <div class="text-center">@L["Col_Avg"]</div>
                     <div class="text-right">@L["Col_Votes"]</div>
                     <div class="text-right">@L["Sort_PricePerKg"]</div>
+                    <div class="text-right">@L["Label_PricePerStar"]</div>
                     <div>@L["Label_Controversy"]</div>
                     <div>@L["Col_YouVsAvg"]</div>
                 </div>
@@ -203,6 +205,9 @@ else if (tab == 0)
                         <div class="text-right text-medium">@r.RatingCount×</div>
                         <div class="text-right" style="font-family:Georgia,serif;font-size:14px;color:var(--coffee-dark);">
                             @(r.PricePerKg.HasValue ? r.PricePerKg.Value.ToString("F0") : "—")
+                        </div>
+                        <div class="text-right" style="font-family:Georgia,serif;font-size:14px;color:var(--coffee-dark);">
+                            @(r.PricePerformance.HasValue ? r.PricePerformance.Value.ToString("F0") : "—")
                         </div>
                         <div>
                             <ControversyBadge Level="r.ControversyLevel" Gauge="true" />
@@ -402,13 +407,13 @@ else if (tab == 2)
         <div class="data-table-wrap"><table class="data-table">
             <thead>
                 <tr>
-                    <th>@L["Label_Supplier"]</th>
-                    <th>@L["Stats_TotalDoses"]</th>
-                    <th>@L["Stats_Last30DaysDoses"]</th>
+                    <th class="sortable" @onclick='() => SortSuppliersBy("name")'>@L["Label_Supplier"]@SupplierSortIndicator("name")</th>
+                    <th class="sortable" @onclick='() => SortSuppliersBy("total")'>@L["Stats_TotalDoses"]@SupplierSortIndicator("total")</th>
+                    <th class="sortable" @onclick='() => SortSuppliersBy("last30")'>@L["Stats_Last30DaysDoses"]@SupplierSortIndicator("last30")</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var stat in supplierStats)
+                @foreach (var stat in SortedSupplierStats())
                 {
                     <tr>
                         <td><strong>@stat.SupplierName</strong></td>
@@ -494,6 +499,9 @@ else if (tab == 3)
     private string userSortKey = "votes";
     private char userSortDir = 'd';
 
+    private string supplierSortKey = "total";
+    private char supplierSortDir = 'd';
+
     private void SortUsersBy(string key)
     {
         if (userSortKey == key) userSortDir = userSortDir == 'd' ? 'a' : 'd';
@@ -502,6 +510,27 @@ else if (tab == 3)
 
     private string UserSortIndicator(string key) =>
         userSortKey == key ? (userSortDir == 'd' ? " ↓" : " ↑") : "";
+
+    private void SortSuppliersBy(string key)
+    {
+        if (supplierSortKey == key) supplierSortDir = supplierSortDir == 'd' ? 'a' : 'd';
+        else { supplierSortKey = key; supplierSortDir = 'd'; }
+    }
+
+    private string SupplierSortIndicator(string key) =>
+        supplierSortKey == key ? (supplierSortDir == 'd' ? " ↓" : " ↑") : "";
+
+    private IEnumerable<SupplierStatistics> SortedSupplierStats()
+    {
+        IEnumerable<SupplierStatistics> q = supplierSortKey switch
+        {
+            "name"   => supplierStats.OrderBy(s => s.SupplierName),
+            "total"  => supplierStats.OrderBy(s => s.TotalDoses),
+            "last30" => supplierStats.OrderBy(s => s.Last30DaysDoses),
+            _        => supplierStats.OrderBy(s => s.SupplierName)
+        };
+        return supplierSortDir == 'd' ? q.Reverse() : q;
+    }
 
     private IEnumerable<UserStatistics> SortedUserStats()
     {
@@ -605,6 +634,7 @@ else if (tab == 3)
             "name" => list.OrderBy(r => r.BlendName),
             "n"    => list.OrderByDescending(r => r.RatingCount),
             "ppk"  => list.OrderByDescending(r => r.PricePerKg ?? 0),
+            "pps"  => list.OrderByDescending(r => r.PricePerformance ?? 0),
             "ctrl" => list.OrderByDescending(r => r.ControversyLevel ?? -1),
             "my"   => list.OrderByDescending(r => myStarsByBlend.GetValueOrDefault(r.BlendId, 0)),
             _      => list.OrderByDescending(r => r.AverageRating),

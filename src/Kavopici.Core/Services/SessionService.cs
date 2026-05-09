@@ -63,6 +63,73 @@ public class SessionService : ISessionService
         return session;
     }
 
+    public async Task<TastingSession> AddRandomBlendOfTheDayAsync(decimal doseMultiplier = 1.0m)
+    {
+        var validatedDose = ValidateDoseMultiplier(doseMultiplier);
+
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var activeBlends = await context.CoffeeBlends
+            .Where(b => b.IsActive)
+            .Select(b => new { b.Id, b.SupplierId })
+            .ToListAsync();
+
+        if (activeBlends.Count == 0)
+            throw new InvalidOperationException("Žádné aktivní směsi nejsou k dispozici.");
+
+        var todayBlendIds = await context.TastingSessions
+            .Where(s => s.IsActive && s.Date == Today)
+            .Select(s => s.BlendId)
+            .ToListAsync();
+
+        var candidates = activeBlends.Where(b => !todayBlendIds.Contains(b.Id)).ToList();
+        if (candidates.Count == 0)
+            candidates = activeBlends;
+
+        var windowStart = Today.AddDays(-30);
+        // SQLite can't Sum decimals server-side, so aggregate in-memory (same pattern as StatisticsService.GetSupplierStatisticsAsync).
+        var windowSessions = await context.TastingSessions
+            .Where(s => s.IsActive
+                     && s.Date >= windowStart
+                     && s.Date <= Today)
+            .Select(s => new { s.Blend.SupplierId, s.DoseMultiplier })
+            .ToListAsync();
+        var supplierDoses = windowSessions
+            .GroupBy(x => x.SupplierId)
+            .ToDictionary(g => g.Key, g => g.Sum(x => x.DoseMultiplier));
+
+        var weights = candidates
+            .Select(b => 1.0 / (1.0 + (double)(supplierDoses.TryGetValue(b.SupplierId, out var d) ? d : 0m)))
+            .ToList();
+        var total = weights.Sum();
+        var roll = Random.Shared.NextDouble() * total;
+
+        var pickedBlendId = candidates[^1].Id;
+        var cumulative = 0.0;
+        for (var i = 0; i < candidates.Count; i++)
+        {
+            cumulative += weights[i];
+            if (roll < cumulative) { pickedBlendId = candidates[i].Id; break; }
+        }
+
+        var session = new TastingSession
+        {
+            BlendId = pickedBlendId,
+            Date = Today,
+            IsActive = true,
+            DoseMultiplier = validatedDose,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        context.TastingSessions.Add(session);
+        await context.SaveChangesAsync();
+
+        await context.Entry(session).Reference(s => s.Blend).LoadAsync();
+        await context.Entry(session.Blend).Reference(b => b.Supplier).LoadAsync();
+
+        return session;
+    }
+
     public async Task RemoveBlendOfTheDayAsync(int sessionId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();
