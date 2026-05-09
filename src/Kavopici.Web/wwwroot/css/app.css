@@ -1446,7 +1446,7 @@ textarea { resize: vertical; min-height: 60px; }
 .session-list-area { container-type: inline-size; }
 .session-row {
     display: grid;
-    grid-template-columns: 36px minmax(140px, 1.4fr) minmax(140px, 1.2fr) minmax(220px, 260px) 28px;
+    grid-template-columns: 36px minmax(140px, 1.4fr) minmax(140px, 1.2fr) 150px minmax(220px, 260px) 28px;
     gap: 10px;
     padding: 12px 14px;
     background: #fff;
@@ -1475,6 +1475,48 @@ textarea { resize: vertical; min-height: 60px; }
     opacity: 0.6;
 }
 .session-row .remove-x:hover { opacity: 1; }
+
+.dose-picker {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: #fff;
+}
+.dose-picker .dose-btn {
+    flex: 1;
+    padding: 6px 4px;
+    background: transparent;
+    border: none;
+    border-right: 1px solid var(--border);
+    color: var(--coffee-medium);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1;
+    min-width: 0;
+}
+.dose-picker .dose-btn:last-child { border-right: none; }
+.dose-picker .dose-btn:hover { background: var(--off-white); }
+.dose-picker .dose-btn.active {
+    background: var(--coffee-brown);
+    color: #fff;
+}
+.dose-picker.dose-picker-sm .dose-btn { padding: 4px 2px; font-size: 11px; }
+.dose-picker-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.dose-picker-row .dose-label {
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--coffee-medium);
+    font-weight: 700;
+    flex-shrink: 0;
+}
 
 .cleanup-auto-bar {
     margin-top: 14px;

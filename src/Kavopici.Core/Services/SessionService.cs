@@ -15,6 +15,13 @@ public class SessionService : ISessionService
 
     private static DateOnly Today => DateOnly.FromDateTime(DateTime.Today);
 
+    private static readonly decimal[] AllowedDoseMultipliers = { 0.5m, 1.0m, 2.0m, 3.0m, 4.0m };
+
+    private static decimal ValidateDoseMultiplier(decimal doseMultiplier)
+        => AllowedDoseMultipliers.Contains(doseMultiplier)
+            ? doseMultiplier
+            : throw new InvalidOperationException("Neplatná velikost dávky.");
+
     private static string? TrimComment(string? comment)
         => string.IsNullOrWhiteSpace(comment) ? null : comment.Trim();
 
@@ -30,8 +37,10 @@ public class SessionService : ISessionService
             .ToListAsync();
     }
 
-    public async Task<TastingSession> AddBlendOfTheDayAsync(int blendId, string? comment = null)
+    public async Task<TastingSession> AddBlendOfTheDayAsync(int blendId, string? comment = null, decimal doseMultiplier = 1.0m)
     {
+        var validatedDose = ValidateDoseMultiplier(doseMultiplier);
+
         await using var context = await _contextFactory.CreateDbContextAsync();
 
         var session = new TastingSession
@@ -40,6 +49,7 @@ public class SessionService : ISessionService
             Date = Today,
             IsActive = true,
             Comment = TrimComment(comment),
+            DoseMultiplier = validatedDose,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -75,6 +85,22 @@ public class SessionService : ISessionService
             throw new InvalidOperationException("Sezení nebylo nalezeno.");
 
         session.Comment = TrimComment(comment);
+        await context.SaveChangesAsync();
+
+        return session;
+    }
+
+    public async Task<TastingSession> SetSessionDoseMultiplierAsync(int sessionId, decimal doseMultiplier)
+    {
+        var validatedDose = ValidateDoseMultiplier(doseMultiplier);
+
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var session = await context.TastingSessions.FindAsync(sessionId);
+        if (session == null || !session.IsActive)
+            throw new InvalidOperationException("Sezení nebylo nalezeno.");
+
+        session.DoseMultiplier = validatedDose;
         await context.SaveChangesAsync();
 
         return session;

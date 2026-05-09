@@ -49,6 +49,10 @@ public class KavopiciDbContext : DbContext
         {
             e.HasKey(s => s.Id);
             e.Property(s => s.Comment).HasMaxLength(500);
+            e.Property(s => s.DoseMultiplier)
+                .HasColumnType("decimal(3,1)")
+                .HasDefaultValue(1.0m)
+                .IsRequired();
             e.HasOne(s => s.Blend)
                 .WithMany(b => b.Sessions)
                 .HasForeignKey(s => s.BlendId)

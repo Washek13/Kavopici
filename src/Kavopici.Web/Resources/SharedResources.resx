@@ -83,6 +83,8 @@
   <data name="Label_Note" xml:space="preserve"><value>Poznámka</value></data>
   <data name="Label_Rating" xml:space="preserve"><value>Hodnocení</value></data>
   <data name="Label_Total" xml:space="preserve"><value>Celkem</value></data>
+  <data name="Stats_TotalDoses" xml:space="preserve"><value>Celkem dávek</value></data>
+  <data name="Stats_Last30DaysDoses" xml:space="preserve"><value>Dávky za 30 dní</value></data>
   <data name="Label_Name" xml:space="preserve"><value>Jméno</value></data>
   <data name="Label_Role" xml:space="preserve"><value>Role</value></data>
   <data name="Label_Actions" xml:space="preserve"><value>Akce</value></data>
@@ -305,6 +307,7 @@
   <data name="Admin_Revealed" xml:space="preserve"><value>Odhalená</value></data>
   <data name="Admin_AdminNote" xml:space="preserve"><value>Poznámka admina</value></data>
   <data name="Admin_AdminNotePh" xml:space="preserve"><value>Poznámka admina pro tuto kávu…</value></data>
+  <data name="Admin_DoseLabel" xml:space="preserve"><value>Dávka</value></data>
   <data name="Admin_AddFromLibrary" xml:space="preserve"><value>Přidat z knihovny</value></data>
   <data name="Admin_AvailableCount" xml:space="preserve"><value>{0} dostupných</value></data>
   <data name="Admin_AutoCleanupTitle" xml:space="preserve"><value>Auto-přiřazení úklidu</value></data>

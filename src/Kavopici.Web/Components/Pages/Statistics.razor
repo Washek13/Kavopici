@@ -403,8 +403,8 @@ else if (tab == 2)
             <thead>
                 <tr>
                     <th>@L["Label_Supplier"]</th>
-                    <th>@L["Label_Total"]</th>
-                    <th>@L["Label_Last30Days"]</th>
+                    <th>@L["Stats_TotalDoses"]</th>
+                    <th>@L["Stats_Last30DaysDoses"]</th>
                 </tr>
             </thead>
             <tbody>
@@ -412,8 +412,8 @@ else if (tab == 2)
                 {
                     <tr>
                         <td><strong>@stat.SupplierName</strong></td>
-                        <td>@stat.TotalSessionCount</td>
-                        <td>@stat.Last30DaysSessionCount</td>
+                        <td>@stat.TotalDoses.ToString("0.#")</td>
+                        <td>@stat.Last30DaysDoses.ToString("0.#")</td>
                     </tr>
                 }
             </tbody>
