@@ -79,6 +79,8 @@
   <data name="Label_Note" xml:space="preserve"><value>Note</value></data>
   <data name="Label_Rating" xml:space="preserve"><value>Rating</value></data>
   <data name="Label_Total" xml:space="preserve"><value>Total</value></data>
+  <data name="Stats_TotalDoses" xml:space="preserve"><value>Total doses</value></data>
+  <data name="Stats_Last30DaysDoses" xml:space="preserve"><value>Doses last 30 days</value></data>
   <data name="Label_Name" xml:space="preserve"><value>Name</value></data>
   <data name="Label_Role" xml:space="preserve"><value>Role</value></data>
   <data name="Label_Actions" xml:space="preserve"><value>Actions</value></data>
@@ -410,6 +412,7 @@
   <data name="Admin_Revealed" xml:space="preserve"><value>Revealed</value></data>
   <data name="Admin_AdminNote" xml:space="preserve"><value>Admin note</value></data>
   <data name="Admin_AdminNotePh" xml:space="preserve"><value>Admin note for this coffee…</value></data>
+  <data name="Admin_DoseLabel" xml:space="preserve"><value>Dose</value></data>
   <data name="Admin_AddFromLibrary" xml:space="preserve"><value>Add from library</value></data>
   <data name="Admin_AvailableCount" xml:space="preserve"><value>{0} available</value></data>
   <data name="Admin_AutoCleanupTitle" xml:space="preserve"><value>Auto-assign cleanup</value></data>

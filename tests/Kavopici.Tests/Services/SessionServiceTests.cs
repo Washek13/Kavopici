@@ -624,5 +624,100 @@ public class SessionServiceTests : IDisposable
         Assert.InRange(carolCount, 60, 140);
     }
 
+    // --- DoseMultiplier tests ---
+
+    [Fact]
+    public async Task AddBlendOfTheDayAsync_DefaultsDoseMultiplierToOne()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        Assert.Equal(1.0m, session.DoseMultiplier);
+    }
+
+    [Theory]
+    [InlineData(0.5)]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    [InlineData(4)]
+    public async Task AddBlendOfTheDayAsync_StoresAllowedDoseMultipliers(double multiplier)
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        var dose = (decimal)multiplier;
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id, null, dose);
+
+        Assert.Equal(dose, session.DoseMultiplier);
+
+        await using var ctx = _factory.CreateDbContext();
+        var stored = await ctx.TastingSessions.FindAsync(session.Id);
+        Assert.Equal(dose, stored!.DoseMultiplier);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1.5)]
+    [InlineData(2.5)]
+    [InlineData(5)]
+    [InlineData(-1)]
+    public async Task AddBlendOfTheDayAsync_RejectsInvalidDoseMultiplier(double multiplier)
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.AddBlendOfTheDayAsync(blend.Id, null, (decimal)multiplier));
+    }
+
+    [Fact]
+    public async Task SetSessionDoseMultiplierAsync_UpdatesValue()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        var updated = await _sessionService.SetSessionDoseMultiplierAsync(session.Id, 2m);
+
+        Assert.Equal(2m, updated.DoseMultiplier);
+
+        await using var ctx = _factory.CreateDbContext();
+        var stored = await ctx.TastingSessions.FindAsync(session.Id);
+        Assert.Equal(2m, stored!.DoseMultiplier);
+    }
+
+    [Fact]
+    public async Task SetSessionDoseMultiplierAsync_RejectsInvalidDoseMultiplier()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.SetSessionDoseMultiplierAsync(session.Id, 1.5m));
+    }
+
+    [Fact]
+    public async Task SetSessionDoseMultiplierAsync_ThrowsWhenSessionMissing()
+    {
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.SetSessionDoseMultiplierAsync(999, 2m));
+    }
+
+    [Fact]
+    public async Task SetSessionDoseMultiplierAsync_ThrowsWhenSessionInactive()
+    {
+        var user = await _userService.CreateUserAsync("User", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Test", "Roaster", null, RoastLevel.Medium, user.Id);
+        var session = await _sessionService.AddBlendOfTheDayAsync(blend.Id);
+        await _sessionService.RemoveBlendOfTheDayAsync(session.Id);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sessionService.SetSessionDoseMultiplierAsync(session.Id, 2m));
+    }
+
     public void Dispose() => _factory.Dispose();
 }

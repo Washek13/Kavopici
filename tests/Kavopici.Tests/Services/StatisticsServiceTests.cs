@@ -323,7 +323,7 @@ public class StatisticsServiceTests : IDisposable
 
     // --- GetUserSessionHistoryAsync tests ---
 
-    private async Task<TastingSession> CreatePastSessionAsync(int blendId, DateOnly date)
+    private async Task<TastingSession> CreatePastSessionAsync(int blendId, DateOnly date, decimal doseMultiplier = 1.0m)
     {
         using var context = _factory.CreateDbContext();
         var session = new TastingSession
@@ -331,6 +331,7 @@ public class StatisticsServiceTests : IDisposable
             BlendId = blendId,
             Date = date,
             IsActive = true,
+            DoseMultiplier = doseMultiplier,
             CreatedAt = DateTime.UtcNow
         };
         context.TastingSessions.Add(session);
@@ -447,12 +448,12 @@ public class StatisticsServiceTests : IDisposable
         Assert.Equal(2, result.Count);
 
         var s1 = result.First(s => s.SupplierName == "Supplier1");
-        Assert.Equal(3, s1.TotalSessionCount);
-        Assert.Equal(3, s1.Last30DaysSessionCount);
+        Assert.Equal(3m, s1.TotalDoses);
+        Assert.Equal(3m, s1.Last30DaysDoses);
 
         var s2 = result.First(s => s.SupplierName == "Supplier2");
-        Assert.Equal(1, s2.TotalSessionCount);
-        Assert.Equal(1, s2.Last30DaysSessionCount);
+        Assert.Equal(1m, s2.TotalDoses);
+        Assert.Equal(1m, s2.Last30DaysDoses);
     }
 
     [Fact]
@@ -470,8 +471,8 @@ public class StatisticsServiceTests : IDisposable
         var result = await _statisticsService.GetSupplierStatisticsAsync();
 
         Assert.Single(result);
-        Assert.Equal(2, result[0].TotalSessionCount);
-        Assert.Equal(1, result[0].Last30DaysSessionCount);
+        Assert.Equal(2m, result[0].TotalDoses);
+        Assert.Equal(1m, result[0].Last30DaysDoses);
     }
 
     [Fact]
@@ -496,6 +497,43 @@ public class StatisticsServiceTests : IDisposable
         Assert.Equal(2, result.Count);
         Assert.Equal("SupplierB", result[0].SupplierName);
         Assert.Equal("SupplierA", result[1].SupplierName);
+    }
+
+    [Fact]
+    public async Task GetSupplierStatisticsAsync_SumsDoseMultipliersAcrossSessions()
+    {
+        var supplier = await _userService.CreateUserAsync("Supplier", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Blend", "Roaster", null, RoastLevel.Medium, supplier.Id);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        await CreatePastSessionAsync(blend.Id, today, doseMultiplier: 0.5m);
+        await CreatePastSessionAsync(blend.Id, today, doseMultiplier: 2m);
+        await CreatePastSessionAsync(blend.Id, today, doseMultiplier: 1m);
+
+        var result = await _statisticsService.GetSupplierStatisticsAsync();
+
+        Assert.Single(result);
+        Assert.Equal(3.5m, result[0].TotalDoses);
+        Assert.Equal(3.5m, result[0].Last30DaysDoses);
+    }
+
+    [Fact]
+    public async Task GetSupplierStatisticsAsync_Last30DaysRespectsDoseMultiplier()
+    {
+        var supplier = await _userService.CreateUserAsync("Supplier", isAdmin: true);
+        var blend = await _blendService.CreateBlendAsync("Blend", "Roaster", null, RoastLevel.Medium, supplier.Id);
+
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var oldDate = DateOnly.FromDateTime(DateTime.Today.AddDays(-60));
+
+        await CreatePastSessionAsync(blend.Id, oldDate, doseMultiplier: 0.5m);
+        await CreatePastSessionAsync(blend.Id, today, doseMultiplier: 3m);
+
+        var result = await _statisticsService.GetSupplierStatisticsAsync();
+
+        Assert.Single(result);
+        Assert.Equal(3.5m, result[0].TotalDoses);
+        Assert.Equal(3m, result[0].Last30DaysDoses);
     }
 
     // --- LinkedBlend statistics tests ---

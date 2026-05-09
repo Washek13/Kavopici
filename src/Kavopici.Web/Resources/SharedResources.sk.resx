@@ -79,6 +79,8 @@
   <data name="Label_Note" xml:space="preserve"><value>Poznámka</value></data>
   <data name="Label_Rating" xml:space="preserve"><value>Hodnotenie</value></data>
   <data name="Label_Total" xml:space="preserve"><value>Celkom</value></data>
+  <data name="Stats_TotalDoses" xml:space="preserve"><value>Celkom dávok</value></data>
+  <data name="Stats_Last30DaysDoses" xml:space="preserve"><value>Dávky za 30 dní</value></data>
   <data name="Label_Name" xml:space="preserve"><value>Meno</value></data>
   <data name="Label_Role" xml:space="preserve"><value>Rola</value></data>
   <data name="Label_Actions" xml:space="preserve"><value>Akcie</value></data>
@@ -410,6 +412,7 @@
   <data name="Admin_Revealed" xml:space="preserve"><value>Odhalená</value></data>
   <data name="Admin_AdminNote" xml:space="preserve"><value>Poznámka admina</value></data>
   <data name="Admin_AdminNotePh" xml:space="preserve"><value>Poznámka admina pre túto kávu…</value></data>
+  <data name="Admin_DoseLabel" xml:space="preserve"><value>Dávka</value></data>
   <data name="Admin_AddFromLibrary" xml:space="preserve"><value>Pridať z knižnice</value></data>
   <data name="Admin_AvailableCount" xml:space="preserve"><value>{0} dostupných</value></data>
   <data name="Admin_AutoCleanupTitle" xml:space="preserve"><value>Auto-priradenie upratovania</value></data>

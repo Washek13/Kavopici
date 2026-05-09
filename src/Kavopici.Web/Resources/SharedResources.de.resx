@@ -79,6 +79,8 @@
   <data name="Label_Note" xml:space="preserve"><value>Anmerkung</value></data>
   <data name="Label_Rating" xml:space="preserve"><value>Bewertung</value></data>
   <data name="Label_Total" xml:space="preserve"><value>Gesamt</value></data>
+  <data name="Stats_TotalDoses" xml:space="preserve"><value>Dosen gesamt</value></data>
+  <data name="Stats_Last30DaysDoses" xml:space="preserve"><value>Dosen letzte 30 Tage</value></data>
   <data name="Label_Name" xml:space="preserve"><value>Name</value></data>
   <data name="Label_Role" xml:space="preserve"><value>Rolle</value></data>
   <data name="Label_Actions" xml:space="preserve"><value>Aktionen</value></data>
@@ -410,6 +412,7 @@
   <data name="Admin_Revealed" xml:space="preserve"><value>Aufgedeckt</value></data>
   <data name="Admin_AdminNote" xml:space="preserve"><value>Admin-Notiz</value></data>
   <data name="Admin_AdminNotePh" xml:space="preserve"><value>Admin-Notiz für diesen Kaffee…</value></data>
+  <data name="Admin_DoseLabel" xml:space="preserve"><value>Dosis</value></data>
   <data name="Admin_AddFromLibrary" xml:space="preserve"><value>Aus Bibliothek hinzufügen</value></data>
   <data name="Admin_AvailableCount" xml:space="preserve"><value>{0} verfügbar</value></data>
   <data name="Admin_AutoCleanupTitle" xml:space="preserve"><value>Auto-Zuweisung Aufräumen</value></data>

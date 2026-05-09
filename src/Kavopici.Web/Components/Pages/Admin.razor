@@ -53,10 +53,11 @@
 
                 <div style="display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:flex-start;">
                     <div class="session-list-area" style="order:2;min-width:0;">
-                        <div class="session-row-head" style="display:grid;grid-template-columns:36px minmax(140px,1.4fr) minmax(140px,1.2fr) minmax(220px,260px) 28px;gap:10px;padding:8px 14px;font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--coffee-medium);font-weight:700;margin-bottom:6px;">
+                        <div class="session-row-head" style="display:grid;grid-template-columns:36px minmax(140px,1.4fr) minmax(140px,1.2fr) 150px minmax(220px,260px) 28px;gap:10px;padding:8px 14px;font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--coffee-medium);font-weight:700;margin-bottom:6px;">
                             <div></div>
                             <div>@L["Label_Blend"]</div>
                             <div>@L["Admin_AdminNote"]</div>
+                            <div>@L["Admin_DoseLabel"]</div>
                             <div>@L["Label_Cleanup"]</div>
                             <div></div>
                         </div>
@@ -91,6 +92,17 @@
                                         <input type="text" placeholder="@L["Admin_AdminNotePh"]"
                                                value="@(session.Comment ?? "")"
                                                @onchange="e => OnSessionNoteChanged(sessionId, e.Value?.ToString())" />
+                                    </div>
+                                    <div>
+                                        <div class="dose-picker dose-picker-sm">
+                                            @foreach (var (val, label) in DoseOptions)
+                                            {
+                                                var dose = val;
+                                                <button type="button"
+                                                        class="dose-btn @(session.DoseMultiplier == dose ? "active" : "")"
+                                                        @onclick="() => OnDoseChanged(sessionId, dose)">@label</button>
+                                            }
+                                        </div>
                                     </div>
                                     <div class="cleanup-cell">
                                         @if (session.CleanupPerson != null)
@@ -132,6 +144,18 @@
                             <div class="section-label">@L["Admin_AddFromLibrary"]</div>
                             <div style="flex:1;"></div>
                             <div style="font-size:11px;color:var(--silver);">@string.Format(L["Admin_AvailableCount"], availableForSession.Count)</div>
+                        </div>
+                        <div class="dose-picker-row">
+                            <span class="dose-label">@L["Admin_DoseLabel"]</span>
+                            <div class="dose-picker">
+                                @foreach (var (val, label) in DoseOptions)
+                                {
+                                    var dose = val;
+                                    <button type="button"
+                                            class="dose-btn @(pendingDoseMultiplier == dose ? "active" : "")"
+                                            @onclick="() => pendingDoseMultiplier = dose">@label</button>
+                                }
+                            </div>
                         </div>
                         <div style="position:relative;margin-bottom:10px;">
                             <input type="text" placeholder="@L["Filter_SearchToday"]" @bind="librarySearch" @bind:event="oninput"
@@ -310,7 +334,7 @@
                                     <td><RoastBadge Level="b.RoastLevel" /></td>
                                     <td>@b.Roaster</td>
                                     <td>@b.Supplier.Name</td>
-                                    <td>@(blendUsageCounts.GetValueOrDefault(b.Id, 0))×</td>
+                                    <td>@(blendUsageCounts.GetValueOrDefault(b.Id, 0m).ToString("0.#"))×</td>
                                     <td style="font-family:Georgia,serif;">@(b.PricePerKg.HasValue ? $"{b.PricePerKg.Value:F0}" : "—")</td>
                                     <td>
                                         <div class="btn-group">
@@ -394,8 +418,18 @@
     private List<User> allUsers = new();
     private List<CoffeeBlend> allBlends = new();
     private List<TastingSession> currentSessions = new();
-    private Dictionary<int, int> blendUsageCounts = new();
+    private Dictionary<int, decimal> blendUsageCounts = new();
     private Dictionary<int, int> userVoteCounts = new();
+    private decimal pendingDoseMultiplier = 1m;
+
+    private static readonly (decimal Value, string Label)[] DoseOptions =
+    {
+        (0.5m, "½"),
+        (1m, "1"),
+        (2m, "2"),
+        (3m, "3"),
+        (4m, "4")
+    };
 
     private string librarySearch = "";
     private bool showAddBlendForm;
@@ -482,9 +516,9 @@
     {
         try
         {
-            // Per-blend usage = number of sessions that used the blend
+            // Per-blend usage = sum of dose multipliers across sessions that used the blend
             var sessions = await SessionService.GetSessionHistoryAsync();
-            blendUsageCounts = sessions.GroupBy(s => s.BlendId).ToDictionary(g => g.Key, g => g.Count());
+            blendUsageCounts = sessions.GroupBy(s => s.BlendId).ToDictionary(g => g.Key, g => g.Sum(s => s.DoseMultiplier));
 
             // Per-user vote count
             foreach (var u in allUsers)
@@ -648,10 +682,22 @@
         try
         {
             errorMessage = null;
-            await SessionService.AddBlendOfTheDayAsync(blendId, null);
+            await SessionService.AddBlendOfTheDayAsync(blendId, null, pendingDoseMultiplier);
             var blend = allBlends.FirstOrDefault(b => b.Id == blendId);
             statusMessage = L["Msg_CoffeeOfDayAdded", blend?.Name ?? ""];
             await LoadCurrentSessions();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
+    }
+
+    private async Task OnDoseChanged(int sessionId, decimal doseMultiplier)
+    {
+        try
+        {
+            errorMessage = null;
+            await SessionService.SetSessionDoseMultiplierAsync(sessionId, doseMultiplier);
+            var session = currentSessions.FirstOrDefault(s => s.Id == sessionId);
+            if (session != null) session.DoseMultiplier = doseMultiplier;
         }
         catch (Exception ex) { errorMessage = ex.Message; }
     }

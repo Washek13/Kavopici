@@ -98,10 +98,10 @@ public class StatisticsService : IStatisticsService
             .Select(g => new SupplierStatistics(
                 SupplierId: g.Key.SupplierId,
                 SupplierName: g.Key.SupplierName,
-                TotalSessionCount: g.Count(),
-                Last30DaysSessionCount: g.Count(s => s.Date >= cutoff)
+                TotalDoses: g.Sum(s => s.DoseMultiplier),
+                Last30DaysDoses: g.Where(s => s.Date >= cutoff).Sum(s => s.DoseMultiplier)
             ))
-            .OrderByDescending(s => s.TotalSessionCount)
+            .OrderByDescending(s => s.TotalDoses)
             .ToList();
     }
 
