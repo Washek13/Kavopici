@@ -407,13 +407,13 @@ else if (tab == 2)
         <div class="data-table-wrap"><table class="data-table">
             <thead>
                 <tr>
-                    <th>@L["Label_Supplier"]</th>
-                    <th>@L["Stats_TotalDoses"]</th>
-                    <th>@L["Stats_Last30DaysDoses"]</th>
+                    <th class="sortable" @onclick='() => SortSuppliersBy("name")'>@L["Label_Supplier"]@SupplierSortIndicator("name")</th>
+                    <th class="sortable" @onclick='() => SortSuppliersBy("total")'>@L["Stats_TotalDoses"]@SupplierSortIndicator("total")</th>
+                    <th class="sortable" @onclick='() => SortSuppliersBy("last30")'>@L["Stats_Last30DaysDoses"]@SupplierSortIndicator("last30")</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var stat in supplierStats)
+                @foreach (var stat in SortedSupplierStats())
                 {
                     <tr>
                         <td><strong>@stat.SupplierName</strong></td>
@@ -499,6 +499,9 @@ else if (tab == 3)
     private string userSortKey = "votes";
     private char userSortDir = 'd';
 
+    private string supplierSortKey = "total";
+    private char supplierSortDir = 'd';
+
     private void SortUsersBy(string key)
     {
         if (userSortKey == key) userSortDir = userSortDir == 'd' ? 'a' : 'd';
@@ -507,6 +510,27 @@ else if (tab == 3)
 
     private string UserSortIndicator(string key) =>
         userSortKey == key ? (userSortDir == 'd' ? " ↓" : " ↑") : "";
+
+    private void SortSuppliersBy(string key)
+    {
+        if (supplierSortKey == key) supplierSortDir = supplierSortDir == 'd' ? 'a' : 'd';
+        else { supplierSortKey = key; supplierSortDir = 'd'; }
+    }
+
+    private string SupplierSortIndicator(string key) =>
+        supplierSortKey == key ? (supplierSortDir == 'd' ? " ↓" : " ↑") : "";
+
+    private IEnumerable<SupplierStatistics> SortedSupplierStats()
+    {
+        IEnumerable<SupplierStatistics> q = supplierSortKey switch
+        {
+            "name"   => supplierStats.OrderBy(s => s.SupplierName),
+            "total"  => supplierStats.OrderBy(s => s.TotalDoses),
+            "last30" => supplierStats.OrderBy(s => s.Last30DaysDoses),
+            _        => supplierStats.OrderBy(s => s.SupplierName)
+        };
+        return supplierSortDir == 'd' ? q.Reverse() : q;
+    }
 
     private IEnumerable<UserStatistics> SortedUserStats()
     {

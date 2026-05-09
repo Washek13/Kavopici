@@ -263,17 +263,17 @@
                 <div class="data-table-wrap"><table class="data-table">
                     <thead>
                         <tr>
-                            <th>@L["Label_Blend"]</th>
-                            <th>@L["Label_Roasting"]</th>
-                            <th>@L["Label_Roaster"]</th>
-                            <th>@L["Admin_BroughtBy"]</th>
-                            <th>@L["Admin_Used"]</th>
-                            <th>@L["Sort_PricePerKg"]</th>
+                            <th class="sortable" @onclick='() => SortLibraryBy("name")'>@L["Label_Blend"]@LibrarySortIndicator("name")</th>
+                            <th class="sortable" @onclick='() => SortLibraryBy("roast")'>@L["Label_Roasting"]@LibrarySortIndicator("roast")</th>
+                            <th class="sortable" @onclick='() => SortLibraryBy("roaster")'>@L["Label_Roaster"]@LibrarySortIndicator("roaster")</th>
+                            <th class="sortable" @onclick='() => SortLibraryBy("supplier")'>@L["Admin_BroughtBy"]@LibrarySortIndicator("supplier")</th>
+                            <th class="sortable" @onclick='() => SortLibraryBy("used")'>@L["Admin_Used"]@LibrarySortIndicator("used")</th>
+                            <th class="sortable" @onclick='() => SortLibraryBy("price")'>@L["Sort_PricePerKg"]@LibrarySortIndicator("price")</th>
                             <th>@L["Label_Actions"]</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var b in FilteredLibraryBlends())
+                        @foreach (var b in SortedFilteredLibraryBlends())
                         {
                             <tr>
                                 @if (editingBlendId == b.Id)
@@ -376,14 +376,14 @@
                 <div class="data-table-wrap"><table class="data-table">
                     <thead>
                         <tr>
-                            <th>@L["Label_Name"]</th>
-                            <th>@L["Label_Role"]</th>
-                            <th>@L["Admin_RatedCount"]</th>
+                            <th class="sortable" @onclick='() => SortAdminUsersBy("name")'>@L["Label_Name"]@AdminUserSortIndicator("name")</th>
+                            <th class="sortable" @onclick='() => SortAdminUsersBy("role")'>@L["Label_Role"]@AdminUserSortIndicator("role")</th>
+                            <th class="sortable" @onclick='() => SortAdminUsersBy("rated")'>@L["Admin_RatedCount"]@AdminUserSortIndicator("rated")</th>
                             <th>@L["Label_Actions"]</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var u in allUsers)
+                        @foreach (var u in SortedUsers())
                         {
                             <tr>
                                 <td>
@@ -474,6 +474,59 @@
             || b.Roaster.Contains(s, StringComparison.OrdinalIgnoreCase)
             || (b.Supplier != null && b.Supplier.Name.Contains(s, StringComparison.OrdinalIgnoreCase))
             || (b.Origin != null && b.Origin.Contains(s, StringComparison.OrdinalIgnoreCase))).ToList();
+    }
+
+    private string librarySortKey = "name";
+    private char librarySortDir = 'a';
+
+    private void SortLibraryBy(string key)
+    {
+        if (librarySortKey == key) librarySortDir = librarySortDir == 'd' ? 'a' : 'd';
+        else { librarySortKey = key; librarySortDir = 'd'; }
+    }
+
+    private string LibrarySortIndicator(string key) =>
+        librarySortKey == key ? (librarySortDir == 'd' ? " ↓" : " ↑") : "";
+
+    private IEnumerable<CoffeeBlend> SortedFilteredLibraryBlends()
+    {
+        var src = FilteredLibraryBlends();
+        IEnumerable<CoffeeBlend> q = librarySortKey switch
+        {
+            "name"     => src.OrderBy(b => b.Name),
+            "roast"    => src.OrderBy(b => (int)b.RoastLevel),
+            "roaster"  => src.OrderBy(b => b.Roaster),
+            "supplier" => src.OrderBy(b => b.Supplier != null ? b.Supplier.Name : ""),
+            "used"     => src.OrderBy(b => blendUsageCounts.GetValueOrDefault(b.Id, 0m)),
+            "price"    => src.OrderBy(b => b.PricePerKg.HasValue ? 0 : 1)
+                             .ThenBy(b => b.PricePerKg),
+            _          => src.OrderBy(b => b.Name)
+        };
+        return librarySortDir == 'd' ? q.Reverse() : q;
+    }
+
+    private string adminUserSortKey = "name";
+    private char adminUserSortDir = 'a';
+
+    private void SortAdminUsersBy(string key)
+    {
+        if (adminUserSortKey == key) adminUserSortDir = adminUserSortDir == 'd' ? 'a' : 'd';
+        else { adminUserSortKey = key; adminUserSortDir = 'd'; }
+    }
+
+    private string AdminUserSortIndicator(string key) =>
+        adminUserSortKey == key ? (adminUserSortDir == 'd' ? " ↓" : " ↑") : "";
+
+    private IEnumerable<User> SortedUsers()
+    {
+        IEnumerable<User> q = adminUserSortKey switch
+        {
+            "name"  => allUsers.OrderBy(u => u.Name),
+            "role"  => allUsers.OrderBy(u => u.IsAdmin),
+            "rated" => allUsers.OrderBy(u => userVoteCounts.GetValueOrDefault(u.Id, 0)),
+            _       => allUsers.OrderBy(u => u.Name)
+        };
+        return adminUserSortDir == 'd' ? q.Reverse() : q;
     }
 
     protected override async Task OnInitializedAsync()
