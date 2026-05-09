@@ -95,12 +95,12 @@
                                     </div>
                                     <div>
                                         <div class="dose-picker dose-picker-sm">
-                                            @foreach (var (val, label) in DoseOptions)
+                                            @foreach (var dose in DoseValues)
                                             {
-                                                var dose = val;
+                                                var d = dose;
                                                 <button type="button"
-                                                        class="dose-btn @(session.DoseMultiplier == dose ? "active" : "")"
-                                                        @onclick="() => OnDoseChanged(sessionId, dose)">@label</button>
+                                                        class="dose-btn @(session.DoseMultiplier == d ? "active" : "")"
+                                                        @onclick="() => OnDoseChanged(sessionId, d)">@DoseLabel(d)</button>
                                             }
                                         </div>
                                     </div>
@@ -148,12 +148,12 @@
                         <div class="dose-picker-row">
                             <span class="dose-label">@L["Admin_DoseLabel"]</span>
                             <div class="dose-picker">
-                                @foreach (var (val, label) in DoseOptions)
+                                @foreach (var dose in DoseValues)
                                 {
-                                    var dose = val;
+                                    var d = dose;
                                     <button type="button"
-                                            class="dose-btn @(pendingDoseMultiplier == dose ? "active" : "")"
-                                            @onclick="() => pendingDoseMultiplier = dose">@label</button>
+                                            class="dose-btn @(pendingDoseMultiplier == d ? "active" : "")"
+                                            @onclick="() => pendingDoseMultiplier = d">@DoseLabel(d)</button>
                                 }
                             </div>
                         </div>
@@ -422,14 +422,9 @@
     private Dictionary<int, int> userVoteCounts = new();
     private decimal pendingDoseMultiplier = 1m;
 
-    private static readonly (decimal Value, string Label)[] DoseOptions =
-    {
-        (0.5m, "½"),
-        (1m, "1"),
-        (2m, "2"),
-        (3m, "3"),
-        (4m, "4")
-    };
+    private static readonly decimal[] DoseValues = { 0.5m, 1m, 2m, 3m, 4m };
+
+    private static string DoseLabel(decimal d) => d == 0.5m ? "½" : ((int)d).ToString();
 
     private string librarySearch = "";
     private bool showAddBlendForm;
