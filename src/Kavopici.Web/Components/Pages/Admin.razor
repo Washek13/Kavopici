@@ -53,12 +53,11 @@
 
                 <div style="display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:flex-start;">
                     <div class="session-list-area" style="order:2;min-width:0;">
-                        <div class="session-row-head" style="display:grid;grid-template-columns:36px minmax(140px,1.4fr) minmax(140px,1.2fr) 150px minmax(220px,260px) 28px;gap:10px;padding:8px 14px;font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--coffee-medium);font-weight:700;margin-bottom:6px;">
+                        <div class="session-row-head" style="display:grid;grid-template-columns:36px minmax(200px,1.7fr) minmax(180px,1.5fr) 110px 28px;gap:10px;padding:8px 14px;font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--coffee-medium);font-weight:700;margin-bottom:6px;">
                             <div></div>
                             <div>@L["Label_Blend"]</div>
                             <div>@L["Admin_AdminNote"]</div>
                             <div>@L["Admin_DoseLabel"]</div>
-                            <div>@L["Label_Cleanup"]</div>
                             <div></div>
                         </div>
 
@@ -75,21 +74,21 @@
                                 var idx = i + 1;
                                 var session = currentSessions[i];
                                 var sessionId = session.Id;
-                                var inactiveCleanup = session.CleanupPerson is { IsActive: false } cp ? cp : null;
                                 <div class="session-row">
                                     <div class="drag-handle">
                                         <div class="idx">#@idx</div>
                                     </div>
                                     <div style="min-width:0;">
                                         <div style="font-size:14px;font-weight:600;color:var(--coffee-dark);font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@session.Blend.Name</div>
-                                        <div style="font-size:11.5px;color:var(--coffee-medium);display:flex;gap:6px;align-items:center;min-width:0;">
+                                        <div style="font-size:11.5px;color:var(--coffee-dark);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@session.Blend.Roaster</div>
+                                        <div style="font-size:11px;color:var(--coffee-medium);display:flex;gap:6px;align-items:center;min-width:0;flex-wrap:wrap;">
                                             <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;">@session.Blend.Supplier.Name</span>
                                             <span>·</span>
                                             <RoastBadge Level="session.Blend.RoastLevel" />
                                         </div>
                                     </div>
                                     <div>
-                                        <input type="text" placeholder="@L["Admin_AdminNotePh"]"
+                                        <input type="text" class="admin-note-input" placeholder="@L["Admin_AdminNotePh"]"
                                                value="@(session.Comment ?? "")"
                                                @onchange="e => OnSessionNoteChanged(sessionId, e.Value?.ToString())" />
                                     </div>
@@ -102,35 +101,13 @@
                                                         class="dose-btn @(session.DoseMultiplier == d ? "active" : "")"
                                                         @onclick="() => OnDoseChanged(sessionId, d)">@DoseLabel(d)</button>
                                             }
+                                            @if (!DoseValues.Contains(session.DoseMultiplier))
+                                            {
+                                                @* Legacy dose (3 or 4 l) kept readable even though it is no longer offered. *@
+                                                <button type="button" class="dose-btn active" disabled
+                                                        title="@L["Admin_LegacyDose"]">@DoseLabel(session.DoseMultiplier)</button>
+                                            }
                                         </div>
-                                    </div>
-                                    <div class="cleanup-cell">
-                                        @if (session.CleanupPerson != null)
-                                        {
-                                            <UserInitials Name="@session.CleanupPerson.Name" Size="24" />
-                                        }
-                                        <select value="@(session.CleanupPersonId?.ToString() ?? "0")"
-                                                @onchange="e => OnCleanupSelectChanged(sessionId, e.Value?.ToString())">
-                                            <option value="0">—</option>
-                                            @foreach (var u in allUsers)
-                                            {
-                                                <option value="@u.Id">@u.Name</option>
-                                            }
-                                            @if (inactiveCleanup != null)
-                                            {
-                                                <option value="@inactiveCleanup.Id">@inactiveCleanup.Name @L["Label_DeactivatedSuffix"]</option>
-                                            }
-                                        </select>
-                                        <button class="btn-icon spin-on-hover" title="@L["Admin_RerollOne"]" @onclick="() => AssignRandomCleanup(sessionId)">🎲</button>
-                                        @if (session.CleanupPersonId != null)
-                                        {
-                                            <button class="btn-icon" style="@(session.CleanupCompleted == true ? "background:#e6f4e6;border-color:var(--success-green);color:var(--success-green);" : "")"
-                                                    title="@L["Btn_CleanupDone"]"
-                                                    @onclick="() => ToggleCleanupCompleted(sessionId, true)">✓</button>
-                                            <button class="btn-icon" style="@(session.CleanupCompleted == false ? "background:#fde7e7;border-color:var(--error-red);color:var(--error-red);" : "")"
-                                                    title="@L["Btn_CleanupNotDone"]"
-                                                    @onclick="() => ToggleCleanupCompleted(sessionId, false)">✗</button>
-                                        }
                                     </div>
                                     <button class="remove-x" @onclick="() => RemoveBlendOfDay(sessionId)" title="@L["Btn_Remove"]">×</button>
                                 </div>
@@ -159,7 +136,7 @@
                             </div>
                         </div>
                         <div style="position:relative;margin-bottom:10px;">
-                            <input type="text" placeholder="@L["Filter_SearchToday"]" @bind="librarySearch" @bind:event="oninput"
+                            <input type="text" placeholder="@L["Filter_Search"]" @bind="librarySearch" @bind:event="oninput"
                                    style="padding-left:30px;background:var(--off-white);" />
                             <div style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--silver);font-size:13px;">🔍</div>
                         </div>
@@ -171,7 +148,7 @@
                                     <div style="font-size:18px;line-height:1;">☕</div>
                                     <div style="flex:1;min-width:0;">
                                         <div style="font-size:12.5px;color:var(--coffee-dark);font-weight:600;font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@c.Name</div>
-                                        <div style="font-size:10.5px;color:var(--coffee-medium);">@c.Supplier.Name @if (!string.IsNullOrEmpty(c.Origin)) { <span> · @c.Origin</span> }</div>
+                                        <div style="font-size:10.5px;color:var(--coffee-medium);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-weight:600;">@c.Roaster</span> · @c.Supplier.Name @if (!string.IsNullOrEmpty(c.Origin)) { <span> · @c.Origin</span> }</div>
                                     </div>
                                     <div style="font-size:14px;color:var(--coffee-brown);font-weight:700;">+</div>
                                 </div>
@@ -421,9 +398,9 @@
     private List<TastingSession> currentSessions = new();
     private Dictionary<int, decimal> blendUsageCounts = new();
     private Dictionary<int, int> userVoteCounts = new();
-    private decimal pendingDoseMultiplier = 1m;
+    private decimal pendingDoseMultiplier = 2m;
 
-    private static readonly decimal[] DoseValues = { 0.5m, 1m, 2m, 3m, 4m };
+    private static readonly decimal[] DoseValues = { 0.5m, 1m, 2m };
 
     private static string DoseLabel(decimal d) => d == 0.5m ? "½" : ((int)d).ToString();
 
@@ -461,6 +438,7 @@
         allBlends.Where(b =>
             string.IsNullOrEmpty(librarySearch)
             || b.Name.Contains(librarySearch, StringComparison.OrdinalIgnoreCase)
+            || b.Roaster.Contains(librarySearch, StringComparison.OrdinalIgnoreCase)
             || (b.Supplier != null && b.Supplier.Name.Contains(librarySearch, StringComparison.OrdinalIgnoreCase))
             || (b.Origin != null && b.Origin.Contains(librarySearch, StringComparison.OrdinalIgnoreCase)))
             .ToList();
@@ -775,39 +753,6 @@
         catch (Exception ex) { errorMessage = ex.Message; }
     }
 
-    private async Task AssignRandomCleanup(int sessionId)
-    {
-        try
-        {
-            errorMessage = null;
-            var updated = await SessionService.AssignRandomCleanupPersonAsync(sessionId);
-            statusMessage = L["Msg_CleanupAssigned", updated.CleanupPerson?.Name ?? ""];
-            await LoadCurrentSessions();
-        }
-        catch (Exception ex) { errorMessage = ex.Message; }
-    }
-
-    private async Task OnCleanupSelectChanged(int sessionId, string? value)
-    {
-        if (!int.TryParse(value, out var userId)) return;
-        try
-        {
-            errorMessage = null;
-            if (userId == 0)
-            {
-                await SessionService.ClearCleanupPersonAsync(sessionId);
-                statusMessage = L["Msg_CleanupCleared"];
-            }
-            else
-            {
-                var updated = await SessionService.SetCleanupPersonAsync(sessionId, userId);
-                statusMessage = L["Msg_CleanupAssigned", updated.CleanupPerson?.Name ?? ""];
-            }
-            await LoadCurrentSessions();
-        }
-        catch (Exception ex) { errorMessage = ex.Message; }
-    }
-
     private async Task OnSessionNoteChanged(int sessionId, string? value)
     {
         try
@@ -819,25 +764,4 @@
         }
         catch (Exception ex) { errorMessage = ex.Message; }
     }
-
-    private async Task ToggleCleanupCompleted(int sessionId, bool target)
-    {
-        try
-        {
-            errorMessage = null;
-            var session = currentSessions.FirstOrDefault(s => s.Id == sessionId);
-            bool? newValue = (session?.CleanupCompleted == target) ? (bool?)null : target;
-            await SessionService.SetCleanupCompletedAsync(sessionId, newValue);
-            statusMessage = newValue switch
-            {
-                true => L["Msg_CleanupMarkedDone"],
-                false => L["Msg_CleanupMarkedNotDone"],
-                _ => L["Msg_CleanupCleared"]
-            };
-            await LoadCurrentSessions();
-        }
-        catch (Exception ex) { errorMessage = ex.Message; }
-    }
-
-
 }

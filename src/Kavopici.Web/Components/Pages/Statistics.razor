@@ -444,8 +444,6 @@ else if (tab == 3)
                     <th class="sortable" @onclick='() => SortUsersBy("supplied")'>@L["Label_SuppliedBlends"]@UserSortIndicator("supplied")</th>
                     <th class="sortable" @onclick='() => SortUsersBy("pricePerStar")'>@L["Label_SuppliedPricePerStar"]@UserSortIndicator("pricePerStar")</th>
                     <th class="sortable" @onclick='() => SortUsersBy("consistency")'>@L["Label_Consistency"]@UserSortIndicator("consistency")</th>
-                    <th class="sortable" @onclick='() => SortUsersBy("cleanup")'>@L["Label_CleanupCount"]@UserSortIndicator("cleanup")</th>
-                    <th class="sortable" @onclick='() => SortUsersBy("reliability")'>@L["Label_CleanupReliability"]@UserSortIndicator("reliability")</th>
                 </tr>
             </thead>
             <tbody>
@@ -460,8 +458,6 @@ else if (tab == 3)
                         <td>@stat.SuppliedBlendsCount</td>
                         <td>@(stat.SuppliedAvgPricePerStar.HasValue ? $"{stat.SuppliedAvgPricePerStar.Value:F0} Kč/★" : "—")</td>
                         <td>@(stat.VotingConsistency.HasValue ? stat.VotingConsistency.Value.ToString("F2") : "—")</td>
-                        <td>@stat.CleanupCount</td>
-                        <td>@(stat.CleanupReliability.HasValue ? $"{stat.CleanupReliability.Value:F0} %" : "—")</td>
                     </tr>
                 }
             </tbody>
@@ -546,9 +542,6 @@ else if (tab == 3)
                                         .ThenBy(s => s.SuppliedAvgPricePerStar),
             "consistency"   => userStats.OrderBy(s => s.VotingConsistency.HasValue ? 0 : 1)
                                         .ThenBy(s => s.VotingConsistency),
-            "cleanup"       => userStats.OrderBy(s => s.CleanupCount),
-            "reliability"   => userStats.OrderBy(s => s.CleanupReliability.HasValue ? 0 : 1)
-                                        .ThenBy(s => s.CleanupReliability),
             _               => userStats.OrderBy(s => s.UserName)
         };
         return userSortDir == 'd' ? q.Reverse() : q;

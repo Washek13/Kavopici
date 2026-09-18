@@ -308,6 +308,7 @@
   <data name="Admin_AdminNote" xml:space="preserve"><value>Poznámka admina</value></data>
   <data name="Admin_AdminNotePh" xml:space="preserve"><value>Poznámka admina pro tuto kávu…</value></data>
   <data name="Admin_DoseLabel" xml:space="preserve"><value>Dávka</value></data>
+  <data name="Admin_LegacyDose" xml:space="preserve"><value>Tato velikost dávky se už nenabízí</value></data>
   <data name="Admin_AddFromLibrary" xml:space="preserve"><value>Přidat z knihovny</value></data>
   <data name="Admin_AvailableCount" xml:space="preserve"><value>{0} dostupných</value></data>
   <data name="Admin_AutoCleanupTitle" xml:space="preserve"><value>Auto-přiřazení úklidu</value></data>
