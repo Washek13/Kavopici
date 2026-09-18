@@ -415,6 +415,7 @@
   <data name="Admin_AdminNote" xml:space="preserve"><value>Admin note</value></data>
   <data name="Admin_AdminNotePh" xml:space="preserve"><value>Admin note for this coffee…</value></data>
   <data name="Admin_DoseLabel" xml:space="preserve"><value>Dose</value></data>
+  <data name="Admin_LegacyDose" xml:space="preserve"><value>This dose size is no longer offered</value></data>
   <data name="Admin_AddFromLibrary" xml:space="preserve"><value>Add from library</value></data>
   <data name="Admin_AvailableCount" xml:space="preserve"><value>{0} available</value></data>
   <data name="Admin_AutoCleanupTitle" xml:space="preserve"><value>Auto-assign cleanup</value></data>

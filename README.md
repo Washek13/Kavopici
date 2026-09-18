@@ -36,15 +36,14 @@ Kávopíči is a web application for office coffee tastings. An admin sets the "
 - **Price per star** — ratio of price per kilogram to average rating; lower = better value for money.
 - **Blend detail** — star distribution, individual ratings with comments and tasting notes.
 - **My ratings** — full tasting history with retroactive rating of missed blends and **editing of existing ratings**.
-- **User overview** — per-user stats table: votes cast, average given, participation rate, favorite tasting note, supplied blends count, price/★ for supplied blends, voting consistency (population std dev), cleanup assignments, and cleanup completion rate (%). Sortable by all columns.
+- **User overview** — per-user stats table: votes cast, average given, participation rate, favorite tasting note, supplied blends count, price/★ for supplied blends, and voting consistency (population std dev). Sortable by all columns.
 - **Blend comparison** — two blends side by side with rating distribution.
 - **CSV export** — download data to a file (including controversy and price/★).
 
 ### Admin
 - **Users** — add, deactivate, grant/revoke admin rights (last admin cannot be removed).
 - **Blends** — add (name, roaster, origin, roast level, supplier, weight, price), edit existing blends and remove (soft delete). Price per kg is calculated automatically from weight and price. **Linked blends** — link the same coffee blend across different suppliers so their ratings aggregate into a single row in statistics.
-- **Coffee of the day** — add and remove blends for the daily tasting session (multiple blends supported), optional note per blend.
-- **Cleanup person** — per session: randomly assign (weighted toward users with fewer recent completions; same person not picked twice in a row), manually pick from active users, or clear. Mark cleanup as completed or not completed.
+- **Coffee of the day** — add and remove blends for the daily tasting session (multiple blends supported), optional note per blend, and dose size per blend (½ / 1 / 2 litres, defaults to 2). The library picker shows the roaster and searches by name, roaster, supplier and origin.
 - **CSV export** — export statistics.
 
 ### Localization
@@ -111,10 +110,10 @@ User                    CoffeeBlend              TastingSession
 ├── IsAdmin             ├── Roaster              ├── Date (DateOnly)
 ├── IsActive            ├── Origin?              ├── IsActive
 └── CreatedAt           ├── RoastLevel (enum)    ├── Comment?
-                        ├── SupplierId (FK→User) ├── CleanupPersonId? (FK→User)
-                        ├── WeightGrams?         ├── CleanupCompleted?
-                        ├── PriceCzk?            └── CreatedAt
-                        ├── PricePerKg? (calc.)
+                        ├── SupplierId (FK→User) ├── DoseMultiplier
+                        ├── WeightGrams?         ├── CleanupPersonId? (FK→User, unused)
+                        ├── PriceCzk?            ├── CleanupCompleted? (unused)
+                        ├── PricePerKg? (calc.)  └── CreatedAt
                         ├── LinkedBlendId? (FK→self)
                         ├── IsActive
                         └── CreatedAt

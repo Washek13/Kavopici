@@ -116,23 +116,6 @@ else
                 <div class="v">@(lastSession?.Date.ToString("d. M. yyyy") ?? "—")</div>
             </div>
         </div>
-        <div class="item">
-            @if (lastSession?.CleanupPerson != null)
-            {
-                <span class="user-initials danger" style="width:34px;height:34px;font-size:14px;">@GetInitials(lastSession.CleanupPerson.Name)</span>
-                <div>
-                    <div class="lbl">@L["Detail_CleanupAssigned"]</div>
-                    <div class="v">@lastSession.CleanupPerson.Name</div>
-                </div>
-            }
-            else
-            {
-                <div>
-                    <div class="lbl">@L["Detail_CleanupAssigned"]</div>
-                    <div class="v">—</div>
-                </div>
-            }
-        </div>
     </div>
 
     <!-- My rating section -->
@@ -361,17 +344,6 @@ else
     private async Task OnYourRatingSubmitted()
     {
         await LoadAsync();
-    }
-
-    private static string GetInitials(string name)
-    {
-        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length switch
-        {
-            0 => "?",
-            1 => parts[0][..1].ToUpper(),
-            _ => $"{parts[0][..1]}{parts[^1][..1]}".ToUpper()
-        };
     }
 
     private void GoBackToStatistics() => Nav.NavigateTo("/statistics");
