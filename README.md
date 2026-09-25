@@ -56,6 +56,7 @@ Kávopíči is a web application for office coffee tastings. An admin sets the "
 - Theme is stored in the database (`AppConfig` table) and determines which tasting notes are available and the visual CSS palette.
   - **Coffee** — Fruity, Nutty, Chocolatey, Caramel, Floral, Spiced, Citrusy, Honey.
   - **Tea** — Floral, Fruity, Grassy, Nutty, Earthy, Woody, Spiced, Sweet.
+- The whole UI follows the theme — app name, browser tab title and favicon, icons and wording (e.g. *Čajopyjové* / „čaj“ instead of *Kávopíči* / „káva“).
 - Legacy databases automatically default to Coffee.
 
 ### Auto-update
@@ -92,7 +93,7 @@ Kavopici.sln
 │   └── Kavopici.Web/           # ASP.NET Core app (entry point)
 │       ├── Components/
 │       │   ├── Pages/          # Login, Dashboard, Statistics, BlendDetail, Comparison, Admin
-│       │   ├── Shared/         # StarRating, BlendCard, UserInitials, ControversyBadge
+│       │   ├── Shared/         # StarRating, BlendCard, UserInitials, ControversyBadge, ThemedHead
 │       │   └── Layout/         # MainLayout (navigation, update banner)
 │       ├── Resources/          # SharedResources.resx + satellites (.cs/.sk/.en/.de)
 │       ├── Services/           # AppState, UpdateService, UpdateState, ThemedLocalizer

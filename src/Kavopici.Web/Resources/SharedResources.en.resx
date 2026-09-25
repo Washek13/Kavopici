@@ -457,4 +457,24 @@
   <data name="Login_FlavorOfDayQuote_Tea" xml:space="preserve"><value>„Lemon zest, jasmine, finish like fresh grass."</value></data>
   <data name="Login_AppVersion" xml:space="preserve"><value>Kávopíči · internal tasting</value></data>
   <data name="Login_AppVersion_Tea" xml:space="preserve"><value>Čajopyjové · internal tasting</value></data>
+  <data name="Brand_TabTitle" xml:space="preserve"><value>Kávopíči</value></data>
+  <data name="Brand_TabTitle_Tea" xml:space="preserve"><value>Čajopyjové</value></data>
+  <data name="Brand_Copyright" xml:space="preserve"><value>© Kávopíči 2025</value></data>
+  <data name="Brand_Copyright_Tea" xml:space="preserve"><value>© Čajopyjové 2025</value></data>
+  <data name="Label_TopAllTime_Tea" xml:space="preserve"><value>Top tea (all-time)</value></data>
+  <data name="Stats_Subtitle_Tea" xml:space="preserve"><value>{0} teas · {1} votes · all-time</value></data>
+  <data name="Filter_Search_Tea" xml:space="preserve"><value>Search (name, producer, supplier, origin)…</value></data>
+  <data name="Col_Coffee_Tea" xml:space="preserve"><value>Tea · Producer</value></data>
+  <data name="Btn_OpenBlendDetail_Tea" xml:space="preserve"><value>Open tea detail →</value></data>
+  <data name="Heading_BlendDetail_Tea" xml:space="preserve"><value>Tea detail</value></data>
+  <data name="Comp_AddCoffee_Tea" xml:space="preserve"><value>Add tea</value></data>
+  <data name="Comp_PickFromAll_Tea" xml:space="preserve"><value>pick from all teas</value></data>
+  <data name="Comp_PickCoffee_Tea" xml:space="preserve"><value>Pick tea</value></data>
+  <data name="Comp_OverlayTrendHint_Tea" xml:space="preserve"><value>all selected teas on one chart</value></data>
+  <data name="Comp_AddFirst_Tea" xml:space="preserve"><value>+ Add first tea</value></data>
+  <data name="Comp_PickAtLeastOne_Tea" xml:space="preserve"><value>Pick at least one tea to compare</value></data>
+  <data name="Word_Coffee_1_Tea" xml:space="preserve"><value>tea</value></data>
+  <data name="Word_Coffee_234_Tea" xml:space="preserve"><value>teas</value></data>
+  <data name="Word_Coffee_5_Tea" xml:space="preserve"><value>teas</value></data>
+  <data name="Admin_AdminNotePh_Tea" xml:space="preserve"><value>Admin note for this tea…</value></data>
 </root>

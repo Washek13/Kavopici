@@ -7,6 +7,8 @@
 @inject IJSRuntime JS
 @inject IThemedLocalizer L
 
+<ThemedHead Theme="AppState.CurrentTheme" />
+
 <div class="app-container">
     @if (UpdateState.IsUpdateAvailable)
     {

@@ -31,7 +31,7 @@ else
         <div class="body">
             <div class="left">
                 <div class="name-row">
-                    <div class="flag-huge">☕</div>
+                    <div class="flag-huge">@AppState.BlendEmoji</div>
                     <div>
                         @if (!string.IsNullOrEmpty(blendStats.Origin))
                         {
@@ -234,7 +234,7 @@ else
                     @foreach (var c in otherBlends)
                     {
                         <div class="modal-list-row" @onclick="() => GoToCompareWith(c.BlendId)">
-                            <div style="font-size:24px;">☕</div>
+                            <div style="font-size:24px;">@AppState.BlendEmoji</div>
                             <div style="flex:1;font-size:14px;color:var(--coffee-dark);font-weight:600;">@c.BlendName</div>
                             <div style="font-family:Georgia,serif;font-size:18px;font-weight:700;">Ø @c.AverageRating.ToString("F1")</div>
                             <button class="btn btn-outline btn-sm">→</button>

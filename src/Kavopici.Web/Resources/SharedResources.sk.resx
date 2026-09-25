@@ -457,4 +457,24 @@
   <data name="Login_FlavorOfDayQuote_Tea" xml:space="preserve"><value>„Citrónová kôra, jazmín, finiš ako čerstvá tráva."</value></data>
   <data name="Login_AppVersion" xml:space="preserve"><value>Kávopíči · interná degustácia</value></data>
   <data name="Login_AppVersion_Tea" xml:space="preserve"><value>Čajopyjové · interná degustácia</value></data>
+  <data name="Brand_TabTitle" xml:space="preserve"><value>Kávopíči</value></data>
+  <data name="Brand_TabTitle_Tea" xml:space="preserve"><value>Čajopyjové</value></data>
+  <data name="Brand_Copyright" xml:space="preserve"><value>© Kávopíči 2025</value></data>
+  <data name="Brand_Copyright_Tea" xml:space="preserve"><value>© Čajopyjové 2025</value></data>
+  <data name="Label_TopAllTime_Tea" xml:space="preserve"><value>Top čaj (all-time)</value></data>
+  <data name="Stats_Subtitle_Tea" xml:space="preserve"><value>{0} čajov · {1} hlasovaní · all-time</value></data>
+  <data name="Filter_Search_Tea" xml:space="preserve"><value>Hľadať (názov, pestovateľ, dodávateľ, pôvod)…</value></data>
+  <data name="Col_Coffee_Tea" xml:space="preserve"><value>Čaj · Pestovateľ</value></data>
+  <data name="Btn_OpenBlendDetail_Tea" xml:space="preserve"><value>Otvoriť detail čaju →</value></data>
+  <data name="Heading_BlendDetail_Tea" xml:space="preserve"><value>Detail čaju</value></data>
+  <data name="Comp_AddCoffee_Tea" xml:space="preserve"><value>Pridať čaj</value></data>
+  <data name="Comp_PickFromAll_Tea" xml:space="preserve"><value>vyberie zo všetkých čajov</value></data>
+  <data name="Comp_PickCoffee_Tea" xml:space="preserve"><value>Vybrať čaj</value></data>
+  <data name="Comp_OverlayTrendHint_Tea" xml:space="preserve"><value>všetky vybrané čaje v jednom grafe</value></data>
+  <data name="Comp_AddFirst_Tea" xml:space="preserve"><value>+ Pridať prvý čaj</value></data>
+  <data name="Comp_PickAtLeastOne_Tea" xml:space="preserve"><value>Vyber aspoň jeden čaj na porovnanie</value></data>
+  <data name="Word_Coffee_1_Tea" xml:space="preserve"><value>čaj</value></data>
+  <data name="Word_Coffee_234_Tea" xml:space="preserve"><value>čaje</value></data>
+  <data name="Word_Coffee_5_Tea" xml:space="preserve"><value>čajov</value></data>
+  <data name="Admin_AdminNotePh_Tea" xml:space="preserve"><value>Poznámka admina pre tento čaj…</value></data>
 </root>
