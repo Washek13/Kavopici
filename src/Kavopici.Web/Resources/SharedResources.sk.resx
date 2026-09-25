@@ -477,4 +477,7 @@
   <data name="Word_Coffee_234_Tea" xml:space="preserve"><value>čaje</value></data>
   <data name="Word_Coffee_5_Tea" xml:space="preserve"><value>čajov</value></data>
   <data name="Admin_AdminNotePh_Tea" xml:space="preserve"><value>Poznámka admina pre tento čaj…</value></data>
+  <data name="Btn_DeleteRating" xml:space="preserve"><value>Zmazať</value></data>
+  <data name="Confirm_DeleteOwnRating" xml:space="preserve"><value>Naozaj chceš zmazať svoje hodnotenie? Túto akciu nie je možné vrátiť späť.</value></data>
+  <data name="Confirm_DeleteUserRating" xml:space="preserve"><value>Naozaj chceš zmazať hodnotenie používateľa {0}? Túto akciu nie je možné vrátiť späť.</value></data>
 </root>

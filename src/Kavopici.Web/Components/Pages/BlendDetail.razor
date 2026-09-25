@@ -6,6 +6,7 @@
 @inject AppState AppState
 @inject NavigationManager Nav
 @inject IThemedLocalizer L
+@inject IJSRuntime JS
 
 @if (!AppState.IsLoggedIn) { Nav.NavigateTo("/"); return; }
 
@@ -191,6 +192,7 @@ else
                     <div class="text-center">@L["Detail_RatingShort"]</div>
                     <div>@L["Detail_CommentColumn"]</div>
                     <div style="text-align:right;">@L["Detail_When"]</div>
+                    <div></div>
                 </div>
                 @{
                     var visibleVotes = votesExpanded ? allRatings : allRatings.Take(5).ToList();
@@ -207,6 +209,13 @@ else
                             @(string.IsNullOrEmpty(v.Comment) ? L["Detail_NoComment"].ToString() : v.Comment)
                         </div>
                         <div style="font-size:11.5px;color:var(--silver);text-align:right;white-space:nowrap;">@v.CreatedAt.ToLocalTime().ToString("d. M. HH:mm")</div>
+                        <div class="vote-actions">
+                            @if (CanDelete(v))
+                            {
+                                <button class="btn btn-danger-outline btn-xs" title="@L["Btn_DeleteRating"]"
+                                        @onclick="() => DeleteRating(v)">@L["Btn_DeleteRating"]</button>
+                            }
+                        </div>
                     </div>
                 }
                 @if (allRatings.Count > 5)
@@ -344,6 +353,25 @@ else
     private async Task OnYourRatingSubmitted()
     {
         await LoadAsync();
+    }
+
+    private bool CanDelete(Rating rating) =>
+        AppState.CurrentUser != null && (AppState.IsAdmin || rating.UserId == AppState.CurrentUser.Id);
+
+    private async Task DeleteRating(Rating rating)
+    {
+        if (AppState.CurrentUser == null) return;
+        var message = rating.UserId == AppState.CurrentUser.Id
+            ? L["Confirm_DeleteOwnRating"].ToString()
+            : string.Format(L["Confirm_DeleteUserRating"], rating.User.Name);
+        if (!await JS.InvokeAsync<bool>("confirm", message)) return;
+
+        try
+        {
+            await RatingService.DeleteRatingAsync(rating.Id, AppState.CurrentUser.Id);
+            await LoadAsync();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
     }
 
     private void GoBackToStatistics() => Nav.NavigateTo("/statistics");

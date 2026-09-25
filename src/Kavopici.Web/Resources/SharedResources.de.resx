@@ -477,4 +477,7 @@
   <data name="Word_Coffee_234_Tea" xml:space="preserve"><value>Tees</value></data>
   <data name="Word_Coffee_5_Tea" xml:space="preserve"><value>Tees</value></data>
   <data name="Admin_AdminNotePh_Tea" xml:space="preserve"><value>Admin-Notiz für diesen Tee…</value></data>
+  <data name="Btn_DeleteRating" xml:space="preserve"><value>Löschen</value></data>
+  <data name="Confirm_DeleteOwnRating" xml:space="preserve"><value>Möchtest du deine Bewertung wirklich löschen? Dies kann nicht rückgängig gemacht werden.</value></data>
+  <data name="Confirm_DeleteUserRating" xml:space="preserve"><value>Möchtest du die Bewertung von {0} wirklich löschen? Dies kann nicht rückgängig gemacht werden.</value></data>
 </root>

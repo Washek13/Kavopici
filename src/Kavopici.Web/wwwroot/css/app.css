@@ -1718,13 +1718,14 @@ textarea { resize: vertical; min-height: 60px; }
 
 .votes-table-grid {
     display: grid;
-    grid-template-columns: minmax(140px, 1fr) 70px minmax(160px, 1.5fr) auto;
+    grid-template-columns: minmax(140px, 1fr) 70px minmax(160px, 1.5fr) auto 72px;
     gap: 12px;
     align-items: center;
     padding: 10px 12px;
     border-bottom: 1px solid var(--border);
 }
 .votes-table-grid.head {
+    display: grid; /* override .detail-section .head flex layout */
     background: var(--off-white);
     border-radius: 6px;
     border-bottom: none;
@@ -1736,6 +1737,7 @@ textarea { resize: vertical; min-height: 60px; }
     margin-bottom: 6px;
 }
 .votes-table-grid:last-child { border-bottom: none; }
+.votes-table-grid .vote-actions { text-align: right; }
 
 /* === Messages === */
 .msg-error {

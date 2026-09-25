@@ -477,4 +477,7 @@
   <data name="Word_Coffee_234_Tea" xml:space="preserve"><value>teas</value></data>
   <data name="Word_Coffee_5_Tea" xml:space="preserve"><value>teas</value></data>
   <data name="Admin_AdminNotePh_Tea" xml:space="preserve"><value>Admin note for this tea…</value></data>
+  <data name="Btn_DeleteRating" xml:space="preserve"><value>Delete</value></data>
+  <data name="Confirm_DeleteOwnRating" xml:space="preserve"><value>Do you really want to delete your rating? This cannot be undone.</value></data>
+  <data name="Confirm_DeleteUserRating" xml:space="preserve"><value>Do you really want to delete the rating by {0}? This cannot be undone.</value></data>
 </root>

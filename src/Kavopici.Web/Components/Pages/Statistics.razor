@@ -374,7 +374,11 @@ else if (tab == 1)
                             }
                             else if (item.HasRated && item.UserRating != null)
                             {
-                                <span style="color:var(--amber-gold);font-weight:600;">@item.UserRating.Stars/10 ★</span>
+                                var ratingToDelete = item.UserRating;
+                                <div style="display:flex;align-items:center;gap:8px;">
+                                    <span style="color:var(--amber-gold);font-weight:600;">@item.UserRating.Stars/10 ★</span>
+                                    <button class="btn btn-danger-outline btn-xs" @onclick="() => DeleteMyRating(ratingToDelete)">@L["Btn_DeleteRating"]</button>
+                                </div>
                             }
                         </td>
                     </tr>
@@ -644,6 +648,20 @@ else if (tab == 3)
         expandedSessions.Remove(sessionId);
         if (AppState.CurrentUser != null)
             userSessions = await StatisticsService.GetUserSessionHistoryAsync(AppState.CurrentUser.Id);
+    }
+
+    private async Task DeleteMyRating(Rating rating)
+    {
+        if (AppState.CurrentUser == null) return;
+        if (!await JS.InvokeAsync<bool>("confirm", L["Confirm_DeleteOwnRating"].ToString())) return;
+
+        try
+        {
+            await RatingService.DeleteRatingAsync(rating.Id, AppState.CurrentUser.Id);
+            expandedSessions.Remove(rating.SessionId);
+            await LoadAsync();
+        }
+        catch (Exception ex) { errorMessage = ex.Message; }
     }
 
     private void SelectBlend(int id) => selectedId = id;
