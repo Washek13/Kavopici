@@ -555,6 +555,9 @@ textarea { resize: vertical; min-height: 60px; }
     border-radius: 8px;
 }
 .about-box-content { transition: filter 0.35s; }
+.about-box-content.clickable { cursor: pointer; border-radius: 6px; }
+.about-box-content.clickable:hover .blend-name,
+.about-box-content.clickable:focus-visible .blend-name { text-decoration: underline; }
 .about-box.locked .about-box-content { filter: blur(7px); user-select: none; pointer-events: none; }
 .about-box .lock-overlay {
     position: absolute;
@@ -585,26 +588,28 @@ textarea { resize: vertical; min-height: 60px; }
 }
 .about-box .blend-meta { font-size: 12.5px; color: var(--coffee-medium); margin-top: 3px; }
 .about-box .blend-supplier { font-size: 11.5px; color: var(--silver); margin-top: 2px; }
-.about-box .admin-note {
-    margin-top: 10px;
-    padding: 7px 10px;
-    background: var(--off-white);
-    border-left: 3px solid var(--amber-gold);
-    border-radius: 6px;
-    font-size: 12.5px;
-    color: var(--coffee-dark);
-    font-weight: 600;
-    line-height: 1.35;
-    position: relative;
-    z-index: 1;
+/* Session description (admin note) — shown above the blend info, always visible, even before voting. */
+.session-note {
+    padding: 12px 14px;
+    background: #fdf3dc;
+    border: 1px solid var(--amber-gold);
+    border-left: 5px solid var(--amber-gold);
+    border-radius: 8px;
 }
-.about-box .admin-note b {
-    display: block;
+.session-note-label {
     font-size: 10.5px;
-    letter-spacing: 1px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
     color: var(--coffee-brown);
-    margin-bottom: 2px;
+    margin-bottom: 3px;
+}
+.session-note-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--coffee-dark);
+    line-height: 1.35;
+    overflow-wrap: anywhere;
 }
 
 .aside-stack { display: flex; flex-direction: column; gap: 14px; }
@@ -767,6 +772,20 @@ textarea { resize: vertical; min-height: 60px; }
     padding: 18px;
     position: sticky;
     top: 80px;
+}
+/* Floating action bar — stays pinned to the bottom of the viewport while the panel is visible. */
+.stats-detail-actions {
+    position: sticky;
+    bottom: 12px;
+    z-index: 2;
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 .stats-detail .head {
     display: flex;
@@ -1718,13 +1737,14 @@ textarea { resize: vertical; min-height: 60px; }
 
 .votes-table-grid {
     display: grid;
-    grid-template-columns: minmax(140px, 1fr) 70px minmax(160px, 1.5fr) auto;
+    grid-template-columns: minmax(140px, 1fr) 70px minmax(160px, 1.5fr) auto 72px;
     gap: 12px;
     align-items: center;
     padding: 10px 12px;
     border-bottom: 1px solid var(--border);
 }
 .votes-table-grid.head {
+    display: grid; /* override .detail-section .head flex layout */
     background: var(--off-white);
     border-radius: 6px;
     border-bottom: none;
@@ -1736,6 +1756,7 @@ textarea { resize: vertical; min-height: 60px; }
     margin-bottom: 6px;
 }
 .votes-table-grid:last-child { border-bottom: none; }
+.votes-table-grid .vote-actions { text-align: right; }
 
 /* === Messages === */
 .msg-error {

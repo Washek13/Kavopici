@@ -184,7 +184,8 @@
   <data name="Badge_ControversyCalm" xml:space="preserve"><value>klid</value></data>
   <data name="Badge_ControversyMild" xml:space="preserve"><value>sporné</value></data>
   <data name="Badge_ControversyHigh" xml:space="preserve"><value>výbušné</value></data>
-  <data name="Label_AdminNote" xml:space="preserve"><value>Pozn. admina</value></data>
+  <data name="Label_AdminNote_Tea" xml:space="preserve"><value>Popis čaje</value></data>
+  <data name="Label_AdminNote" xml:space="preserve"><value>Popis kávy</value></data>
   <data name="Msg_RevealAfterRating" xml:space="preserve"><value>odhalí se po hodnocení</value></data>
   <data name="Heading_TodaysTasting" xml:space="preserve"><value>Dnešní degustace</value></data>
   <data name="Label_TopAllTime" xml:space="preserve"><value>Top blend (all-time)</value></data>
@@ -458,4 +459,27 @@
   <data name="Label_LinkedBlend_Tea" xml:space="preserve"><value>Propojit s čajem</value></data>
   <data name="Label_SuppliedBlends_Tea" xml:space="preserve"><value>Dodané čaje</value></data>
   <data name="Placeholder_NoteForTasters_Tea" xml:space="preserve"><value>Poznámka pro degustátory (např. Vzorek A)...</value></data>
+  <data name="Brand_TabTitle" xml:space="preserve"><value>Kávopíči</value></data>
+  <data name="Brand_TabTitle_Tea" xml:space="preserve"><value>Čajopyjové</value></data>
+  <data name="Brand_Copyright" xml:space="preserve"><value>© Kávopíči 2025</value></data>
+  <data name="Brand_Copyright_Tea" xml:space="preserve"><value>© Čajopyjové 2025</value></data>
+  <data name="Label_TopAllTime_Tea" xml:space="preserve"><value>Top čaj (all-time)</value></data>
+  <data name="Stats_Subtitle_Tea" xml:space="preserve"><value>{0} čajů · {1} hlasování · all-time</value></data>
+  <data name="Filter_Search_Tea" xml:space="preserve"><value>Hledat (název, pěstitel, dodavatel, původ)…</value></data>
+  <data name="Col_Coffee_Tea" xml:space="preserve"><value>Čaj · Pěstitel</value></data>
+  <data name="Btn_OpenBlendDetail_Tea" xml:space="preserve"><value>Otevřít detail čaje →</value></data>
+  <data name="Heading_BlendDetail_Tea" xml:space="preserve"><value>Detail čaje</value></data>
+  <data name="Comp_AddCoffee_Tea" xml:space="preserve"><value>Přidat čaj</value></data>
+  <data name="Comp_PickFromAll_Tea" xml:space="preserve"><value>vybere ze všech čajů</value></data>
+  <data name="Comp_PickCoffee_Tea" xml:space="preserve"><value>Vybrat čaj</value></data>
+  <data name="Comp_OverlayTrendHint_Tea" xml:space="preserve"><value>všechny vybrané čaje v jednom grafu</value></data>
+  <data name="Comp_AddFirst_Tea" xml:space="preserve"><value>+ Přidat první čaj</value></data>
+  <data name="Comp_PickAtLeastOne_Tea" xml:space="preserve"><value>Vyber alespoň jeden čaj pro porovnání</value></data>
+  <data name="Word_Coffee_1_Tea" xml:space="preserve"><value>čaj</value></data>
+  <data name="Word_Coffee_234_Tea" xml:space="preserve"><value>čaje</value></data>
+  <data name="Word_Coffee_5_Tea" xml:space="preserve"><value>čajů</value></data>
+  <data name="Admin_AdminNotePh_Tea" xml:space="preserve"><value>Poznámka admina pro tento čaj…</value></data>
+  <data name="Btn_DeleteRating" xml:space="preserve"><value>Smazat</value></data>
+  <data name="Confirm_DeleteOwnRating" xml:space="preserve"><value>Opravdu chceš smazat své hodnocení? Tuto akci nelze vrátit zpět.</value></data>
+  <data name="Confirm_DeleteUserRating" xml:space="preserve"><value>Opravdu chceš smazat hodnocení uživatele {0}? Tuto akci nelze vrátit zpět.</value></data>
 </root>

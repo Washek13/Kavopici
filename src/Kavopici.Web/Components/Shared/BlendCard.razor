@@ -1,7 +1,14 @@
 @inject IThemedLocalizer L
 
 <div class="about-box @(Locked ? "locked" : "")">
-    <div class="about-box-content">
+    <div class="about-box-content @(IsClickable ? "clickable" : "")"
+         role="@(IsClickable ? "link" : null)"
+         tabindex="@(IsClickable ? "0" : null)"
+         title="@(IsClickable ? L["Btn_OpenDetail"].ToString() : null)"
+         @onclick="HandleClick"
+         @onclick:stopPropagation="IsClickable"
+         @onkeydown="HandleKeyDown"
+         @onkeydown:stopPropagation="IsClickable">
         <div class="blend-name">@Blend.Name</div>
         <div class="blend-meta">
             @Blend.Roaster
@@ -24,16 +31,25 @@
             <div class="lock-pill">🔒 @L["Msg_RevealAfterRating"]</div>
         </div>
     }
-    @if (!string.IsNullOrEmpty(SessionComment))
-    {
-        <div class="admin-note">
-            <b>@L["Label_AdminNote"]:</b> @SessionComment
-        </div>
-    }
 </div>
 
 @code {
     [Parameter, EditorRequired] public CoffeeBlend Blend { get; set; } = null!;
-    [Parameter] public string? SessionComment { get; set; }
     [Parameter] public bool Locked { get; set; }
+
+    /// <summary>Invoked when the (unlocked) blend info is clicked, e.g. to open the blend detail.</summary>
+    [Parameter] public EventCallback OnClick { get; set; }
+
+    // Never clickable while locked, so the secret blend is not revealed before voting.
+    private bool IsClickable => !Locked && OnClick.HasDelegate;
+
+    private async Task HandleClick()
+    {
+        if (IsClickable) await OnClick.InvokeAsync();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (IsClickable && (e.Key == "Enter" || e.Key == " ")) await OnClick.InvokeAsync();
+    }
 }

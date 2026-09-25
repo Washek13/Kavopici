@@ -15,7 +15,7 @@
     <aside class="side-nav">
         <nav>
             <button class="nav-item @(view == "session" ? "active" : "")" @onclick='() => view = "session"'>
-                <div class="icon">☕</div>
+                <div class="icon">@AppState.BlendEmoji</div>
                 <div class="text">
                     <div class="nm">@L["Admin_TodaySession"]</div>
                     <div class="sub">@DateTime.Today.ToString("d. M.") · @(currentSessions.Count > 0 ? L["Admin_Running"].ToString().ToLower() : "—")</div>
@@ -145,7 +145,7 @@
                             {
                                 var bid = c.Id;
                                 <div class="lib-list-row" @onclick="() => AddBlendQuick(bid)">
-                                    <div style="font-size:18px;line-height:1;">☕</div>
+                                    <div style="font-size:18px;line-height:1;">@AppState.BlendEmoji</div>
                                     <div style="flex:1;min-width:0;">
                                         <div style="font-size:12.5px;color:var(--coffee-dark);font-weight:600;font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@c.Name</div>
                                         <div style="font-size:10.5px;color:var(--coffee-medium);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"><span style="font-weight:600;">@c.Roaster</span> · @c.Supplier.Name @if (!string.IsNullOrEmpty(c.Origin)) { <span> · @c.Origin</span> }</div>
@@ -302,7 +302,7 @@
                                 {
                                     <td>
                                         <div style="display:flex;align-items:center;gap:10px;">
-                                            <span style="font-size:18px;">☕</span>
+                                            <span style="font-size:18px;">@AppState.BlendEmoji</span>
                                             <div>
                                                 <div style="font-family:Georgia,serif;font-weight:600;">@b.Name</div>
                                                 <div style="font-size:11.5px;color:var(--coffee-medium);">@(b.Origin ?? "")</div>

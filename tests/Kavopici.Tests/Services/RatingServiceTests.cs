@@ -330,5 +330,83 @@ public class RatingServiceTests : IDisposable
         Assert.Empty(noteIds);
     }
 
+    [Fact]
+    public async Task DeleteRatingAsync_OwnRating_DeletesRatingAndNotes()
+    {
+        var (_, session) = await SetupAsync();
+        var author = await _userService.CreateUserAsync("Author");
+        var rating = await _ratingService.SubmitRatingAsync(
+            session.BlendId, author.Id, session.Id, 7, "Mistake");
+        await _ratingService.SetRatingNotesAsync(rating.Id, new List<int> { 1, 2 });
+
+        await _ratingService.DeleteRatingAsync(rating.Id, author.Id);
+
+        Assert.Null(await _ratingService.GetUserRatingForSessionAsync(author.Id, session.Id));
+        Assert.Empty(await _ratingService.GetRatingNoteIdsAsync(rating.Id));
+    }
+
+    [Fact]
+    public async Task DeleteRatingAsync_OwnRating_AllowsRatingAgain()
+    {
+        var (_, session) = await SetupAsync();
+        var author = await _userService.CreateUserAsync("Author");
+        var rating = await _ratingService.SubmitRatingAsync(
+            session.BlendId, author.Id, session.Id, 7, null);
+
+        await _ratingService.DeleteRatingAsync(rating.Id, author.Id);
+        var again = await _ratingService.SubmitRatingAsync(
+            session.BlendId, author.Id, session.Id, 3, null);
+
+        Assert.Equal(3, again.Stars);
+    }
+
+    [Fact]
+    public async Task DeleteRatingAsync_OtherUsersRatingAsNonAdmin_Throws()
+    {
+        var (_, session) = await SetupAsync();
+        var author = await _userService.CreateUserAsync("Author");
+        var other = await _userService.CreateUserAsync("Other");
+        var rating = await _ratingService.SubmitRatingAsync(
+            session.BlendId, author.Id, session.Id, 7, null);
+
+        await Assert.ThrowsAsync<UnauthorizedAccessException>(
+            () => _ratingService.DeleteRatingAsync(rating.Id, other.Id));
+
+        Assert.NotNull(await _ratingService.GetUserRatingForSessionAsync(author.Id, session.Id));
+    }
+
+    [Fact]
+    public async Task DeleteRatingAsync_OtherUsersRatingAsAdmin_Deletes()
+    {
+        var (admin, session) = await SetupAsync();
+        var author = await _userService.CreateUserAsync("Author");
+        var rating = await _ratingService.SubmitRatingAsync(
+            session.BlendId, author.Id, session.Id, 7, null);
+
+        await _ratingService.DeleteRatingAsync(rating.Id, admin.Id);
+
+        Assert.Null(await _ratingService.GetUserRatingForSessionAsync(author.Id, session.Id));
+    }
+
+    [Fact]
+    public async Task DeleteRatingAsync_NonExistentRating_Throws()
+    {
+        var (user, _) = await SetupAsync();
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _ratingService.DeleteRatingAsync(9999, user.Id));
+    }
+
+    [Fact]
+    public async Task DeleteRatingAsync_NonExistentUser_Throws()
+    {
+        var (user, session) = await SetupAsync();
+        var rating = await _ratingService.SubmitRatingAsync(
+            session.BlendId, user.Id, session.Id, 7, null);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _ratingService.DeleteRatingAsync(rating.Id, 9999));
+    }
+
     public void Dispose() => _factory.Dispose();
 }

@@ -188,7 +188,7 @@ else
             </div>
 
             <div class="login-footer">
-                <div>© Kávopíči 2025</div>
+                <div>@L["Brand_Copyright"]</div>
                 <div>·</div>
                 <div>@L["Login_LocalApp"]</div>
                 <div style="flex:1;"></div>
@@ -243,7 +243,7 @@ else
             <div class="right-divider"></div>
 
             <div class="flavor-of-day">
-                <div class="emoji">🫐</div>
+                <div class="emoji">@(AppState.CurrentTheme == Theme.Tea ? "🍋" : "🫐")</div>
                 <div style="flex:1;min-width:0;">
                     <div class="lbl">@L["Login_FlavorOfDay"]</div>
                     <div class="quote">@L["Login_FlavorOfDayQuote"]</div>

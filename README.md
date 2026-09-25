@@ -25,17 +25,19 @@ Kávopíči is a web application for office coffee tastings. An admin sets the "
 - **Overview** — clickable cards for the top-rated blend (→ detail) and your total rating count (→ statistics).
 - **Coffee flavor wheel** — link to an interactive flavor wheel for better orientation in taste profiles.
 - Multiple "coffees of the day" — admin can set multiple blends for a session, each shown as a separate card.
-- **Secret voting** — blend details are revealed only after rating. Admin notes are visible before voting so users can tell samples apart.
+- **Secret voting** — blend details are revealed only after rating. The admin note is shown as a prominent **coffee description** panel right under the card heading, always visible (also before voting) so users can tell samples apart.
 - Rating 1–10 stars, optional comment, and tasting note selection (Fruity, Nutty, Chocolatey, Caramel, Floral, Spiced, Citrusy, Honey).
 - Edit your own rating.
+- After rating, click the blend info on the card to open the blend detail.
 - **Retroactive voting** — missed blends can be rated later from the "My Ratings" tab in Statistics.
 
 ### Statistics
 - Summary table of blends (average, **controversy**, count, roaster, supplier, price/kg, **price/★**) — sortable by column.
 - **Controversy** — agreement level between raters calculated from score variance (Agreement / Mild disagreement / Disagreement).
 - **Price per star** — ratio of price per kilogram to average rating; lower = better value for money.
-- **Blend detail** — star distribution, individual ratings with comments and tasting notes.
-- **My ratings** — full tasting history with retroactive rating of missed blends and **editing of existing ratings**.
+- **Floating actions** — the *Open blend detail* and *Compare* buttons of the selected blend panel stay pinned to the bottom of the visible area.
+- **Blend detail** — star distribution, individual ratings with comments and tasting notes. Users can delete their own ratings here; admins can delete anyone's rating.
+- **My ratings** — full tasting history with retroactive rating of missed blends, **editing** and **deleting of existing ratings** (with confirmation).
 - **User overview** — per-user stats table: votes cast, average given, participation rate, favorite tasting note, supplied blends count, price/★ for supplied blends, and voting consistency (population std dev). Sortable by all columns.
 - **Blend comparison** — two blends side by side with rating distribution.
 - **CSV export** — download data to a file (including controversy and price/★).
@@ -56,6 +58,7 @@ Kávopíči is a web application for office coffee tastings. An admin sets the "
 - Theme is stored in the database (`AppConfig` table) and determines which tasting notes are available and the visual CSS palette.
   - **Coffee** — Fruity, Nutty, Chocolatey, Caramel, Floral, Spiced, Citrusy, Honey.
   - **Tea** — Floral, Fruity, Grassy, Nutty, Earthy, Woody, Spiced, Sweet.
+- The whole UI follows the theme — app name, browser tab title and favicon, icons and wording (e.g. *Čajopyjové* / „čaj“ instead of *Kávopíči* / „káva“).
 - Legacy databases automatically default to Coffee.
 
 ### Auto-update
@@ -92,7 +95,7 @@ Kavopici.sln
 │   └── Kavopici.Web/           # ASP.NET Core app (entry point)
 │       ├── Components/
 │       │   ├── Pages/          # Login, Dashboard, Statistics, BlendDetail, Comparison, Admin
-│       │   ├── Shared/         # StarRating, BlendCard, UserInitials, ControversyBadge
+│       │   ├── Shared/         # StarRating, BlendCard, UserInitials, ControversyBadge, ThemedHead
 │       │   └── Layout/         # MainLayout (navigation, update banner)
 │       ├── Resources/          # SharedResources.resx + satellites (.cs/.sk/.en/.de)
 │       ├── Services/           # AppState, UpdateService, UpdateState, ThemedLocalizer

@@ -74,6 +74,28 @@ public class RatingService : IRatingService
         return rating;
     }
 
+    public async Task DeleteRatingAsync(int ratingId, int requestingUserId)
+    {
+        await using var context = await _contextFactory.CreateDbContextAsync();
+
+        var rating = await context.Ratings.FindAsync(ratingId)
+            ?? throw new InvalidOperationException("Hodnocení nebylo nalezeno.");
+
+        var requester = await context.Users.FindAsync(requestingUserId)
+            ?? throw new InvalidOperationException("Uživatel nebyl nalezen.");
+
+        // Permission is checked against the database, not the caller's UI state.
+        if (rating.UserId != requester.Id && !(requester.IsAdmin && requester.IsActive))
+            throw new UnauthorizedAccessException("Můžete smazat pouze svá vlastní hodnocení.");
+
+        var notes = await context.RatingTastingNotes
+            .Where(rtn => rtn.RatingId == ratingId)
+            .ToListAsync();
+        context.RatingTastingNotes.RemoveRange(notes);
+        context.Ratings.Remove(rating);
+        await context.SaveChangesAsync();
+    }
+
     public async Task<List<Rating>> GetRatingsForSessionAsync(int sessionId)
     {
         await using var context = await _contextFactory.CreateDbContextAsync();

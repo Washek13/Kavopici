@@ -29,7 +29,7 @@ else
     @if (filledCount == 0)
     {
         <div style="padding:60px;text-align:center;color:var(--coffee-medium);background:#fff;border:1px dashed var(--border-strong);border-radius:12px;">
-            <div style="font-size:48px;margin-bottom:10px;">☕☕</div>
+            <div style="font-size:48px;margin-bottom:10px;">@(AppState.BlendEmoji + AppState.BlendEmoji)</div>
             <div style="font-size:15px;margin-bottom:14px;">@L["Comp_PickAtLeastOne"]</div>
             <button class="btn btn-primary" @onclick="() => OpenPicker(0)">@L["Comp_AddFirst"]</button>
         </div>
@@ -50,7 +50,7 @@ else
                     <div class="col-hero">
                         <div class="col-accent" style="background:@color;"></div>
                         <div style="display:flex;align-items:flex-start;gap:10px;">
-                            <div style="font-size:38px;line-height:1;">☕</div>
+                            <div style="font-size:38px;line-height:1;">@AppState.BlendEmoji</div>
                             <div style="flex:1;min-width:0;">
                                 <div class="col-origin">@c.Origin</div>
                                 <div style="font-family:Georgia,serif;font-size:18px;color:var(--coffee-dark);font-weight:700;line-height:1.15;margin-top:1px;">@c.BlendName</div>
@@ -181,7 +181,7 @@ else
                             var color = COLORS[k % COLORS.Length];
                             <div class="item">
                                 <span class="swatch" style="background:@color;"></span>
-                                <span style="font-weight:600;">☕ @c.BlendName</span>
+                                <span style="font-weight:600;">@AppState.BlendEmoji @c.BlendName</span>
                             </div>
                         }
                     </div>
@@ -204,7 +204,7 @@ else
                     {
                         var bid = c.BlendId;
                         <div class="modal-list-row" @onclick="() => Pick(bid)">
-                            <div style="font-size:24px;">☕</div>
+                            <div style="font-size:24px;">@AppState.BlendEmoji</div>
                             <div style="flex:1;min-width:0;">
                                 <div style="font-size:14px;font-weight:600;color:var(--coffee-dark);font-family:Georgia,serif;">@c.BlendName</div>
                                 <div style="font-size:11.5px;color:var(--coffee-medium);">@c.Roaster @if (!string.IsNullOrEmpty(c.Origin)) { <span> · @c.Origin</span> }</div>

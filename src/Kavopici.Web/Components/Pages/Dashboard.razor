@@ -98,7 +98,16 @@ else
                             }
                         </div>
 
-                        <BlendCard Blend="session.Blend" SessionComment="@session.Comment" Locked="!voted" />
+                        @if (!string.IsNullOrWhiteSpace(session.Comment))
+                        {
+                            <div class="session-note">
+                                <div class="session-note-label">@L["Label_AdminNote"]</div>
+                                <div class="session-note-text">@session.Comment</div>
+                            </div>
+                        }
+
+                        <BlendCard Blend="session.Blend" Locked="!voted"
+                                   OnClick="() => GoToBlend(session.BlendId)" />
 
                         <div>
                             <div class="section-block">

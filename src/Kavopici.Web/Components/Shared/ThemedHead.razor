@@ -1,0 +1,20 @@
+@inject IThemedLocalizer L
+
+@* Browser tab title and favicon that follow the active theme. Theme is passed as a
+   parameter so the component re-renders when the parent layout reacts to a theme change. *@
+<PageTitle>@L["Brand_TabTitle"]</PageTitle>
+<HeadContent>
+    @if (Theme == Theme.Tea)
+    {
+        <link rel="icon" type="image/png" href="icon-tea.png" />
+    }
+    else
+    {
+        <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    }
+</HeadContent>
+
+@code {
+    [Parameter]
+    public Theme Theme { get; set; }
+}

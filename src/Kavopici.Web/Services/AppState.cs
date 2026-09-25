@@ -11,6 +11,9 @@ public class AppState
 
     public Theme CurrentTheme { get; private set; } = Theme.Coffee;
 
+    /// <summary>Emoji representing a single blend in the active theme.</summary>
+    public string BlendEmoji => CurrentTheme == Theme.Tea ? "🍵" : "☕";
+
     public event Action? OnChange;
     public event Action? OnThemeChange;
 
