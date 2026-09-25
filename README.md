@@ -28,6 +28,7 @@ Kávopíči is a web application for office coffee tastings. An admin sets the "
 - **Secret voting** — blend details are revealed only after rating. Admin notes are visible before voting so users can tell samples apart.
 - Rating 1–10 stars, optional comment, and tasting note selection (Fruity, Nutty, Chocolatey, Caramel, Floral, Spiced, Citrusy, Honey).
 - Edit your own rating.
+- After rating, click the blend info on the card to open the blend detail.
 - **Retroactive voting** — missed blends can be rated later from the "My Ratings" tab in Statistics.
 
 ### Statistics

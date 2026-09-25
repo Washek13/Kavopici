@@ -98,7 +98,8 @@ else
                             }
                         </div>
 
-                        <BlendCard Blend="session.Blend" SessionComment="@session.Comment" Locked="!voted" />
+                        <BlendCard Blend="session.Blend" SessionComment="@session.Comment" Locked="!voted"
+                                   OnClick="() => GoToBlend(session.BlendId)" />
 
                         <div>
                             <div class="section-block">

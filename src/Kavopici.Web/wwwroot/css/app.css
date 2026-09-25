@@ -555,6 +555,9 @@ textarea { resize: vertical; min-height: 60px; }
     border-radius: 8px;
 }
 .about-box-content { transition: filter 0.35s; }
+.about-box-content.clickable { cursor: pointer; border-radius: 6px; }
+.about-box-content.clickable:hover .blend-name,
+.about-box-content.clickable:focus-visible .blend-name { text-decoration: underline; }
 .about-box.locked .about-box-content { filter: blur(7px); user-select: none; pointer-events: none; }
 .about-box .lock-overlay {
     position: absolute;
