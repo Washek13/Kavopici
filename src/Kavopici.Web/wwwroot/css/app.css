@@ -771,6 +771,20 @@ textarea { resize: vertical; min-height: 60px; }
     position: sticky;
     top: 80px;
 }
+/* Floating action bar — stays pinned to the bottom of the viewport while the panel is visible. */
+.stats-detail-actions {
+    position: sticky;
+    bottom: 12px;
+    z-index: 2;
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
 .stats-detail .head {
     display: flex;
     align-items: flex-start;
