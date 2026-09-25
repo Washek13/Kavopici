@@ -31,17 +31,10 @@
             <div class="lock-pill">🔒 @L["Msg_RevealAfterRating"]</div>
         </div>
     }
-    @if (!string.IsNullOrEmpty(SessionComment))
-    {
-        <div class="admin-note">
-            <b>@L["Label_AdminNote"]:</b> @SessionComment
-        </div>
-    }
 </div>
 
 @code {
     [Parameter, EditorRequired] public CoffeeBlend Blend { get; set; } = null!;
-    [Parameter] public string? SessionComment { get; set; }
     [Parameter] public bool Locked { get; set; }
 
     /// <summary>Invoked when the (unlocked) blend info is clicked, e.g. to open the blend detail.</summary>

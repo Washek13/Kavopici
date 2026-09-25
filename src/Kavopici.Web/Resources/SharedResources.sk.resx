@@ -291,7 +291,8 @@
   <data name="Badge_ControversyCalm" xml:space="preserve"><value>pokoj</value></data>
   <data name="Badge_ControversyMild" xml:space="preserve"><value>sporné</value></data>
   <data name="Badge_ControversyHigh" xml:space="preserve"><value>výbušné</value></data>
-  <data name="Label_AdminNote" xml:space="preserve"><value>Pozn. admina</value></data>
+  <data name="Label_AdminNote_Tea" xml:space="preserve"><value>Popis čaju</value></data>
+  <data name="Label_AdminNote" xml:space="preserve"><value>Popis kávy</value></data>
   <data name="Msg_RevealAfterRating" xml:space="preserve"><value>odhalí sa po hodnotení</value></data>
   <data name="Heading_TodaysTasting" xml:space="preserve"><value>Dnešná degustácia</value></data>
   <data name="Label_TopAllTime" xml:space="preserve"><value>Top zmes (all-time)</value></data>

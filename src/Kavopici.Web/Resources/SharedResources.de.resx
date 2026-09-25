@@ -291,7 +291,8 @@
   <data name="Badge_ControversyCalm" xml:space="preserve"><value>einig</value></data>
   <data name="Badge_ControversyMild" xml:space="preserve"><value>geteilt</value></data>
   <data name="Badge_ControversyHigh" xml:space="preserve"><value>kontrovers</value></data>
-  <data name="Label_AdminNote" xml:space="preserve"><value>Admin-Notiz</value></data>
+  <data name="Label_AdminNote_Tea" xml:space="preserve"><value>Teebeschreibung</value></data>
+  <data name="Label_AdminNote" xml:space="preserve"><value>Kaffeebeschreibung</value></data>
   <data name="Msg_RevealAfterRating" xml:space="preserve"><value>nach der Bewertung sichtbar</value></data>
   <data name="Heading_TodaysTasting" xml:space="preserve"><value>Heutige Verkostung</value></data>
   <data name="Label_TopAllTime" xml:space="preserve"><value>Top-Mischung (all-time)</value></data>

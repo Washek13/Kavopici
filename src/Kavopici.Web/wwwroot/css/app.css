@@ -588,26 +588,28 @@ textarea { resize: vertical; min-height: 60px; }
 }
 .about-box .blend-meta { font-size: 12.5px; color: var(--coffee-medium); margin-top: 3px; }
 .about-box .blend-supplier { font-size: 11.5px; color: var(--silver); margin-top: 2px; }
-.about-box .admin-note {
-    margin-top: 10px;
-    padding: 7px 10px;
-    background: var(--off-white);
-    border-left: 3px solid var(--amber-gold);
-    border-radius: 6px;
-    font-size: 12.5px;
-    color: var(--coffee-dark);
-    font-weight: 600;
-    line-height: 1.35;
-    position: relative;
-    z-index: 1;
+/* Session description (admin note) — shown above the blend info, always visible, even before voting. */
+.session-note {
+    padding: 12px 14px;
+    background: #fdf3dc;
+    border: 1px solid var(--amber-gold);
+    border-left: 5px solid var(--amber-gold);
+    border-radius: 8px;
 }
-.about-box .admin-note b {
-    display: block;
+.session-note-label {
     font-size: 10.5px;
-    letter-spacing: 1px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
     color: var(--coffee-brown);
-    margin-bottom: 2px;
+    margin-bottom: 3px;
+}
+.session-note-text {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--coffee-dark);
+    line-height: 1.35;
+    overflow-wrap: anywhere;
 }
 
 .aside-stack { display: flex; flex-direction: column; gap: 14px; }
