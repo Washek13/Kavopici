@@ -62,10 +62,13 @@ public static class TastingNoteHelpers
         { "Sladká", "#FF8F00" }
     };
 
+    // Wheel order (clockwise from 12 o'clock) follows the SCA Coffee Taster's Flavor Wheel
+    // linked from the dashboard: Floral → Fruity (… Citrus fruit) → Spices → Nutty/Cocoa
+    // (Nutty, Cocoa) → Sweet (Brown sugar: Caramelized, Honey).
     public static IReadOnlyList<string> CoffeeNoteNames { get; } = new[]
     {
-        "Ovocná", "Ořechová", "Čokoládová", "Karamelová",
-        "Květinová", "Kořeněná", "Citrusová", "Medová"
+        "Květinová", "Ovocná", "Citrusová", "Kořeněná",
+        "Ořechová", "Čokoládová", "Karamelová", "Medová"
     };
 
     public static IReadOnlyList<string> TeaNoteNames { get; } = new[]
